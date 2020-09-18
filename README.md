@@ -1,1 +1,1 @@
-# FTB-Essentials
+# FTB Essentials
