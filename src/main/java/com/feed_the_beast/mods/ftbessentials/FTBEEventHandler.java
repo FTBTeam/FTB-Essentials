@@ -3,9 +3,13 @@ package com.feed_the_beast.mods.ftbessentials;
 import com.google.gson.JsonObject;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.storage.FolderName;
+import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
@@ -133,6 +137,32 @@ public class FTBEEventHandler
 			{
 				event.player.abilities.allowFlying = true;
 				event.player.sendPlayerAbilities();
+			}
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public static void playerServerChatHighest(ServerChatEvent event)
+	{
+		FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+
+		if (data.muted)
+		{
+			event.setCanceled(true);
+			event.getPlayer().sendStatusMessage(new StringTextComponent("You can't use chat, you've been muted by an admin!").mergeStyle(TextFormatting.RED), false);
+		}
+	}
+
+	@SubscribeEvent
+	public static void playerName(PlayerEvent.NameFormat event)
+	{
+		if (event.getPlayer() instanceof ServerPlayerEntity)
+		{
+			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+
+			if (!data.nick.isEmpty())
+			{
+				event.setDisplayname(new StringTextComponent(data.nick));
 			}
 		}
 	}

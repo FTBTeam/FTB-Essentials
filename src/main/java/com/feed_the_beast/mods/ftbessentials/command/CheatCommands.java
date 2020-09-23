@@ -171,19 +171,38 @@ public class CheatCommands
 
 	public static int nickfor(CommandSource source, ServerPlayerEntity player, String nick)
 	{
-		source.sendFeedback(new StringTextComponent("WIP!"), false);
+		FTBEPlayerData data = FTBEPlayerData.get(player);
+		data.nick = nick.trim();
+		data.save();
+		player.refreshDisplayName();
+
+		if (data.nick.isEmpty())
+		{
+			source.sendFeedback(new StringTextComponent("Nickname reset!"), true);
+		}
+		else
+		{
+			source.sendFeedback(new StringTextComponent("Nickname changed to '" + data.nick + "'"), true);
+		}
+
 		return 1;
 	}
 
 	public static int mute(CommandSource source, ServerPlayerEntity player)
 	{
-		source.sendFeedback(new StringTextComponent("WIP!"), false);
+		FTBEPlayerData data = FTBEPlayerData.get(player);
+		data.muted = true;
+		data.save();
+		source.sendFeedback(new StringTextComponent("").append(player.getDisplayName()).appendString(" has been muted by ").append(source.getDisplayName()), true);
 		return 1;
 	}
 
 	public static int unmute(CommandSource source, ServerPlayerEntity player)
 	{
-		source.sendFeedback(new StringTextComponent("WIP!"), false);
+		FTBEPlayerData data = FTBEPlayerData.get(player);
+		data.muted = false;
+		data.save();
+		source.sendFeedback(new StringTextComponent("").append(player.getDisplayName()).appendString(" has been unmuted by ").append(source.getDisplayName()), true);
 		return 1;
 	}
 }
