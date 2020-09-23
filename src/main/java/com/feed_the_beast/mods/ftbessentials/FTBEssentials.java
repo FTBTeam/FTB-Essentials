@@ -4,6 +4,8 @@ import com.feed_the_beast.mods.ftbessentials.net.FTBEssentialsNet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.minecraftforge.fml.common.Mod;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author LatvianModder
@@ -13,6 +15,7 @@ import net.minecraftforge.fml.common.Mod;
 public class FTBEssentials
 {
 	public static final String MOD_ID = "ftbessentials";
+	public static final Logger LOGGER = LogManager.getLogger("FTB Essentials");
 	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().setLenient().create();
 
 	public static FTBEssentials instance;

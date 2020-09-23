@@ -4,8 +4,14 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.ChestContainer;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.util.Util;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
 /**
@@ -47,7 +53,21 @@ public class MiscCommands
 
 	public static int trashcan(ServerPlayerEntity player)
 	{
-		player.sendMessage(new StringTextComponent("WIP!"), Util.DUMMY_UUID);
+		player.openContainer(new INamedContainerProvider()
+		{
+			@Override
+			public ITextComponent getDisplayName()
+			{
+				return new StringTextComponent("Trash Can");
+			}
+
+			@Override
+			public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity player)
+			{
+				return ChestContainer.createGeneric9X4(id, playerInventory);
+			}
+		});
+
 		return 1;
 	}
 

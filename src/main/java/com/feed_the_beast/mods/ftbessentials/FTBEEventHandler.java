@@ -9,6 +9,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 
 import javax.annotation.Nullable;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -73,7 +74,23 @@ public class FTBEEventHandler
 	{
 		FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
 
-		Path dir = mkdirs(event.getPlayer().getServer(), "playerdata");
+		try
+		{
+			Path dir = mkdirs(event.getPlayer().getServer(), "playerdata");
+			Path file = dir.resolve(event.getPlayerUUID() + ".json");
+
+			if (Files.exists(file))
+			{
+				try (BufferedReader reader = Files.newBufferedReader(file))
+				{
+					data.fromJson(FTBEssentials.GSON.fromJson(reader, JsonObject.class));
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			FTBEssentials.LOGGER.error("Failed to save player data for " + data.uuid + ":" + data.name + ": " + ex);
+		}
 	}
 
 	@SubscribeEvent
@@ -87,8 +104,9 @@ public class FTBEEventHandler
 			{
 				JsonObject json = data.toJson();
 				Path dir = mkdirs(event.getPlayer().getServer(), "playerdata");
+				Path file = dir.resolve(event.getPlayerUUID() + ".json");
 
-				try (BufferedWriter writer = Files.newBufferedWriter(event.getPlayerFile("ftbessentials.json").toPath()))
+				try (BufferedWriter writer = Files.newBufferedWriter(file))
 				{
 					FTBEssentials.GSON.toJson(json, writer);
 				}
@@ -97,7 +115,7 @@ public class FTBEEventHandler
 			}
 			catch (Exception ex)
 			{
-				System.err.println("Failed to save player data for " + data.uuid + ":" + data.name + ": " + ex);
+				FTBEssentials.LOGGER.error("Failed to save player data for " + data.uuid + ":" + data.name + ": " + ex);
 			}
 		}
 	}

@@ -43,6 +43,8 @@ public class FTBEPlayerData
 	public String name;
 	public boolean save;
 
+	public boolean muted;
+
 	public FTBEPlayerData(UUID u)
 	{
 		uuid = u;
@@ -58,6 +60,12 @@ public class FTBEPlayerData
 	public JsonObject toJson()
 	{
 		JsonObject json = new JsonObject();
+		json.addProperty("muted", muted);
 		return json;
+	}
+
+	public void fromJson(JsonObject json)
+	{
+		muted = json.get("muted").getAsBoolean();
 	}
 }
