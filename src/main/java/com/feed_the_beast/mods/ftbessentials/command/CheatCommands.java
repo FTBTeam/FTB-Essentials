@@ -1,6 +1,6 @@
 package com.feed_the_beast.mods.ftbessentials.command;
 
-import com.feed_the_beast.mods.ftbessentials.FTBEPlayerData;
+import com.feed_the_beast.mods.ftbessentials.util.FTBEPlayerData;
 import com.feed_the_beast.mods.ftbessentials.util.OtherPlayerInventory;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;

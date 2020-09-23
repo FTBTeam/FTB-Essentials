@@ -1,5 +1,7 @@
 package com.feed_the_beast.mods.ftbessentials;
 
+import com.feed_the_beast.mods.ftbessentials.util.FTBEPlayerData;
+import com.feed_the_beast.mods.ftbessentials.util.TeleportPos;
 import com.google.gson.JsonObject;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -70,9 +72,17 @@ public class FTBEEventHandler
 	@SubscribeEvent
 	public static void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event)
 	{
-		// FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+		FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+		data.lastSeen = new TeleportPos(event.getPlayer());
+		data.save();
+	}
 
-		// TODO: Remove this?
+	@SubscribeEvent
+	public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event)
+	{
+		FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+		data.lastSeen = new TeleportPos(event.getPlayer());
+		data.save();
 	}
 
 	@SubscribeEvent

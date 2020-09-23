@@ -7,6 +7,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.GameProfileArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.text.StringTextComponent;
 
 /**
  * @author LatvianModder
@@ -47,21 +48,25 @@ public class HomeCommands
 
 	public static int home(ServerPlayerEntity player, String name)
 	{
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 
 	public static int sethome(ServerPlayerEntity player, String name)
 	{
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 
 	public static int delhome(ServerPlayerEntity player, String name)
 	{
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 
 	public static int listhomes(ServerPlayerEntity player, GameProfile of)
 	{
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 }

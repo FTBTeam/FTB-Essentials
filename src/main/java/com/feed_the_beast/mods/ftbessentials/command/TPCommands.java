@@ -1,5 +1,7 @@
 package com.feed_the_beast.mods.ftbessentials.command;
 
+import com.feed_the_beast.mods.ftbessentials.util.FTBEPlayerData;
+import com.feed_the_beast.mods.ftbessentials.util.TeleportPos;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.command.CommandSource;
@@ -7,8 +9,10 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.command.arguments.GameProfileArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.World;
+import net.minecraft.world.gen.Heightmap;
+import net.minecraft.world.server.ServerWorld;
 
 /**
  * @author LatvianModder
@@ -31,7 +35,7 @@ public class TPCommands
 
 		dispatcher.register(Commands.literal("teleport_last")
 				.then(Commands.argument("player", GameProfileArgument.gameProfile())
-						.executes(context -> tpLast(context.getSource().asPlayer(), GameProfileArgument.getGameProfiles(context, "name").iterator().next()))
+						.executes(context -> tpLast(context.getSource().asPlayer(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
 				)
 		);
 
@@ -56,43 +60,79 @@ public class TPCommands
 
 	public static int back(ServerPlayerEntity player)
 	{
-		player.sendMessage(new StringTextComponent("WIP!"), Util.DUMMY_UUID);
+		FTBEPlayerData data = FTBEPlayerData.get(player);
+
+		if (data.teleportHistory.isEmpty())
+		{
+			player.sendStatusMessage(new StringTextComponent("Teleportation history is empty!"), false);
+			return 0;
+		}
+
+		if (data.backTeleporter.teleport(player, serverPlayerEntity -> data.teleportHistory.getLast()))
+		{
+			data.teleportHistory.removeLast();
+			data.save();
+		}
+
 		return 1;
 	}
 
 	public static int spawn(ServerPlayerEntity player)
 	{
-		player.sendMessage(new StringTextComponent("WIP!"), Util.DUMMY_UUID);
-		return 1;
+		FTBEPlayerData data = FTBEPlayerData.get(player);
+		ServerWorld w = player.server.getWorld(World.OVERWORLD);
+
+		if (w == null)
+		{
+			return 0;
+		}
+
+		return data.spawnTeleporter.teleport(player, p -> new TeleportPos(w, w.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, w.getSpawnPoint()))) ? 1 : 0;
 	}
 
 	public static int rtp(ServerPlayerEntity player)
 	{
-		player.sendMessage(new StringTextComponent("WIP!"), Util.DUMMY_UUID);
+		FTBEPlayerData data = FTBEPlayerData.get(player);
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 
 	public static int tpLast(ServerPlayerEntity player, GameProfile to)
 	{
-		player.sendMessage(new StringTextComponent("WIP!"), Util.DUMMY_UUID);
+		ServerPlayerEntity p = player.server.getPlayerList().getPlayerByUUID(to.getId());
+
+		if (p != null)
+		{
+			new TeleportPos(p).teleport(player);
+			return 1;
+		}
+
+		FTBEPlayerData dataTo = FTBEPlayerData.get(to);
+		dataTo.lastSeen.teleport(player);
 		return 1;
 	}
 
 	public static int tpa(ServerPlayerEntity player, ServerPlayerEntity to)
 	{
-		player.sendMessage(new StringTextComponent("WIP!"), Util.DUMMY_UUID);
+		FTBEPlayerData data = FTBEPlayerData.get(player);
+		FTBEPlayerData dataTo = FTBEPlayerData.get(to);
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 
 	public static int tpaccept(ServerPlayerEntity player, ServerPlayerEntity from)
 	{
-		player.sendMessage(new StringTextComponent("WIP!"), Util.DUMMY_UUID);
+		FTBEPlayerData data = FTBEPlayerData.get(player);
+		FTBEPlayerData dataFrom = FTBEPlayerData.get(from);
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 
 	public static int tpdeny(ServerPlayerEntity player, ServerPlayerEntity from)
 	{
-		player.sendMessage(new StringTextComponent("WIP!"), Util.DUMMY_UUID);
+		FTBEPlayerData data = FTBEPlayerData.get(player);
+		FTBEPlayerData dataFrom = FTBEPlayerData.get(from);
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 }

@@ -1,6 +1,6 @@
 package com.feed_the_beast.mods.ftbessentials.command;
 
-import com.feed_the_beast.mods.ftbessentials.FTBEPlayerData;
+import com.feed_the_beast.mods.ftbessentials.util.FTBEPlayerData;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.command.CommandSource;
@@ -13,7 +13,6 @@ import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
@@ -54,7 +53,7 @@ public class MiscCommands
 
 	public static int kickme(ServerPlayerEntity player)
 	{
-		player.sendMessage(new StringTextComponent("WIP!"), Util.DUMMY_UUID);
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 
@@ -80,13 +79,13 @@ public class MiscCommands
 
 	public static int leaderboard(ServerPlayerEntity player)
 	{
-		player.sendMessage(new StringTextComponent("WIP!"), Util.DUMMY_UUID);
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 
 	public static int rec(ServerPlayerEntity player)
 	{
-		player.sendMessage(new StringTextComponent("WIP!"), Util.DUMMY_UUID);
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 

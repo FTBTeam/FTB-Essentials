@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.text.StringTextComponent;
 
 /**
  * @author LatvianModder
@@ -39,21 +40,25 @@ public class WarpCommands
 
 	public static int warp(ServerPlayerEntity player, String name)
 	{
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 
 	public static int setwarp(ServerPlayerEntity player, String name)
 	{
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 
 	public static int delwarp(ServerPlayerEntity player, String name)
 	{
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 
 	public static int listwarps(ServerPlayerEntity player, GameProfile of)
 	{
+		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 }
