@@ -1,8 +1,10 @@
 package com.feed_the_beast.mods.ftbessentials;
 
 import com.google.gson.JsonObject;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.storage.FolderName;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -116,6 +118,21 @@ public class FTBEEventHandler
 			catch (Exception ex)
 			{
 				FTBEssentials.LOGGER.error("Failed to save player data for " + data.uuid + ":" + data.name + ": " + ex);
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void playerTick(TickEvent.PlayerTickEvent event)
+	{
+		if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayerEntity)
+		{
+			FTBEPlayerData data = FTBEPlayerData.get(event.player);
+
+			if ((data.fly || data.god) && !event.player.abilities.allowFlying)
+			{
+				event.player.abilities.allowFlying = true;
+				event.player.sendPlayerAbilities();
 			}
 		}
 	}

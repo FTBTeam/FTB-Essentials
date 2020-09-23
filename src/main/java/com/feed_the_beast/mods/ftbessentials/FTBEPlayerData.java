@@ -44,12 +44,18 @@ public class FTBEPlayerData
 	public boolean save;
 
 	public boolean muted;
+	public boolean fly;
+	public boolean god;
 
 	public FTBEPlayerData(UUID u)
 	{
 		uuid = u;
 		name = "Unknown";
 		save = false;
+
+		muted = false;
+		fly = false;
+		god = false;
 	}
 
 	public void save()
@@ -61,11 +67,26 @@ public class FTBEPlayerData
 	{
 		JsonObject json = new JsonObject();
 		json.addProperty("muted", muted);
+		json.addProperty("fly", fly);
+		json.addProperty("god", god);
 		return json;
 	}
 
 	public void fromJson(JsonObject json)
 	{
-		muted = json.get("muted").getAsBoolean();
+		if (json.has("muted"))
+		{
+			muted = json.get("muted").getAsBoolean();
+		}
+
+		if (json.has("fly"))
+		{
+			fly = json.get("fly").getAsBoolean();
+		}
+
+		if (json.has("god"))
+		{
+			god = json.get("god").getAsBoolean();
+		}
 	}
 }
