@@ -28,7 +28,6 @@ public class CooldownTeleporter
 		else if (this != playerData.backTeleporter)
 		{
 			playerData.addTeleportHistory(player, currentPos);
-			playerData.save();
 		}
 
 		return true;

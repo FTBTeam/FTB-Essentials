@@ -10,6 +10,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.storage.FolderName;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -174,6 +175,15 @@ public class FTBEEventHandler
 			{
 				event.setDisplayname(new StringTextComponent(data.nick));
 			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void playerDeath(LivingDeathEvent event)
+	{
+		if (event.getEntity() instanceof ServerPlayerEntity)
+		{
+			FTBEPlayerData.addTeleportHistory((ServerPlayerEntity) event.getEntity());
 		}
 	}
 }

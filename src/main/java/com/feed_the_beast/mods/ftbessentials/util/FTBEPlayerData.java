@@ -22,11 +22,6 @@ public class FTBEPlayerData
 {
 	public static final Map<UUID, FTBEPlayerData> MAP = new HashMap<>();
 
-	public static FTBEPlayerData get(UUID id)
-	{
-		return MAP.computeIfAbsent(id, FTBEPlayerData::new);
-	}
-
 	public static FTBEPlayerData get(GameProfile profile)
 	{
 		FTBEPlayerData data = MAP.get(profile.getId());
@@ -34,7 +29,12 @@ public class FTBEPlayerData
 		if (data == null)
 		{
 			data = new FTBEPlayerData(profile.getId());
-			data.name = profile.getName();
+
+			if (profile.getName() != null && !profile.getName().isEmpty())
+			{
+				data.name = profile.getName();
+			}
+
 			MAP.put(profile.getId(), data);
 		}
 
@@ -169,5 +169,7 @@ public class FTBEPlayerData
 		{
 			teleportHistory.removeFirst();
 		}
+
+		save();
 	}
 }
