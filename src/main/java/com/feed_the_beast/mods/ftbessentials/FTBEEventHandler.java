@@ -1,23 +1,23 @@
 package com.feed_the_beast.mods.ftbessentials;
 
 import com.feed_the_beast.mods.ftbessentials.util.FTBEPlayerData;
+import com.feed_the_beast.mods.ftbessentials.util.FTBEWorldData;
 import com.feed_the_beast.mods.ftbessentials.util.TeleportPos;
 import com.google.gson.JsonObject;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.storage.FolderName;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 
-import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.nio.file.Files;
@@ -29,45 +29,62 @@ import java.nio.file.Path;
 @Mod.EventBusSubscriber(modid = FTBEssentials.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class FTBEEventHandler
 {
-	public static final FolderName FTBESSENTIALS_DIRECTORY = new FolderName("ftbessentials");
-
-	private static Path mkdirs(@Nullable MinecraftServer server, String path)
-	{
-		if (server == null)
-		{
-			throw new NullPointerException("Could not create FTB Essentials data directory: Server is null");
-		}
-
-		Path dir = server.func_240776_a_(FTBESSENTIALS_DIRECTORY);
-
-		if (!path.isEmpty())
-		{
-			dir = dir.resolve(path);
-		}
-
-		if (Files.notExists(dir))
-		{
-			try
-			{
-				Files.createDirectories(dir);
-			}
-			catch (Exception ex)
-			{
-				throw new RuntimeException("Could not create FTB Essentials data directory: " + ex);
-			}
-		}
-
-		return dir;
-	}
-
 	@SubscribeEvent
 	public static void serverAboutToStart(FMLServerAboutToStartEvent event)
 	{
 		FTBEPlayerData.MAP.clear();
+		FTBEWorldData.instance = new FTBEWorldData(event.getServer());
 
-		Path dir = mkdirs(event.getServer(), "");
+		try
+		{
+			Path dir = FTBEWorldData.instance.mkdirs("");
+			Path file = dir.resolve("world.json");
 
-		// TODO: Load warps
+			if (Files.exists(file))
+			{
+				try (BufferedReader reader = Files.newBufferedReader(file))
+				{
+					FTBEWorldData.instance.fromJson(FTBEssentials.GSON.fromJson(reader, JsonObject.class));
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			FTBEssentials.LOGGER.error("Failed to load world data: " + ex);
+			ex.printStackTrace();
+		}
+	}
+
+	@SubscribeEvent
+	public static void serverStopped(FMLServerStoppedEvent event)
+	{
+		FTBEWorldData.instance = null;
+	}
+
+	@SubscribeEvent
+	public static void worldSaved(WorldEvent.Save event)
+	{
+		if (FTBEWorldData.instance != null && FTBEWorldData.instance.save)
+		{
+			try
+			{
+				JsonObject json = FTBEWorldData.instance.toJson();
+				Path dir = FTBEWorldData.instance.mkdirs("");
+				Path file = dir.resolve("world.json");
+
+				try (BufferedWriter writer = Files.newBufferedWriter(file))
+				{
+					FTBEssentials.GSON.toJson(json, writer);
+				}
+
+				FTBEWorldData.instance.save = false;
+			}
+			catch (Exception ex)
+			{
+				FTBEssentials.LOGGER.error("Failed to save world data: " + ex);
+				ex.printStackTrace();
+			}
+		}
 	}
 
 	@SubscribeEvent
@@ -89,11 +106,16 @@ public class FTBEEventHandler
 	@SubscribeEvent
 	public static void playerLoad(PlayerEvent.LoadFromFile event)
 	{
+		if (FTBEWorldData.instance == null)
+		{
+			return;
+		}
+
 		FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
 
 		try
 		{
-			Path dir = mkdirs(event.getPlayer().getServer(), "playerdata");
+			Path dir = FTBEWorldData.instance.mkdirs("playerdata");
 			Path file = dir.resolve(event.getPlayerUUID() + ".json");
 
 			if (Files.exists(file))
@@ -106,7 +128,8 @@ public class FTBEEventHandler
 		}
 		catch (Exception ex)
 		{
-			FTBEssentials.LOGGER.error("Failed to save player data for " + data.uuid + ":" + data.name + ": " + ex);
+			FTBEssentials.LOGGER.error("Failed to load player data for " + data.uuid + ":" + data.name + ": " + ex);
+			ex.printStackTrace();
 		}
 	}
 
@@ -115,12 +138,12 @@ public class FTBEEventHandler
 	{
 		FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
 
-		if (data.save)
+		if (data.save && FTBEWorldData.instance != null)
 		{
 			try
 			{
 				JsonObject json = data.toJson();
-				Path dir = mkdirs(event.getPlayer().getServer(), "playerdata");
+				Path dir = FTBEWorldData.instance.mkdirs("playerdata");
 				Path file = dir.resolve(event.getPlayerUUID() + ".json");
 
 				try (BufferedWriter writer = Files.newBufferedWriter(file))
@@ -133,6 +156,7 @@ public class FTBEEventHandler
 			catch (Exception ex)
 			{
 				FTBEssentials.LOGGER.error("Failed to save player data for " + data.uuid + ":" + data.name + ": " + ex);
+				ex.printStackTrace();
 			}
 		}
 	}

@@ -17,7 +17,7 @@ import net.minecraft.world.server.ServerWorld;
 /**
  * @author LatvianModder
  */
-public class TPCommands
+public class TeleportCommands
 {
 	public static void register(CommandDispatcher<CommandSource> dispatcher)
 	{
@@ -68,13 +68,14 @@ public class TPCommands
 			return 0;
 		}
 
-		if (data.backTeleporter.teleport(player, serverPlayerEntity -> data.teleportHistory.getLast()))
+		if (data.backTeleporter.teleport(player, serverPlayerEntity -> data.teleportHistory.getLast()).runCommand(player) != 0)
 		{
 			data.teleportHistory.removeLast();
 			data.save();
+			return 1;
 		}
 
-		return 1;
+		return 0;
 	}
 
 	public static int spawn(ServerPlayerEntity player)
@@ -87,7 +88,7 @@ public class TPCommands
 			return 0;
 		}
 
-		return data.spawnTeleporter.teleport(player, p -> new TeleportPos(w, w.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, w.getSpawnPoint()))) ? 1 : 0;
+		return data.spawnTeleporter.teleport(player, p -> new TeleportPos(w, w.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, w.getSpawnPoint()))).runCommand(player);
 	}
 
 	public static int rtp(ServerPlayerEntity player)

@@ -1,5 +1,6 @@
 package com.feed_the_beast.mods.ftbessentials.util;
 
+import com.feed_the_beast.mods.ftbessentials.FTBEConfig;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -11,6 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
@@ -65,6 +67,7 @@ public class FTBEPlayerData
 	public boolean god;
 	public String nick;
 	public TeleportPos lastSeen;
+	public final LinkedHashMap<String, TeleportPos> homes;
 
 	public final CooldownTeleporter backTeleporter;
 	public final CooldownTeleporter deathTeleporter;
@@ -86,14 +89,15 @@ public class FTBEPlayerData
 		god = false;
 		nick = "";
 		lastSeen = new TeleportPos(World.OVERWORLD, BlockPos.ZERO);
+		homes = new LinkedHashMap<>();
 
-		backTeleporter = new CooldownTeleporter(this);
-		deathTeleporter = new CooldownTeleporter(this);
-		spawnTeleporter = new CooldownTeleporter(this);
-		warpTeleporter = new CooldownTeleporter(this);
-		homeTeleporter = new CooldownTeleporter(this);
-		tpaTeleporter = new CooldownTeleporter(this);
-		rtpTeleporter = new CooldownTeleporter(this);
+		backTeleporter = new CooldownTeleporter(this, FTBEConfig::getBackCooldown);
+		deathTeleporter = new CooldownTeleporter(this, FTBEConfig::getDeathCooldown);
+		spawnTeleporter = new CooldownTeleporter(this, FTBEConfig::getSpawnCooldown);
+		warpTeleporter = new CooldownTeleporter(this, FTBEConfig::getWarpCooldown);
+		homeTeleporter = new CooldownTeleporter(this, FTBEConfig::getHomeCooldown);
+		tpaTeleporter = new CooldownTeleporter(this, FTBEConfig::getTpaCooldown);
+		rtpTeleporter = new CooldownTeleporter(this, FTBEConfig::getRtpCooldown);
 		teleportHistory = new LinkedList<>();
 	}
 
@@ -120,30 +124,24 @@ public class FTBEPlayerData
 
 		json.add("teleportHistory", tph);
 
+		JsonObject hm = new JsonObject();
+
+		for (Map.Entry<String, TeleportPos> h : homes.entrySet())
+		{
+			hm.add(h.getKey(), h.getValue().toJson());
+		}
+
+		json.add("homes", hm);
+
 		return json;
 	}
 
 	public void fromJson(JsonObject json)
 	{
-		if (json.has("muted"))
-		{
-			muted = json.get("muted").getAsBoolean();
-		}
-
-		if (json.has("fly"))
-		{
-			fly = json.get("fly").getAsBoolean();
-		}
-
-		if (json.has("god"))
-		{
-			god = json.get("god").getAsBoolean();
-		}
-
-		if (json.has("nick"))
-		{
-			nick = json.get("nick").getAsString();
-		}
+		muted = json.has("muted") && json.get("muted").getAsBoolean();
+		fly = json.has("fly") && json.get("fly").getAsBoolean();
+		god = json.has("god") && json.get("god").getAsBoolean();
+		nick = json.has("nick") ? json.get("nick").getAsString() : "";
 
 		if (json.has("lastSeen"))
 		{
@@ -159,13 +157,23 @@ public class FTBEPlayerData
 				teleportHistory.add(new TeleportPos(e.getAsJsonObject()));
 			}
 		}
+
+		homes.clear();
+
+		if (json.has("homes"))
+		{
+			for (Map.Entry<String, JsonElement> e : json.get("homes").getAsJsonObject().entrySet())
+			{
+				homes.put(e.getKey(), new TeleportPos(e.getValue().getAsJsonObject()));
+			}
+		}
 	}
 
 	public void addTeleportHistory(ServerPlayerEntity player, TeleportPos pos)
 	{
 		teleportHistory.add(pos);
 
-		while (teleportHistory.size() > 10)
+		while (teleportHistory.size() > FTBEConfig.maxBack)
 		{
 			teleportHistory.removeFirst();
 		}

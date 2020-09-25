@@ -3,7 +3,11 @@ package com.feed_the_beast.mods.ftbessentials;
 import com.feed_the_beast.mods.ftbessentials.net.FTBEssentialsNet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.network.FMLNetworkConstants;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,6 +27,7 @@ public class FTBEssentials
 	public FTBEssentials()
 	{
 		instance = this;
+		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
 		FTBEssentialsNet.init();
 	}
 }
