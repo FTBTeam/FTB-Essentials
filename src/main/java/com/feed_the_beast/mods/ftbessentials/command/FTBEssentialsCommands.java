@@ -17,6 +17,7 @@ public class FTBEssentialsCommands
 		HomeCommands.register(event.getDispatcher());
 		WarpCommands.register(event.getDispatcher());
 		TeleportCommands.register(event.getDispatcher());
+		TPACommands.register(event.getDispatcher());
 		CheatCommands.register(event.getDispatcher());
 		MiscCommands.register(event.getDispatcher());
 	}

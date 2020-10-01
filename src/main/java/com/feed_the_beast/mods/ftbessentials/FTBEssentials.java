@@ -29,5 +29,6 @@ public class FTBEssentials
 		instance = this;
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
 		FTBEssentialsNet.init();
+		FTBEConfig.init();
 	}
 }

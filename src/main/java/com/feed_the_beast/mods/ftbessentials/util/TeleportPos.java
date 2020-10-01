@@ -19,7 +19,20 @@ public class TeleportPos
 	@FunctionalInterface
 	public interface TeleportResult
 	{
-		TeleportResult SUCCESS = player -> 1;
+		TeleportResult SUCCESS = new TeleportResult()
+		{
+			@Override
+			public int runCommand(ServerPlayerEntity player)
+			{
+				return 1;
+			}
+
+			@Override
+			public boolean isSuccess()
+			{
+				return true;
+			}
+		};
 
 		TeleportResult DIMENSION_NOT_FOUND = player -> {
 			player.sendStatusMessage(new StringTextComponent("Dimension not found!"), false);
@@ -27,6 +40,11 @@ public class TeleportPos
 		};
 
 		int runCommand(ServerPlayerEntity player);
+
+		default boolean isSuccess()
+		{
+			return false;
+		}
 	}
 
 	@FunctionalInterface
@@ -37,7 +55,7 @@ public class TeleportPos
 		@Override
 		default int runCommand(ServerPlayerEntity player)
 		{
-			player.sendStatusMessage(new StringTextComponent("Can't teleport! Cooldown: " + (getCooldown() / 1000L) + " s"), false);
+			player.sendStatusMessage(new StringTextComponent("Can't teleport yet! Cooldown: " + CooldownTeleporter.prettyTimeString(getCooldown() / 1000L)), false);
 			return 0;
 		}
 	}

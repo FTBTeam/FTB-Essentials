@@ -1,18 +1,28 @@
 package com.feed_the_beast.mods.ftbessentials.command;
 
+import com.feed_the_beast.mods.ftbessentials.FTBEConfig;
 import com.feed_the_beast.mods.ftbessentials.util.FTBEPlayerData;
+import com.feed_the_beast.mods.ftbessentials.util.RTPEvent;
 import com.feed_the_beast.mods.ftbessentials.util.TeleportPos;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.command.arguments.GameProfileArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.border.WorldBorder;
+import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.MinecraftForge;
+
+import java.util.Optional;
 
 /**
  * @author LatvianModder
@@ -36,24 +46,6 @@ public class TeleportCommands
 		dispatcher.register(Commands.literal("teleport_last")
 				.then(Commands.argument("player", GameProfileArgument.gameProfile())
 						.executes(context -> tpLast(context.getSource().asPlayer(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
-				)
-		);
-
-		dispatcher.register(Commands.literal("tpa")
-				.then(Commands.argument("to", EntityArgument.player())
-						.executes(context -> tpa(context.getSource().asPlayer(), EntityArgument.getPlayer(context, "to")))
-				)
-		);
-
-		dispatcher.register(Commands.literal("tpaccept")
-				.then(Commands.argument("from", EntityArgument.player())
-						.executes(context -> tpaccept(context.getSource().asPlayer(), EntityArgument.getPlayer(context, "from")))
-				)
-		);
-
-		dispatcher.register(Commands.literal("tpdeny")
-				.then(Commands.argument("from", EntityArgument.player())
-						.executes(context -> tpdeny(context.getSource().asPlayer(), EntityArgument.getPlayer(context, "from")))
 				)
 		);
 	}
@@ -94,8 +86,58 @@ public class TeleportCommands
 	public static int rtp(ServerPlayerEntity player)
 	{
 		FTBEPlayerData data = FTBEPlayerData.get(player);
-		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
-		return 1;
+		return data.rtpTeleporter.teleport(player, p -> {
+			p.sendStatusMessage(new StringTextComponent("Looking for random location..."), false);
+			return findBlockPos(p.getServerWorld(), p, 1);
+		}).runCommand(player);
+	}
+
+	private static TeleportPos findBlockPos(ServerWorld world, ServerPlayerEntity player, int attempt)
+	{
+		if (attempt > FTBEConfig.rtpMaxTries)
+		{
+			player.sendStatusMessage(new StringTextComponent("Could not find a valid location to teleport to!"), false);
+			return new TeleportPos(player);
+		}
+
+		double dist = FTBEConfig.rtpMinDistance + world.rand.nextDouble() * (FTBEConfig.rtpMaxDistance - FTBEConfig.rtpMinDistance);
+		double angle = world.rand.nextDouble() * Math.PI * 2D;
+
+		int x = MathHelper.floor(Math.cos(angle) * dist);
+		int y = 256;
+		int z = MathHelper.floor(Math.sin(angle) * dist);
+		BlockPos currentPos = new BlockPos(x, y, z);
+
+		WorldBorder border = world.getWorldBorder();
+
+		if (!border.contains(currentPos))
+		{
+			return findBlockPos(world, player, attempt + 1);
+		}
+
+		Optional<RegistryKey<Biome>> biomeKey = world.func_242406_i(currentPos);
+
+		if (biomeKey.isPresent() && biomeKey.get().getLocation().getPath().contains("ocean"))
+		{
+			return findBlockPos(world, player, attempt + 1);
+		}
+
+		// TODO: FTB Chunks will listen to RTPEvent and cancel it if position is inside a claimed chunk
+		if (MinecraftForge.EVENT_BUS.post(new RTPEvent(world, player, currentPos, attempt)))
+		{
+			return findBlockPos(world, player, attempt + 1);
+		}
+
+		world.getChunk(currentPos.getX() >> 4, currentPos.getZ() >> 4, ChunkStatus.HEIGHTMAPS);
+		BlockPos newPos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, currentPos);
+
+		if (newPos.getY() > 0)
+		{
+			player.sendStatusMessage(new StringTextComponent(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, z %d]", attempt, newPos.getX(), newPos.getZ())), false);
+			return new TeleportPos(world.getDimensionKey(), newPos.up());
+		}
+
+		return findBlockPos(world, player, attempt + 1);
 	}
 
 	public static int tpLast(ServerPlayerEntity player, GameProfile to)
@@ -110,30 +152,6 @@ public class TeleportCommands
 
 		FTBEPlayerData dataTo = FTBEPlayerData.get(to);
 		dataTo.lastSeen.teleport(player);
-		return 1;
-	}
-
-	public static int tpa(ServerPlayerEntity player, ServerPlayerEntity to)
-	{
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-		FTBEPlayerData dataTo = FTBEPlayerData.get(to);
-		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
-		return 1;
-	}
-
-	public static int tpaccept(ServerPlayerEntity player, ServerPlayerEntity from)
-	{
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-		FTBEPlayerData dataFrom = FTBEPlayerData.get(from);
-		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
-		return 1;
-	}
-
-	public static int tpdeny(ServerPlayerEntity player, ServerPlayerEntity from)
-	{
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-		FTBEPlayerData dataFrom = FTBEPlayerData.get(from);
-		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		return 1;
 	}
 }

@@ -70,7 +70,7 @@ public class HomeCommands
 	{
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 
-		if (data.homes.size() >= FTBEConfig.maxHomes && !data.homes.containsKey(name.toLowerCase()))
+		if (data.homes.size() >= FTBEConfig.getMaxHomes(player) && !data.homes.containsKey(name.toLowerCase()))
 		{
 			player.sendStatusMessage(new StringTextComponent("Can't add any more homes!"), false);
 			return 0;

@@ -1,10 +1,12 @@
 package com.feed_the_beast.mods.ftbessentials;
 
+import com.feed_the_beast.mods.ftbessentials.command.TPACommands;
 import com.feed_the_beast.mods.ftbessentials.util.FTBEPlayerData;
 import com.feed_the_beast.mods.ftbessentials.util.FTBEWorldData;
 import com.feed_the_beast.mods.ftbessentials.util.TeleportPos;
 import com.google.gson.JsonObject;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.event.ServerChatEvent;
@@ -22,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Iterator;
 
 /**
  * @author LatvianModder
@@ -59,6 +62,7 @@ public class FTBEEventHandler
 	public static void serverStopped(FMLServerStoppedEvent event)
 	{
 		FTBEWorldData.instance = null;
+		TPACommands.REQUESTS.clear();
 	}
 
 	@SubscribeEvent
@@ -172,6 +176,40 @@ public class FTBEEventHandler
 			{
 				event.player.abilities.allowFlying = true;
 				event.player.sendPlayerAbilities();
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void serverTick(TickEvent.ServerTickEvent event)
+	{
+		if (event.phase == TickEvent.Phase.END)
+		{
+			long now = System.currentTimeMillis();
+
+			Iterator<TPACommands.TPARequest> iterator = TPACommands.REQUESTS.values().iterator();
+
+			while (iterator.hasNext())
+			{
+				TPACommands.TPARequest r = iterator.next();
+
+				if (now > r.created + 60000L)
+				{
+					ServerPlayerEntity source = r.server.getPlayerList().getPlayerByUUID(r.source.uuid);
+					ServerPlayerEntity target = r.server.getPlayerList().getPlayerByUUID(r.target.uuid);
+
+					if (source != null)
+					{
+						source.sendMessage(new StringTextComponent("TPA request expired!"), Util.DUMMY_UUID);
+					}
+
+					if (target != null)
+					{
+						target.sendMessage(new StringTextComponent("TPA request expired!"), Util.DUMMY_UUID);
+					}
+
+					iterator.remove();
+				}
 			}
 		}
 	}

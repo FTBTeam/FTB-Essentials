@@ -70,7 +70,6 @@ public class FTBEPlayerData
 	public final LinkedHashMap<String, TeleportPos> homes;
 
 	public final CooldownTeleporter backTeleporter;
-	public final CooldownTeleporter deathTeleporter;
 	public final CooldownTeleporter spawnTeleporter;
 	public final CooldownTeleporter warpTeleporter;
 	public final CooldownTeleporter homeTeleporter;
@@ -92,7 +91,6 @@ public class FTBEPlayerData
 		homes = new LinkedHashMap<>();
 
 		backTeleporter = new CooldownTeleporter(this, FTBEConfig::getBackCooldown);
-		deathTeleporter = new CooldownTeleporter(this, FTBEConfig::getDeathCooldown);
 		spawnTeleporter = new CooldownTeleporter(this, FTBEConfig::getSpawnCooldown);
 		warpTeleporter = new CooldownTeleporter(this, FTBEConfig::getWarpCooldown);
 		homeTeleporter = new CooldownTeleporter(this, FTBEConfig::getHomeCooldown);
@@ -173,7 +171,7 @@ public class FTBEPlayerData
 	{
 		teleportHistory.add(pos);
 
-		while (teleportHistory.size() > FTBEConfig.maxBack)
+		while (teleportHistory.size() > FTBEConfig.getMaxBack(player))
 		{
 			teleportHistory.removeFirst();
 		}

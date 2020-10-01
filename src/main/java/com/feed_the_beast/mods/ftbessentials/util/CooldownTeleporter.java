@@ -9,6 +9,66 @@ import java.util.function.Function;
  */
 public class CooldownTeleporter
 {
+	public static String prettyTimeString(long seconds)
+	{
+		if (seconds <= 0L)
+		{
+			return "0 seconds";
+		}
+
+		StringBuilder builder = new StringBuilder();
+		prettyTimeString(builder, seconds, true);
+		return builder.toString();
+	}
+
+	private static void prettyTimeString(StringBuilder builder, long seconds, boolean addAnother)
+	{
+		if (seconds <= 0L)
+		{
+			return;
+		}
+		else if (!addAnother)
+		{
+			builder.append(" and ");
+		}
+
+		if (seconds < 60L)
+		{
+			builder.append(seconds);
+			builder.append(seconds == 1L ? " second" : " seconds");
+		}
+		else if (seconds < 3600L)
+		{
+			builder.append(seconds / 60L);
+			builder.append(seconds / 60L == 1L ? " minute" : " minutes");
+
+			if (addAnother)
+			{
+				prettyTimeString(builder, seconds % 60L, false);
+			}
+		}
+		else if (seconds < 86400L)
+		{
+			builder.append(seconds / 3600L);
+			builder.append(seconds / 3600L == 1L ? " hour" : " hours");
+
+			if (addAnother)
+			{
+				prettyTimeString(builder, seconds % 3600L, false);
+			}
+		}
+		else
+		{
+			builder.append(seconds / 86400L);
+			builder.append(seconds / 86400L == 1L ? " day" : " days");
+
+			if (addAnother)
+			{
+				prettyTimeString(builder, seconds % 86400L, false);
+			}
+		}
+	}
+
 	public final FTBEPlayerData playerData;
 	public final Function<ServerPlayerEntity, Long> cooldownGetter;
 	public long cooldown;
@@ -20,7 +80,7 @@ public class CooldownTeleporter
 		cooldown = 0L;
 	}
 
-	public TeleportPos.TeleportResult teleport(ServerPlayerEntity player, Function<ServerPlayerEntity, TeleportPos> positionGetter)
+	public TeleportPos.TeleportResult checkCooldown()
 	{
 		long now = System.currentTimeMillis();
 
@@ -29,14 +89,26 @@ public class CooldownTeleporter
 			return (TeleportPos.CooldownTeleportResult) () -> cooldown - now;
 		}
 
-		cooldown = now + Math.max(0L, cooldownGetter.apply(player));
+		return TeleportPos.TeleportResult.SUCCESS;
+	}
+
+	public TeleportPos.TeleportResult teleport(ServerPlayerEntity player, Function<ServerPlayerEntity, TeleportPos> positionGetter)
+	{
+		TeleportPos.TeleportResult res0 = checkCooldown();
+
+		if (!res0.isSuccess())
+		{
+			return res0;
+		}
+
+		cooldown = System.currentTimeMillis() + Math.max(0L, cooldownGetter.apply(player));
 
 		TeleportPos p = positionGetter.apply(player);
 		TeleportPos currentPos = new TeleportPos(player);
 
-		TeleportPos.TeleportResult res0 = p.teleport(player);
+		res0 = p.teleport(player);
 
-		if (res0 != TeleportPos.TeleportResult.SUCCESS)
+		if (!res0.isSuccess())
 		{
 			return res0;
 		}
