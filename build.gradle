@@ -119,3 +119,21 @@ if (ENV.LOCAL_MAVEN) {
 		}
 	}
 }
+
+if (ENV.CURSEFORGE_KEY) {
+	curseforge {
+		apiKey = ENV.CURSEFORGE_KEY
+		project {
+			id = "${curseforge_id}"
+			releaseType = "release"
+			addGameVersion "1.16.2"
+			addGameVersion "1.16.3"
+			relations {
+				optionalDependency 'ftb-ranks'
+			}
+			changelog = getGitChangelog
+			changelogType = 'markdown'
+			addArtifact(deobfJar)
+		}
+	}
+}
