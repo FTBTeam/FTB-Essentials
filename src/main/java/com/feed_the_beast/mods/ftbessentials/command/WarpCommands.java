@@ -45,7 +45,6 @@ public class WarpCommands
 
 	public static int warp(ServerPlayerEntity player, String name)
 	{
-		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		TeleportPos pos = FTBEWorldData.instance.warps.get(name.toLowerCase());
 
