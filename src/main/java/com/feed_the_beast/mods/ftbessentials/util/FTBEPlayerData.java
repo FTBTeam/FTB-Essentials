@@ -68,6 +68,7 @@ public class FTBEPlayerData
 	public String nick;
 	public TeleportPos lastSeen;
 	public final LinkedHashMap<String, TeleportPos> homes;
+	public int recording;
 
 	public final CooldownTeleporter backTeleporter;
 	public final CooldownTeleporter spawnTeleporter;
@@ -89,6 +90,7 @@ public class FTBEPlayerData
 		nick = "";
 		lastSeen = new TeleportPos(World.OVERWORLD, BlockPos.ZERO);
 		homes = new LinkedHashMap<>();
+		recording = 0;
 
 		backTeleporter = new CooldownTeleporter(this, FTBEConfig::getBackCooldown);
 		spawnTeleporter = new CooldownTeleporter(this, FTBEConfig::getSpawnCooldown);
@@ -112,6 +114,7 @@ public class FTBEPlayerData
 		json.addProperty("god", god);
 		json.addProperty("nick", nick);
 		json.add("lastSeen", lastSeen.toJson());
+		json.addProperty("recording", recording);
 
 		JsonArray tph = new JsonArray();
 
@@ -140,6 +143,7 @@ public class FTBEPlayerData
 		fly = json.has("fly") && json.get("fly").getAsBoolean();
 		god = json.has("god") && json.get("god").getAsBoolean();
 		nick = json.has("nick") ? json.get("nick").getAsString() : "";
+		recording = json.has("recording") ? json.get("recording").getAsInt() : 0;
 
 		if (json.has("lastSeen"))
 		{

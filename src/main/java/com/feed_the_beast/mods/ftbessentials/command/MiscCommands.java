@@ -13,8 +13,11 @@ import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Util;
+import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * @author LatvianModder
@@ -35,18 +38,22 @@ public class MiscCommands
 				.executes(context -> leaderboard(context.getSource().asPlayer()))
 		);
 
-		dispatcher.register(Commands.literal("rec")
-				.executes(context -> rec(context.getSource().asPlayer()))
+		dispatcher.register(Commands.literal("recording")
+				.executes(context -> recording(context.getSource().asPlayer()))
+		);
+
+		dispatcher.register(Commands.literal("streaming")
+				.executes(context -> streaming(context.getSource().asPlayer()))
 		);
 
 		dispatcher.register(Commands.literal("hat")
 				.executes(context -> hat(context.getSource().asPlayer()))
 		);
 
-		dispatcher.register(Commands.literal("nick")
-				.executes(context -> nick(context.getSource().asPlayer(), ""))
-				.then(Commands.argument("nick", StringArgumentType.greedyString())
-						.executes(context -> nick(context.getSource().asPlayer(), StringArgumentType.getString(context, "nick")))
+		dispatcher.register(Commands.literal("nickname")
+				.executes(context -> nickname(context.getSource().asPlayer(), ""))
+				.then(Commands.argument("nickname", StringArgumentType.greedyString())
+						.executes(context -> nickname(context.getSource().asPlayer(), StringArgumentType.getString(context, "nick")))
 				)
 		);
 	}
@@ -83,9 +90,41 @@ public class MiscCommands
 		return 1;
 	}
 
-	public static int rec(ServerPlayerEntity player)
+	public static int recording(ServerPlayerEntity player)
 	{
-		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
+		FTBEPlayerData data = FTBEPlayerData.get(player);
+		data.recording = data.recording == 1 ? 0 : 1;
+		data.save();
+		player.refreshDisplayName();
+
+		if (data.recording == 1)
+		{
+			player.server.getPlayerList().func_232641_a_(new StringTextComponent("").append(player.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)).appendString(" is now recording!"), ChatType.CHAT, Util.DUMMY_UUID);
+		}
+		else
+		{
+			player.server.getPlayerList().func_232641_a_(new StringTextComponent("").append(player.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)).appendString(" is no longer recording!"), ChatType.CHAT, Util.DUMMY_UUID);
+		}
+
+		return 1;
+	}
+
+	public static int streaming(ServerPlayerEntity player)
+	{
+		FTBEPlayerData data = FTBEPlayerData.get(player);
+		data.recording = data.recording == 2 ? 0 : 2;
+		data.save();
+		player.refreshDisplayName();
+
+		if (data.recording == 2)
+		{
+			player.server.getPlayerList().func_232641_a_(new StringTextComponent("").append(player.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)).appendString(" is now streaming!"), ChatType.CHAT, Util.DUMMY_UUID);
+		}
+		else
+		{
+			player.server.getPlayerList().func_232641_a_(new StringTextComponent("").append(player.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)).appendString(" is no longer streaming!"), ChatType.CHAT, Util.DUMMY_UUID);
+		}
+
 		return 1;
 	}
 
@@ -99,7 +138,7 @@ public class MiscCommands
 		return 1;
 	}
 
-	public static int nick(ServerPlayerEntity player, String nick)
+	public static int nickname(ServerPlayerEntity player, String nick)
 	{
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.nick = nick.trim();

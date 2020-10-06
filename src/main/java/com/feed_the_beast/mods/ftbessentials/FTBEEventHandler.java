@@ -7,7 +7,9 @@ import com.feed_the_beast.mods.ftbessentials.util.TeleportPos;
 import com.google.gson.JsonObject;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Util;
+import net.minecraft.util.text.Color;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
@@ -236,6 +238,24 @@ public class FTBEEventHandler
 			if (!data.nick.isEmpty())
 			{
 				event.setDisplayname(new StringTextComponent(data.nick));
+			}
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOWEST)
+	public static void playerNameLow(PlayerEvent.NameFormat event)
+	{
+		if (event.getPlayer() instanceof ServerPlayerEntity)
+		{
+			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+
+			if (data.recording == 1)
+			{
+				event.setDisplayname(new StringTextComponent("").append(new StringTextComponent("\u23FA").mergeStyle(TextFormatting.RED)).appendString(" ").append(event.getDisplayname()));
+			}
+			else if (data.recording == 2)
+			{
+				event.setDisplayname(new StringTextComponent("").append(new StringTextComponent("\u23FA").mergeStyle(Style.EMPTY.setColor(Color.fromInt(0xFF9146FF)))).appendString(" ").append(event.getDisplayname()));
 			}
 		}
 	}

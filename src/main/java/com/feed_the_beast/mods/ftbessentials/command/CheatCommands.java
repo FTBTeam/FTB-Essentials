@@ -31,28 +31,28 @@ public class CheatCommands
 
 		dispatcher.register(Commands.literal("heal")
 				.requires(source -> source.hasPermissionLevel(2))
-				.executes(context -> heal(context.getSource(), context.getSource().asPlayer()))
+				.executes(context -> heal(context.getSource().asPlayer()))
 				.then(Commands.argument("player", EntityArgument.player())
 						.requires(source -> source.hasPermissionLevel(2))
-						.executes(context -> heal(context.getSource(), EntityArgument.getPlayer(context, "player")))
+						.executes(context -> heal(EntityArgument.getPlayer(context, "player")))
 				)
 		);
 
 		dispatcher.register(Commands.literal("fly")
 				.requires(source -> source.hasPermissionLevel(2))
-				.executes(context -> fly(context.getSource(), context.getSource().asPlayer()))
+				.executes(context -> fly(context.getSource().asPlayer()))
 				.then(Commands.argument("player", EntityArgument.player())
 						.requires(source -> source.hasPermissionLevel(2))
-						.executes(context -> fly(context.getSource(), EntityArgument.getPlayer(context, "player")))
+						.executes(context -> fly(EntityArgument.getPlayer(context, "player")))
 				)
 		);
 
 		dispatcher.register(Commands.literal("god")
 				.requires(source -> source.hasPermissionLevel(2))
-				.executes(context -> god(context.getSource(), context.getSource().asPlayer()))
+				.executes(context -> god(context.getSource().asPlayer()))
 				.then(Commands.argument("player", EntityArgument.player())
 						.requires(source -> source.hasPermissionLevel(2))
-						.executes(context -> god(context.getSource(), EntityArgument.getPlayer(context, "player")))
+						.executes(context -> god(EntityArgument.getPlayer(context, "player")))
 				)
 		);
 
@@ -64,14 +64,14 @@ public class CheatCommands
 				)
 		);
 
-		dispatcher.register(Commands.literal("nickfor")
+		dispatcher.register(Commands.literal("nicknamefor")
 				.requires(source -> source.hasPermissionLevel(2))
 				.then(Commands.argument("player", EntityArgument.player())
 						.requires(source -> source.hasPermissionLevel(2))
-						.executes(context -> nickfor(context.getSource(), EntityArgument.getPlayer(context, "player"), ""))
+						.executes(context -> nicknamefor(context.getSource(), EntityArgument.getPlayer(context, "player"), ""))
 						.then(Commands.argument("nick", StringArgumentType.greedyString())
 								.requires(source -> source.hasPermissionLevel(2))
-								.executes(context -> nickfor(context.getSource(), EntityArgument.getPlayer(context, "player"), StringArgumentType.getString(context, "nick")))
+								.executes(context -> nicknamefor(context.getSource(), EntityArgument.getPlayer(context, "player"), StringArgumentType.getString(context, "nick")))
 						)
 				)
 		);
@@ -93,7 +93,7 @@ public class CheatCommands
 		);
 	}
 
-	public static int heal(CommandSource source, ServerPlayerEntity player)
+	public static int heal(ServerPlayerEntity player)
 	{
 		player.setHealth(player.getMaxHealth());
 		player.getFoodStats().addStats(40, 40F);
@@ -101,7 +101,7 @@ public class CheatCommands
 		return 1;
 	}
 
-	public static int fly(CommandSource source, ServerPlayerEntity player)
+	public static int fly(ServerPlayerEntity player)
 	{
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 
@@ -125,7 +125,7 @@ public class CheatCommands
 		return 1;
 	}
 
-	public static int god(CommandSource source, ServerPlayerEntity player)
+	public static int god(ServerPlayerEntity player)
 	{
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 
@@ -169,7 +169,7 @@ public class CheatCommands
 		return 1;
 	}
 
-	public static int nickfor(CommandSource source, ServerPlayerEntity player, String nick)
+	public static int nicknamefor(CommandSource source, ServerPlayerEntity player, String nick)
 	{
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.nick = nick.trim();
