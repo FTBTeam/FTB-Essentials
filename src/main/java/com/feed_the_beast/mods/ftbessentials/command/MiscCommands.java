@@ -60,7 +60,7 @@ public class MiscCommands
 
 	public static int kickme(ServerPlayerEntity player)
 	{
-		player.sendStatusMessage(new StringTextComponent("WIP!"), false);
+		player.connection.disconnect(new StringTextComponent("You kicked yourself!"));
 		return 1;
 	}
 
