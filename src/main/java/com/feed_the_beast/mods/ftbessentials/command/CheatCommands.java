@@ -14,6 +14,8 @@ import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
@@ -98,6 +100,7 @@ public class CheatCommands
 		player.setHealth(player.getMaxHealth());
 		player.getFoodStats().addStats(40, 40F);
 		player.extinguish();
+		player.curePotionEffects(new ItemStack(Items.MILK_BUCKET));
 		return 1;
 	}
 
