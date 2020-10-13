@@ -74,7 +74,7 @@ public class MiscCommands
 		dispatcher.register(Commands.literal("nickname")
 				.executes(context -> nickname(context.getSource().asPlayer(), ""))
 				.then(Commands.argument("nickname", StringArgumentType.greedyString())
-						.executes(context -> nickname(context.getSource().asPlayer(), StringArgumentType.getString(context, "nick")))
+						.executes(context -> nickname(context.getSource().asPlayer(), StringArgumentType.getString(context, "nickname")))
 				)
 		);
 	}

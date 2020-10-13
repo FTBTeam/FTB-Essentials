@@ -71,9 +71,9 @@ public class CheatCommands
 				.then(Commands.argument("player", EntityArgument.player())
 						.requires(source -> source.hasPermissionLevel(2))
 						.executes(context -> nicknamefor(context.getSource(), EntityArgument.getPlayer(context, "player"), ""))
-						.then(Commands.argument("nick", StringArgumentType.greedyString())
+						.then(Commands.argument("nickname", StringArgumentType.greedyString())
 								.requires(source -> source.hasPermissionLevel(2))
-								.executes(context -> nicknamefor(context.getSource(), EntityArgument.getPlayer(context, "player"), StringArgumentType.getString(context, "nick")))
+								.executes(context -> nicknamefor(context.getSource(), EntityArgument.getPlayer(context, "player"), StringArgumentType.getString(context, "nickname")))
 						)
 				)
 		);
