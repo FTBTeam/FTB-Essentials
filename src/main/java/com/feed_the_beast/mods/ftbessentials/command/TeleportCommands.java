@@ -88,7 +88,7 @@ public class TeleportCommands
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		return data.rtpTeleporter.teleport(player, p -> {
 			p.sendStatusMessage(new StringTextComponent("Looking for random location..."), false);
-			return findBlockPos(p.getServerWorld(), p, 1);
+			return findBlockPos(p.server.getWorld(World.OVERWORLD), p, 1);
 		}).runCommand(player);
 	}
 

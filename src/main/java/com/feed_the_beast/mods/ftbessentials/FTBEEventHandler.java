@@ -255,7 +255,7 @@ public class FTBEEventHandler
 			}
 			else if (data.recording == 2)
 			{
-				event.setDisplayname(new StringTextComponent("").append(new StringTextComponent("\u23FA").mergeStyle(Style.EMPTY.setColor(Color.fromInt(0xFF9146FF)))).appendString(" ").append(event.getDisplayname()));
+				event.setDisplayname(new StringTextComponent("").append(new StringTextComponent("\u23FA").mergeStyle(Style.EMPTY.setColor(Color.fromInt(0x9146FF)))).appendString(" ").append(event.getDisplayname()));
 			}
 		}
 	}
