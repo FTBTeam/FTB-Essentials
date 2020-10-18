@@ -1,6 +1,7 @@
 package com.feed_the_beast.mods.ftbessentials.util;
 
 import com.feed_the_beast.mods.ftbessentials.FTBEConfig;
+import com.feed_the_beast.mods.ftbessentials.FTBEssentials;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -11,6 +12,10 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -60,7 +65,7 @@ public class FTBEPlayerData
 
 	public final UUID uuid;
 	public String name;
-	public boolean save;
+	private boolean save;
 
 	public boolean muted;
 	public boolean fly;
@@ -181,5 +186,54 @@ public class FTBEPlayerData
 		}
 
 		save();
+	}
+
+	public void load()
+	{
+		try
+		{
+			Path dir = FTBEWorldData.instance.mkdirs("playerdata");
+			Path file = dir.resolve(uuid + ".json");
+
+			if (Files.exists(file))
+			{
+				try (BufferedReader reader = Files.newBufferedReader(file))
+				{
+					fromJson(FTBEssentials.GSON.fromJson(reader, JsonObject.class));
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			FTBEssentials.LOGGER.error("Failed to load player data for " + uuid + ":" + name + ": " + ex);
+			ex.printStackTrace();
+		}
+	}
+
+	public void saveNow()
+	{
+		if (!save)
+		{
+			return;
+		}
+
+		try
+		{
+			JsonObject json = toJson();
+			Path dir = FTBEWorldData.instance.mkdirs("playerdata");
+			Path file = dir.resolve(uuid + ".json");
+
+			try (BufferedWriter writer = Files.newBufferedWriter(file))
+			{
+				FTBEssentials.GSON.toJson(json, writer);
+			}
+
+			save = false;
+		}
+		catch (Exception ex)
+		{
+			FTBEssentials.LOGGER.error("Failed to save player data for " + uuid + ":" + name + ": " + ex);
+			ex.printStackTrace();
+		}
 	}
 }

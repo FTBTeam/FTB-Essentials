@@ -112,58 +112,18 @@ public class FTBEEventHandler
 	@SubscribeEvent
 	public static void playerLoad(PlayerEvent.LoadFromFile event)
 	{
-		if (FTBEWorldData.instance == null)
+		if (FTBEWorldData.instance != null)
 		{
-			return;
-		}
-
-		FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
-
-		try
-		{
-			Path dir = FTBEWorldData.instance.mkdirs("playerdata");
-			Path file = dir.resolve(event.getPlayerUUID() + ".json");
-
-			if (Files.exists(file))
-			{
-				try (BufferedReader reader = Files.newBufferedReader(file))
-				{
-					data.fromJson(FTBEssentials.GSON.fromJson(reader, JsonObject.class));
-				}
-			}
-		}
-		catch (Exception ex)
-		{
-			FTBEssentials.LOGGER.error("Failed to load player data for " + data.uuid + ":" + data.name + ": " + ex);
-			ex.printStackTrace();
+			FTBEPlayerData.get(event.getPlayer()).load();
 		}
 	}
 
 	@SubscribeEvent
 	public static void playerSaved(PlayerEvent.SaveToFile event)
 	{
-		FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
-
-		if (data.save && FTBEWorldData.instance != null)
+		if (FTBEWorldData.instance != null)
 		{
-			try
-			{
-				JsonObject json = data.toJson();
-				Path dir = FTBEWorldData.instance.mkdirs("playerdata");
-				Path file = dir.resolve(event.getPlayerUUID() + ".json");
-
-				try (BufferedWriter writer = Files.newBufferedWriter(file))
-				{
-					FTBEssentials.GSON.toJson(json, writer);
-				}
-
-				data.save = false;
-			}
-			catch (Exception ex)
-			{
-				FTBEssentials.LOGGER.error("Failed to save player data for " + data.uuid + ":" + data.name + ": " + ex);
-				ex.printStackTrace();
-			}
+			FTBEPlayerData.get(event.getPlayer()).saveNow();
 		}
 	}
 

@@ -97,7 +97,9 @@ public class TeleportPos
 			return TeleportResult.DIMENSION_NOT_FOUND;
 		}
 
+		int lvl = player.experienceLevel;
 		player.teleport(world, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, player.rotationYaw, player.rotationPitch);
+		player.setExperienceLevel(lvl);
 		return TeleportResult.SUCCESS;
 	}
 

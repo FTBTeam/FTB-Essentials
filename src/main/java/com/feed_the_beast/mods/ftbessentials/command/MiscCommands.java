@@ -113,7 +113,9 @@ public class MiscCommands
 					.filter(path -> path.toString().endsWith(".json"))
 					.map(Path::getFileName)
 					.map(path -> new GameProfile(UUID.fromString(path.toString().replace(".json", "")), null))
-					.forEach(FTBEPlayerData::get);
+					.filter(profile -> !FTBEPlayerData.MAP.containsKey(profile.getId()))
+					.map(FTBEPlayerData::get)
+					.forEach(FTBEPlayerData::load);
 		}
 		catch (Exception ex)
 		{
