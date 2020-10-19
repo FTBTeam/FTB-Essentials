@@ -2,6 +2,8 @@ package com.feed_the_beast.mods.ftbessentials.util;
 
 import com.feed_the_beast.mods.ftbessentials.FTBEConfig;
 import com.feed_the_beast.mods.ftbessentials.FTBEssentials;
+import com.feed_the_beast.mods.ftbessentials.net.FTBEssentialsNet;
+import com.feed_the_beast.mods.ftbessentials.net.UpdateTabNamePacket;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -11,7 +13,9 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.network.PacketDistributor;
 
+import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.nio.file.Files;
@@ -235,5 +239,15 @@ public class FTBEPlayerData
 			FTBEssentials.LOGGER.error("Failed to save player data for " + uuid + ":" + name + ": " + ex);
 			ex.printStackTrace();
 		}
+	}
+
+	public void sendTabName()
+	{
+		sendTabName(null);
+	}
+
+	public void sendTabName(@Nullable ServerPlayerEntity to)
+	{
+		FTBEssentialsNet.MAIN.send(to == null ? PacketDistributor.ALL.noArg() : PacketDistributor.PLAYER.with(() -> to), new UpdateTabNamePacket(uuid, name, nick, recording, false));
 	}
 }

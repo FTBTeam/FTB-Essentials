@@ -34,6 +34,9 @@ import java.util.Iterator;
 @Mod.EventBusSubscriber(modid = FTBEssentials.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class FTBEEventHandler
 {
+	public static final Style RECORDING_STYLE = Style.EMPTY.setColor(Color.fromTextFormatting(TextFormatting.RED));
+	public static final Style STREAMING_STYLE = Style.EMPTY.setColor(Color.fromInt(0x9146FF));
+
 	@SubscribeEvent
 	public static void serverAboutToStart(FMLServerAboutToStartEvent event)
 	{
@@ -99,6 +102,11 @@ public class FTBEEventHandler
 		FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
 		data.lastSeen = new TeleportPos(event.getPlayer());
 		data.save();
+
+		for (FTBEPlayerData d : FTBEPlayerData.MAP.values())
+		{
+			d.sendTabName((ServerPlayerEntity) event.getPlayer());
+		}
 	}
 
 	@SubscribeEvent
@@ -209,13 +217,9 @@ public class FTBEEventHandler
 		{
 			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
 
-			if (data.recording == 1)
+			if (data.recording > 0)
 			{
-				event.setDisplayname(new StringTextComponent("").append(new StringTextComponent("\u23FA").mergeStyle(TextFormatting.RED)).appendString(" ").append(event.getDisplayname()));
-			}
-			else if (data.recording == 2)
-			{
-				event.setDisplayname(new StringTextComponent("").append(new StringTextComponent("\u23FA").mergeStyle(Style.EMPTY.setColor(Color.fromInt(0x9146FF)))).appendString(" ").append(event.getDisplayname()));
+				event.setDisplayname(new StringTextComponent("").append(new StringTextComponent("\u23FA").mergeStyle(data.recording == 1 ? RECORDING_STYLE : STREAMING_STYLE)).appendString(" ").append(event.getDisplayname()));
 			}
 		}
 	}

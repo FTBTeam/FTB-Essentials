@@ -22,6 +22,6 @@ public class FTBEssentialsNet
 				.networkProtocolVersion(() -> MAIN_VERSION)
 				.simpleChannel();
 
-		//MAIN.registerMessage(1, SelectTemperedJarRecipePacket.class, SelectTemperedJarRecipePacket::write, SelectTemperedJarRecipePacket::new, SelectTemperedJarRecipePacket::handle);
+		MAIN.registerMessage(1, UpdateTabNamePacket.class, UpdateTabNamePacket::write, UpdateTabNamePacket::new, UpdateTabNamePacket::handle);
 	}
 }

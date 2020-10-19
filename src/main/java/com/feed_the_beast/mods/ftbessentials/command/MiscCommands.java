@@ -221,6 +221,7 @@ public class MiscCommands
 			player.server.getPlayerList().func_232641_a_(new StringTextComponent("").append(player.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)).appendString(" is no longer recording!"), ChatType.CHAT, Util.DUMMY_UUID);
 		}
 
+		data.sendTabName();
 		return 1;
 	}
 
@@ -240,6 +241,7 @@ public class MiscCommands
 			player.server.getPlayerList().func_232641_a_(new StringTextComponent("").append(player.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)).appendString(" is no longer streaming!"), ChatType.CHAT, Util.DUMMY_UUID);
 		}
 
+		data.sendTabName();
 		return 1;
 	}
 
@@ -255,8 +257,15 @@ public class MiscCommands
 
 	public static int nickname(ServerPlayerEntity player, String nick)
 	{
+		if (nick.length() > 30)
+		{
+			player.sendStatusMessage(new StringTextComponent("Nickname too long!"), false);
+			return 0;
+		}
+
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.nick = nick.trim();
+
 		data.save();
 		player.refreshDisplayName();
 
@@ -269,6 +278,7 @@ public class MiscCommands
 			player.sendStatusMessage(new StringTextComponent("Nickname changed to '" + data.nick + "'"), false);
 		}
 
+		data.sendTabName();
 		return 1;
 	}
 }

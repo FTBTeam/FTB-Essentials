@@ -8,7 +8,7 @@ buildscript {
 	dependencies {
 		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
 		classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.1.0'
-		classpath 'com.wynprice.cursemaven:CurseMaven:1.2.+'
+		classpath 'com.wynprice.cursemaven:CurseMaven:2.+'
 	}
 }
 apply plugin: 'net.minecraftforge.gradle'

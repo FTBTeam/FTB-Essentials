@@ -174,6 +174,12 @@ public class CheatCommands
 
 	public static int nicknamefor(CommandSource source, ServerPlayerEntity player, String nick)
 	{
+		if (nick.length() > 30)
+		{
+			player.sendStatusMessage(new StringTextComponent("Nickname too long!"), false);
+			return 0;
+		}
+
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.nick = nick.trim();
 		data.save();
@@ -188,6 +194,7 @@ public class CheatCommands
 			source.sendFeedback(new StringTextComponent("Nickname changed to '" + data.nick + "'"), true);
 		}
 
+		data.sendTabName();
 		return 1;
 	}
 
