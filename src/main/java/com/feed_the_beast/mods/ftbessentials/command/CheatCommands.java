@@ -163,9 +163,9 @@ public class CheatCommands
 			}
 
 			@Override
-			public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity player)
+			public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity p)
 			{
-				return new ChestContainer(ContainerType.GENERIC_9X5, id, playerInventory, new OtherPlayerInventory((ServerPlayerEntity) player), 5);
+				return new ChestContainer(ContainerType.GENERIC_9X5, id, playerInventory, new OtherPlayerInventory(player), 5);
 			}
 		});
 
