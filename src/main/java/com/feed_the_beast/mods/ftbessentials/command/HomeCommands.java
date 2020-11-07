@@ -46,7 +46,7 @@ public class HomeCommands
 		dispatcher.register(Commands.literal("listhomes")
 				.executes(context -> listhomes(context.getSource(), context.getSource().asPlayer().getGameProfile()))
 				.then(Commands.argument("player", GameProfileArgument.gameProfile())
-						.requires(source -> source.hasPermissionLevel(2))
+						.requires(source -> source.getServer().isSinglePlayer() || source.hasPermissionLevel(2))
 						.executes(context -> listhomes(context.getSource(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
 				)
 		);

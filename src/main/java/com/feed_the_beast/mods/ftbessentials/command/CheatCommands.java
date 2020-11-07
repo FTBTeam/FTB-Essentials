@@ -35,7 +35,6 @@ public class CheatCommands
 				.requires(source -> source.hasPermissionLevel(2))
 				.executes(context -> heal(context.getSource().asPlayer()))
 				.then(Commands.argument("player", EntityArgument.player())
-						.requires(source -> source.hasPermissionLevel(2))
 						.executes(context -> heal(EntityArgument.getPlayer(context, "player")))
 				)
 		);
@@ -44,7 +43,6 @@ public class CheatCommands
 				.requires(source -> source.hasPermissionLevel(2))
 				.executes(context -> fly(context.getSource().asPlayer()))
 				.then(Commands.argument("player", EntityArgument.player())
-						.requires(source -> source.hasPermissionLevel(2))
 						.executes(context -> fly(EntityArgument.getPlayer(context, "player")))
 				)
 		);
@@ -53,7 +51,6 @@ public class CheatCommands
 				.requires(source -> source.hasPermissionLevel(2))
 				.executes(context -> god(context.getSource().asPlayer()))
 				.then(Commands.argument("player", EntityArgument.player())
-						.requires(source -> source.hasPermissionLevel(2))
 						.executes(context -> god(EntityArgument.getPlayer(context, "player")))
 				)
 		);
@@ -61,7 +58,6 @@ public class CheatCommands
 		dispatcher.register(Commands.literal("invsee")
 				.requires(source -> source.hasPermissionLevel(2))
 				.then(Commands.argument("player", EntityArgument.player())
-						.requires(source -> source.hasPermissionLevel(2))
 						.executes(context -> invsee(context.getSource().asPlayer(), EntityArgument.getPlayer(context, "player")))
 				)
 		);

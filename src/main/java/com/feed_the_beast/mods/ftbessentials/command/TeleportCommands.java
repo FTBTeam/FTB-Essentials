@@ -44,6 +44,7 @@ public class TeleportCommands
 		);
 
 		dispatcher.register(Commands.literal("teleport_last")
+				.requires(source -> source.hasPermissionLevel(2))
 				.then(Commands.argument("player", GameProfileArgument.gameProfile())
 						.executes(context -> tpLast(context.getSource().asPlayer(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
 				)

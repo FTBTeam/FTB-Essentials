@@ -27,12 +27,14 @@ public class WarpCommands
 		);
 
 		dispatcher.register(Commands.literal("setwarp")
+				.requires(source -> source.hasPermissionLevel(2))
 				.then(Commands.argument("name", StringArgumentType.greedyString())
 						.executes(context -> setwarp(context.getSource().asPlayer(), StringArgumentType.getString(context, "name")))
 				)
 		);
 
 		dispatcher.register(Commands.literal("delwarp")
+				.requires(source -> source.hasPermissionLevel(2))
 				.then(Commands.argument("name", StringArgumentType.greedyString())
 						.executes(context -> delwarp(context.getSource().asPlayer(), StringArgumentType.getString(context, "name")))
 				)
