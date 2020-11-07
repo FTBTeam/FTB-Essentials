@@ -8,16 +8,14 @@ buildscript {
 	dependencies {
 		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
 		classpath 'gradle.plugin.com.matthewprenger:CurseGradle:1.1.0'
-		classpath 'com.wynprice.cursemaven:CurseMaven:2.+'
 	}
 }
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'com.matthewprenger.cursegradle'
 apply plugin: 'maven'
-apply plugin: 'com.wynprice.cursemaven'
 
-apply from: 'https://raw.githubusercontent.com/MinecraftModDevelopment/Gradle-Collection/master/generic/markdown-git-changelog.gradle'
+apply from: 'https://files.latmod.com/public/markdown-git-changelog.gradle'
 
 def ENV = System.getenv()
 version = ENV.BUILD_NUMBER ? "${mod_version}.${ENV.BUILD_NUMBER}" : "${mod_version}.custom"
@@ -77,17 +75,16 @@ minecraft {
 	}
 }
 
-configurations.all {
-	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
-
 repositories {
 	mavenLocal()
+	maven { url = "https://www.cursemaven.com" }
+	maven { url "https://maven.latmod.com/" } //FTB GUI Library, FTB Teams, FTB Ranks, KubeJS
 }
 
 dependencies {
 	minecraft "net.minecraftforge:forge:${forge_version}"
-	compile fg.deobf(curse.resolve('jei', project.jei_file))
+	compile fg.deobf("curse.maven:jei:${jei_file}")
+	compile(fg.deobf("com.feed_the_beast.mods:ftb-ranks:1603.+"))
 }
 
 jar {
@@ -128,6 +125,7 @@ if (ENV.CURSEFORGE_KEY) {
 			releaseType = "release"
 			addGameVersion "1.16.2"
 			addGameVersion "1.16.3"
+			addGameVersion "1.16.4"
 			relations {
 				optionalDependency 'ftb-ranks'
 			}
