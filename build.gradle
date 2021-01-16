@@ -83,7 +83,7 @@ repositories {
 
 dependencies {
 	minecraft "net.minecraftforge:forge:${forge_version}"
-	compile fg.deobf("curse.maven:jei:${jei_file}")
+	compile fg.deobf("curse.maven:jei-238222:${jei_file}")
 	compile(fg.deobf("com.feed_the_beast.mods:ftb-ranks:1603.+"))
 }
 
