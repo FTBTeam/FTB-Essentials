@@ -13,12 +13,12 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'com.matthewprenger.cursegradle'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 apply from: 'https://files.latmod.com/public/markdown-git-changelog.gradle'
 
 def ENV = System.getenv()
-version = ENV.BUILD_NUMBER ? "${mod_version}.${ENV.BUILD_NUMBER}" : "${mod_version}.custom"
+version = "${mod_version}-build.${ENV.BUILD_NUMBER ?: 9999}"
 group = project.mod_package
 archivesBaseName = project.mod_name
 
@@ -112,11 +112,30 @@ def reobfArtifact = artifacts.add('default', reobfFile) {
     builtBy 'reobfJar'
 }
 
-if (ENV.LOCAL_MAVEN) {
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                repository(url: "file://${ENV.LOCAL_MAVEN}")
+publishing {
+    publications {
+        mavenForge(MavenPublication) {
+            artifactId = rootProject.archivesBaseName
+            artifact(reobfArtifact) {
+                classifier null
+            }
+        }
+    }
+
+    repositories {
+        if (ENV.LOCAL_MAVEN) {
+            maven {
+                url = "file://${ENV.LOCAL_MAVEN}"
+            }
+        }
+
+        if (ENV.SAPS_TOKEN) {
+            maven {
+                url "https://maven.saps.dev/minecraft"
+                credentials {
+                    username = "latvian"
+                    password = "${ENV.SAPS_TOKEN}"
+                }
             }
         }
     }
