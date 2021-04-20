@@ -7,12 +7,9 @@ import java.util.function.Function;
 /**
  * @author LatvianModder
  */
-public class CooldownTeleporter
-{
-	public static String prettyTimeString(long seconds)
-	{
-		if (seconds <= 0L)
-		{
+public class CooldownTeleporter {
+	public static String prettyTimeString(long seconds) {
+		if (seconds <= 0L) {
 			return "0 seconds";
 		}
 
@@ -21,49 +18,35 @@ public class CooldownTeleporter
 		return builder.toString();
 	}
 
-	private static void prettyTimeString(StringBuilder builder, long seconds, boolean addAnother)
-	{
-		if (seconds <= 0L)
-		{
+	private static void prettyTimeString(StringBuilder builder, long seconds, boolean addAnother) {
+		if (seconds <= 0L) {
 			return;
-		}
-		else if (!addAnother)
-		{
+		} else if (!addAnother) {
 			builder.append(" and ");
 		}
 
-		if (seconds < 60L)
-		{
+		if (seconds < 60L) {
 			builder.append(seconds);
 			builder.append(seconds == 1L ? " second" : " seconds");
-		}
-		else if (seconds < 3600L)
-		{
+		} else if (seconds < 3600L) {
 			builder.append(seconds / 60L);
 			builder.append(seconds / 60L == 1L ? " minute" : " minutes");
 
-			if (addAnother)
-			{
+			if (addAnother) {
 				prettyTimeString(builder, seconds % 60L, false);
 			}
-		}
-		else if (seconds < 86400L)
-		{
+		} else if (seconds < 86400L) {
 			builder.append(seconds / 3600L);
 			builder.append(seconds / 3600L == 1L ? " hour" : " hours");
 
-			if (addAnother)
-			{
+			if (addAnother) {
 				prettyTimeString(builder, seconds % 3600L, false);
 			}
-		}
-		else
-		{
+		} else {
 			builder.append(seconds / 86400L);
 			builder.append(seconds / 86400L == 1L ? " day" : " days");
 
-			if (addAnother)
-			{
+			if (addAnother) {
 				prettyTimeString(builder, seconds % 86400L, false);
 			}
 		}
@@ -73,48 +56,41 @@ public class CooldownTeleporter
 	public final Function<ServerPlayerEntity, Long> cooldownGetter;
 	public long cooldown;
 
-	public CooldownTeleporter(FTBEPlayerData d, Function<ServerPlayerEntity, Long> c)
-	{
+	public CooldownTeleporter(FTBEPlayerData d, Function<ServerPlayerEntity, Long> c) {
 		playerData = d;
 		cooldownGetter = c;
 		cooldown = 0L;
 	}
 
-	public TeleportPos.TeleportResult checkCooldown()
-	{
+	public TeleportPos.TeleportResult checkCooldown() {
 		long now = System.currentTimeMillis();
 
-		if (now < cooldown)
-		{
+		if (now < cooldown) {
 			return (TeleportPos.CooldownTeleportResult) () -> cooldown - now;
 		}
 
 		return TeleportPos.TeleportResult.SUCCESS;
 	}
 
-	public TeleportPos.TeleportResult teleport(ServerPlayerEntity player, Function<ServerPlayerEntity, TeleportPos> positionGetter)
-	{
+	public TeleportPos.TeleportResult teleport(ServerPlayerEntity player, Function<ServerPlayerEntity, TeleportPos> positionGetter) {
 		TeleportPos.TeleportResult res0 = checkCooldown();
 
-		if (!res0.isSuccess())
-		{
+		if (!res0.isSuccess()) {
 			return res0;
 		}
 
-		cooldown = System.currentTimeMillis() + Math.max(0L, cooldownGetter.apply(player));
+		cooldown = System.currentTimeMillis() + Math.max(0L, cooldownGetter.apply(player) * 1000L);
 
 		TeleportPos p = positionGetter.apply(player);
 		TeleportPos currentPos = new TeleportPos(player);
 
 		res0 = p.teleport(player);
 
-		if (!res0.isSuccess())
-		{
+		if (!res0.isSuccess()) {
 			return res0;
 		}
 
-		if (this != playerData.backTeleporter)
-		{
+		if (this != playerData.backTeleporter) {
 			playerData.addTeleportHistory(player, currentPos);
 		}
 

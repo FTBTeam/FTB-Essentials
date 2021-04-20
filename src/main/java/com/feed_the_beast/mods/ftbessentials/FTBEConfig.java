@@ -11,8 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 /**
  * @author LatvianModder
  */
-public class FTBEConfig
-{
+public class FTBEConfig {
 	public static int maxBack;
 	public static int maxHomes;
 	public static long backCooldown;
@@ -27,8 +26,7 @@ public class FTBEConfig
 
 	private static Pair<ServerConfig, ForgeConfigSpec> server;
 
-	public static void init()
-	{
+	public static void init() {
 		FMLJavaModLoadingContext.get().getModEventBus().register(FTBEConfig.class);
 
 		server = new ForgeConfigSpec.Builder().configure(ServerConfig::new);
@@ -38,12 +36,10 @@ public class FTBEConfig
 	}
 
 	@SubscribeEvent
-	public static void reload(ModConfig.ModConfigEvent event)
-	{
+	public static void reload(ModConfig.ModConfigEvent event) {
 		ModConfig config = event.getConfig();
 
-		if (config.getSpec() == server.getRight())
-		{
+		if (config.getSpec() == server.getRight()) {
 			ServerConfig c = server.getLeft();
 			maxBack = c.maxBack.get();
 			maxHomes = c.maxHomes.get();
@@ -59,8 +55,7 @@ public class FTBEConfig
 		}
 	}
 
-	private static class ServerConfig
-	{
+	private static class ServerConfig {
 		private final ForgeConfigSpec.IntValue maxBack;
 		private final ForgeConfigSpec.IntValue maxHomes;
 		private final ForgeConfigSpec.LongValue backCooldown;
@@ -73,8 +68,7 @@ public class FTBEConfig
 		private final ForgeConfigSpec.DoubleValue rtpMinDistance;
 		private final ForgeConfigSpec.DoubleValue rtpMaxDistance;
 
-		private ServerConfig(ForgeConfigSpec.Builder builder)
-		{
+		private ServerConfig(ForgeConfigSpec.Builder builder) {
 			maxBack = builder
 					.comment("Max number of times you can use /back")
 					.defineInRange("maxBack", 10, 0, Integer.MAX_VALUE);
@@ -121,55 +115,67 @@ public class FTBEConfig
 		}
 	}
 
-	/*
-	public static int getMaxClaimedChunks(ClaimedChunkPlayerData playerData, ServerPlayerEntity player)
-	{
-		if (FTBChunks.ranksMod)
-		{
-			return FTBRanksIntegration.getMaxClaimedChunks(player, maxClaimedChunks) + playerData.getExtraClaimChunks();
+	public static int getMaxBack(ServerPlayerEntity player) {
+		if (FTBEssentials.ranksMod) {
+			return FTBRanksIntegration.getMaxBack(player, maxBack);
 		}
 
-		return maxClaimedChunks + playerData.getExtraClaimChunks();
-	}
-	*/
-
-	public static int getMaxBack(ServerPlayerEntity player)
-	{
 		return maxBack;
 	}
 
-	public static long getMaxHomes(ServerPlayerEntity player)
-	{
+	public static long getMaxHomes(ServerPlayerEntity player) {
+		if (FTBEssentials.ranksMod) {
+			return FTBRanksIntegration.getMaxHomes(player, maxHomes);
+		}
+
 		return maxHomes;
 	}
 
-	public static long getBackCooldown(ServerPlayerEntity player)
-	{
-		return backCooldown * 1000L;
+	public static long getBackCooldown(ServerPlayerEntity player) {
+		if (FTBEssentials.ranksMod) {
+			return FTBRanksIntegration.getBackCooldown(player, backCooldown);
+		}
+
+		return backCooldown;
 	}
 
-	public static long getSpawnCooldown(ServerPlayerEntity player)
-	{
-		return spawnCooldown * 1000L;
+	public static long getSpawnCooldown(ServerPlayerEntity player) {
+		if (FTBEssentials.ranksMod) {
+			return FTBRanksIntegration.getSpawnCooldown(player, spawnCooldown);
+		}
+
+		return spawnCooldown;
 	}
 
-	public static long getWarpCooldown(ServerPlayerEntity player)
-	{
-		return warpCooldown * 1000L;
+	public static long getWarpCooldown(ServerPlayerEntity player) {
+		if (FTBEssentials.ranksMod) {
+			return FTBRanksIntegration.getWarpCooldown(player, warpCooldown);
+		}
+
+		return warpCooldown;
 	}
 
-	public static long getHomeCooldown(ServerPlayerEntity player)
-	{
-		return homeCooldown * 1000L;
+	public static long getHomeCooldown(ServerPlayerEntity player) {
+		if (FTBEssentials.ranksMod) {
+			return FTBRanksIntegration.getHomeCooldown(player, homeCooldown);
+		}
+
+		return homeCooldown;
 	}
 
-	public static long getTpaCooldown(ServerPlayerEntity player)
-	{
-		return tpaCooldown * 1000L;
+	public static long getTpaCooldown(ServerPlayerEntity player) {
+		if (FTBEssentials.ranksMod) {
+			return FTBRanksIntegration.getTpaCooldown(player, tpaCooldown);
+		}
+
+		return tpaCooldown;
 	}
 
-	public static long getRtpCooldown(ServerPlayerEntity player)
-	{
-		return rtpCooldown * 1000L;
+	public static long getRtpCooldown(ServerPlayerEntity player) {
+		if (FTBEssentials.ranksMod) {
+			return FTBRanksIntegration.getRtpCooldown(player, rtpCooldown);
+		}
+
+		return rtpCooldown;
 	}
 }

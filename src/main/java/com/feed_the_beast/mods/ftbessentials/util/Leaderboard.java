@@ -16,21 +16,18 @@ import java.util.function.Predicate;
 /**
  * @author LatvianModder
  */
-public class Leaderboard<N extends Number>
-{
+public class Leaderboard<N extends Number> {
 	public static final DecimalFormat DECIMAL_FORMAT = Util.make(new DecimalFormat("########0.00"), decimalFormat -> decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT)));
 
 	public static final Map<String, Leaderboard<?>> MAP = new LinkedHashMap<>();
 
-	public static <T extends Number> Leaderboard<T> add(String name, T defaultValue)
-	{
+	public static <T extends Number> Leaderboard<T> add(String name, T defaultValue) {
 		Leaderboard<T> leaderboard = new Leaderboard<>(name, defaultValue);
 		MAP.put(name, leaderboard);
 		return leaderboard;
 	}
 
-	static
-	{
+	static {
 		add("deaths", 0)
 				.value(stats -> stats.getValue(Stats.CUSTOM.get(Stats.DEATHS)))
 		;
@@ -83,8 +80,7 @@ public class Leaderboard<N extends Number>
 	public Predicate<N> filter;
 	public Function<N, String> stringGetter;
 
-	public Leaderboard(String n, N def)
-	{
+	public Leaderboard(String n, N def) {
 		name = n;
 		defaultValue = def;
 		valueGetter = stats -> defaultValue;
@@ -92,67 +88,51 @@ public class Leaderboard<N extends Number>
 		stringGetter = num -> NumberFormat.getIntegerInstance(Locale.US).format(num.intValue());
 	}
 
-	public Leaderboard<N> value(Function<ServerStatisticsManager, N> v)
-	{
+	public Leaderboard<N> value(Function<ServerStatisticsManager, N> v) {
 		valueGetter = v;
 		return this;
 	}
 
-	public Leaderboard<N> filter(Predicate<N> f)
-	{
+	public Leaderboard<N> filter(Predicate<N> f) {
 		filter = f;
 		return this;
 	}
 
-	public Leaderboard<N> string(Function<N, String> s)
-	{
+	public Leaderboard<N> string(Function<N, String> s) {
 		stringGetter = s;
 		return this;
 	}
 
-	public Leaderboard<N> formatDivideByTen()
-	{
+	public Leaderboard<N> formatDivideByTen() {
 		return string(value -> DECIMAL_FORMAT.format(value.doubleValue() * 0.1D));
 	}
 
-	public Leaderboard<N> formatDistance()
-	{
+	public Leaderboard<N> formatDistance() {
 		return string(value -> {
 			double d0 = value.doubleValue() / 100.0D;
 			double d1 = d0 / 1000.0D;
-			if (d1 > 0.5D)
-			{
+			if (d1 > 0.5D) {
 				return DECIMAL_FORMAT.format(d1) + " km";
-			}
-			else
-			{
+			} else {
 				return d0 > 0.5D ? DECIMAL_FORMAT.format(d0) + " m" : value + " cm";
 			}
 		});
 	}
 
-	public Leaderboard<N> formatTime()
-	{
+	public Leaderboard<N> formatTime() {
 		return string(value -> {
 			double d0 = value.doubleValue() / 20.0D;
 			double d1 = d0 / 60.0D;
 			double d2 = d1 / 60.0D;
 			double d3 = d2 / 24.0D;
 			double d4 = d3 / 365.0D;
-			if (d4 > 0.5D)
-			{
+			if (d4 > 0.5D) {
 				return DECIMAL_FORMAT.format(d4) + " y";
-			}
-			else if (d3 > 0.5D)
-			{
+			} else if (d3 > 0.5D) {
 				return DECIMAL_FORMAT.format(d3) + " d";
-			}
-			else if (d2 > 0.5D)
-			{
+			} else if (d2 > 0.5D) {
 				return DECIMAL_FORMAT.format(d2) + " h";
-			}
-			else
-			{
+			} else {
 				return d1 > 0.5D ? DECIMAL_FORMAT.format(d1) + " m" : d0 + " s";
 			}
 		});

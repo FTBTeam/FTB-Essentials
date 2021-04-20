@@ -9,11 +9,9 @@ import net.minecraftforge.fml.common.Mod;
  * @author LatvianModder
  */
 @Mod.EventBusSubscriber(modid = FTBEssentials.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class FTBEssentialsCommands
-{
+public class FTBEssentialsCommands {
 	@SubscribeEvent
-	public static void registerCommands(RegisterCommandsEvent event)
-	{
+	public static void registerCommands(RegisterCommandsEvent event) {
 		HomeCommands.register(event.getDispatcher());
 		WarpCommands.register(event.getDispatcher());
 		TeleportCommands.register(event.getDispatcher());

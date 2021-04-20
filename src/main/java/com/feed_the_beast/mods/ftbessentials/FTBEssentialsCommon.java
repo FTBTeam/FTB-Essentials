@@ -5,9 +5,7 @@ import com.feed_the_beast.mods.ftbessentials.net.UpdateTabNamePacket;
 /**
  * @author LatvianModder
  */
-public class FTBEssentialsCommon
-{
-	public void updateTabName(UpdateTabNamePacket packet)
-	{
+public class FTBEssentialsCommon {
+	public void updateTabName(UpdateTabNamePacket packet) {
 	}
 }

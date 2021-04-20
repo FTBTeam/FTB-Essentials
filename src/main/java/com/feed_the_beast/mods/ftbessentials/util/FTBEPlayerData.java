@@ -29,20 +29,16 @@ import java.util.UUID;
 /**
  * @author LatvianModder
  */
-public class FTBEPlayerData
-{
+public class FTBEPlayerData {
 	public static final Map<UUID, FTBEPlayerData> MAP = new HashMap<>();
 
-	public static FTBEPlayerData get(GameProfile profile)
-	{
+	public static FTBEPlayerData get(GameProfile profile) {
 		FTBEPlayerData data = MAP.get(profile.getId());
 
-		if (data == null)
-		{
+		if (data == null) {
 			data = new FTBEPlayerData(profile.getId());
 
-			if (profile.getName() != null && !profile.getName().isEmpty())
-			{
+			if (profile.getName() != null && !profile.getName().isEmpty()) {
 				data.name = profile.getName();
 			}
 
@@ -52,18 +48,15 @@ public class FTBEPlayerData
 		return data;
 	}
 
-	public static FTBEPlayerData get(PlayerEntity player)
-	{
+	public static FTBEPlayerData get(PlayerEntity player) {
 		return get(player.getGameProfile());
 	}
 
-	public static void addTeleportHistory(ServerPlayerEntity player, RegistryKey<World> dimension, BlockPos pos)
-	{
+	public static void addTeleportHistory(ServerPlayerEntity player, RegistryKey<World> dimension, BlockPos pos) {
 		get(player).addTeleportHistory(player, new TeleportPos(dimension, pos));
 	}
 
-	public static void addTeleportHistory(ServerPlayerEntity player)
-	{
+	public static void addTeleportHistory(ServerPlayerEntity player) {
 		addTeleportHistory(player, player.world.getDimensionKey(), player.getPosition());
 	}
 
@@ -87,8 +80,7 @@ public class FTBEPlayerData
 	public final CooldownTeleporter rtpTeleporter;
 	public final LinkedList<TeleportPos> teleportHistory;
 
-	public FTBEPlayerData(UUID u)
-	{
+	public FTBEPlayerData(UUID u) {
 		uuid = u;
 		name = "Unknown";
 		save = false;
@@ -110,13 +102,11 @@ public class FTBEPlayerData
 		teleportHistory = new LinkedList<>();
 	}
 
-	public void save()
-	{
+	public void save() {
 		save = true;
 	}
 
-	public JsonObject toJson()
-	{
+	public JsonObject toJson() {
 		JsonObject json = new JsonObject();
 		json.addProperty("muted", muted);
 		json.addProperty("fly", fly);
@@ -127,8 +117,7 @@ public class FTBEPlayerData
 
 		JsonArray tph = new JsonArray();
 
-		for (TeleportPos pos : teleportHistory)
-		{
+		for (TeleportPos pos : teleportHistory) {
 			tph.add(pos.toJson());
 		}
 
@@ -136,8 +125,7 @@ public class FTBEPlayerData
 
 		JsonObject hm = new JsonObject();
 
-		for (Map.Entry<String, TeleportPos> h : homes.entrySet())
-		{
+		for (Map.Entry<String, TeleportPos> h : homes.entrySet()) {
 			hm.add(h.getKey(), h.getValue().toJson());
 		}
 
@@ -146,108 +134,86 @@ public class FTBEPlayerData
 		return json;
 	}
 
-	public void fromJson(JsonObject json)
-	{
+	public void fromJson(JsonObject json) {
 		muted = json.has("muted") && json.get("muted").getAsBoolean();
 		fly = json.has("fly") && json.get("fly").getAsBoolean();
 		god = json.has("god") && json.get("god").getAsBoolean();
 		nick = json.has("nick") ? json.get("nick").getAsString() : "";
 		recording = json.has("recording") ? json.get("recording").getAsInt() : 0;
 
-		if (json.has("lastSeen"))
-		{
+		if (json.has("lastSeen")) {
 			lastSeen = new TeleportPos(json.get("lastSeen").getAsJsonObject());
 		}
 
 		teleportHistory.clear();
 
-		if (json.has("teleportHistory"))
-		{
-			for (JsonElement e : json.get("teleportHistory").getAsJsonArray())
-			{
+		if (json.has("teleportHistory")) {
+			for (JsonElement e : json.get("teleportHistory").getAsJsonArray()) {
 				teleportHistory.add(new TeleportPos(e.getAsJsonObject()));
 			}
 		}
 
 		homes.clear();
 
-		if (json.has("homes"))
-		{
-			for (Map.Entry<String, JsonElement> e : json.get("homes").getAsJsonObject().entrySet())
-			{
+		if (json.has("homes")) {
+			for (Map.Entry<String, JsonElement> e : json.get("homes").getAsJsonObject().entrySet()) {
 				homes.put(e.getKey(), new TeleportPos(e.getValue().getAsJsonObject()));
 			}
 		}
 	}
 
-	public void addTeleportHistory(ServerPlayerEntity player, TeleportPos pos)
-	{
+	public void addTeleportHistory(ServerPlayerEntity player, TeleportPos pos) {
 		teleportHistory.add(pos);
 
-		while (teleportHistory.size() > FTBEConfig.getMaxBack(player))
-		{
+		while (teleportHistory.size() > FTBEConfig.getMaxBack(player)) {
 			teleportHistory.removeFirst();
 		}
 
 		save();
 	}
 
-	public void load()
-	{
-		try
-		{
+	public void load() {
+		try {
 			Path dir = FTBEWorldData.instance.mkdirs("playerdata");
 			Path file = dir.resolve(uuid + ".json");
 
-			if (Files.exists(file))
-			{
-				try (BufferedReader reader = Files.newBufferedReader(file))
-				{
+			if (Files.exists(file)) {
+				try (BufferedReader reader = Files.newBufferedReader(file)) {
 					fromJson(FTBEssentials.GSON.fromJson(reader, JsonObject.class));
 				}
 			}
-		}
-		catch (Exception ex)
-		{
+		} catch (Exception ex) {
 			FTBEssentials.LOGGER.error("Failed to load player data for " + uuid + ":" + name + ": " + ex);
 			ex.printStackTrace();
 		}
 	}
 
-	public void saveNow()
-	{
-		if (!save)
-		{
+	public void saveNow() {
+		if (!save) {
 			return;
 		}
 
-		try
-		{
+		try {
 			JsonObject json = toJson();
 			Path dir = FTBEWorldData.instance.mkdirs("playerdata");
 			Path file = dir.resolve(uuid + ".json");
 
-			try (BufferedWriter writer = Files.newBufferedWriter(file))
-			{
+			try (BufferedWriter writer = Files.newBufferedWriter(file)) {
 				FTBEssentials.GSON.toJson(json, writer);
 			}
 
 			save = false;
-		}
-		catch (Exception ex)
-		{
+		} catch (Exception ex) {
 			FTBEssentials.LOGGER.error("Failed to save player data for " + uuid + ":" + name + ": " + ex);
 			ex.printStackTrace();
 		}
 	}
 
-	public void sendTabName()
-	{
+	public void sendTabName() {
 		sendTabName(null);
 	}
 
-	public void sendTabName(@Nullable ServerPlayerEntity to)
-	{
+	public void sendTabName(@Nullable ServerPlayerEntity to) {
 		FTBEssentialsNet.MAIN.send(to == null ? PacketDistributor.ALL.noArg() : PacketDistributor.PLAYER.with(() -> to), new UpdateTabNamePacket(uuid, name, nick, recording, false));
 	}
 }

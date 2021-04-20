@@ -38,10 +38,8 @@ import java.util.UUID;
 /**
  * @author LatvianModder
  */
-public class MiscCommands
-{
-	public static void register(CommandDispatcher<CommandSource> dispatcher)
-	{
+public class MiscCommands {
+	public static void register(CommandDispatcher<CommandSource> dispatcher) {
 		dispatcher.register(Commands.literal("kickme")
 				.executes(context -> kickme(context.getSource().asPlayer()))
 		);
@@ -52,8 +50,7 @@ public class MiscCommands
 
 		LiteralArgumentBuilder<CommandSource> leaderboardCommand = Commands.literal("leaderboard");
 
-		for (Leaderboard<?> leaderboard : Leaderboard.MAP.values())
-		{
+		for (Leaderboard<?> leaderboard : Leaderboard.MAP.values()) {
 			leaderboardCommand = leaderboardCommand.then(Commands.literal(leaderboard.name).executes(context -> leaderboard(context.getSource(), leaderboard, false)));
 		}
 
@@ -79,25 +76,20 @@ public class MiscCommands
 		);
 	}
 
-	public static int kickme(ServerPlayerEntity player)
-	{
+	public static int kickme(ServerPlayerEntity player) {
 		player.connection.disconnect(new StringTextComponent("You kicked yourself!"));
 		return 1;
 	}
 
-	public static int trashcan(ServerPlayerEntity player)
-	{
-		player.openContainer(new INamedContainerProvider()
-		{
+	public static int trashcan(ServerPlayerEntity player) {
+		player.openContainer(new INamedContainerProvider() {
 			@Override
-			public ITextComponent getDisplayName()
-			{
+			public ITextComponent getDisplayName() {
 				return new StringTextComponent("Trash Can");
 			}
 
 			@Override
-			public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity player)
-			{
+			public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity player) {
 				return ChestContainer.createGeneric9X4(id, playerInventory);
 			}
 		});
@@ -105,10 +97,8 @@ public class MiscCommands
 		return 1;
 	}
 
-	public static <T extends Number> int leaderboard(CommandSource source, Leaderboard<T> leaderboard, boolean reverse)
-	{
-		try
-		{
+	public static <T extends Number> int leaderboard(CommandSource source, Leaderboard<T> leaderboard, boolean reverse) {
+		try {
 			Files.list(FTBEWorldData.instance.mkdirs("playerdata"))
 					.filter(path -> path.toString().endsWith(".json"))
 					.map(Path::getFileName)
@@ -116,42 +106,32 @@ public class MiscCommands
 					.filter(profile -> !FTBEPlayerData.MAP.containsKey(profile.getId()))
 					.map(FTBEPlayerData::get)
 					.forEach(FTBEPlayerData::load);
-		}
-		catch (Exception ex)
-		{
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 
 		List<Pair<FTBEPlayerData, T>> list = new ArrayList<>();
 		int self = -1;
 
-		for (FTBEPlayerData playerData : FTBEPlayerData.MAP.values())
-		{
+		for (FTBEPlayerData playerData : FTBEPlayerData.MAP.values()) {
 			ServerStatisticsManager stats = source.getServer().getPlayerList().getPlayerStats(FakePlayerFactory.get(source.getWorld(), new GameProfile(playerData.uuid, playerData.name)));
 
 			T num = leaderboard.valueGetter.apply(stats);
 
-			if (leaderboard.filter.test(num))
-			{
+			if (leaderboard.filter.test(num)) {
 				list.add(Pair.of(playerData, num));
 			}
 		}
 
-		if (reverse)
-		{
+		if (reverse) {
 			list.sort(Comparator.comparingDouble(pair -> pair.getRight().doubleValue()));
-		}
-		else
-		{
+		} else {
 			list.sort((pair1, pair2) -> Double.compare(pair2.getRight().doubleValue(), pair1.getRight().doubleValue()));
 		}
 
-		if (source.getEntity() instanceof ServerPlayerEntity)
-		{
-			for (int i = 0; i < list.size(); i++)
-			{
-				if (list.get(i).getLeft().uuid.equals(source.getEntity().getUniqueID()))
-				{
+		if (source.getEntity() instanceof ServerPlayerEntity) {
+			for (int i = 0; i < list.size(); i++) {
+				if (list.get(i).getLeft().uuid.equals(source.getEntity().getUniqueID())) {
 					self = list.size();
 					break;
 				}
@@ -160,39 +140,29 @@ public class MiscCommands
 
 		source.sendFeedback(new StringTextComponent("== Leaderboard [" + leaderboard.name + "] ==").mergeStyle(TextFormatting.DARK_GREEN), false);
 
-		if (list.isEmpty())
-		{
+		if (list.isEmpty()) {
 			source.sendFeedback(new StringTextComponent("No data!").mergeStyle(TextFormatting.GRAY), false);
 			return 1;
 		}
 
-		for (int i = 0; i < Math.min(20, list.size()); i++)
-		{
+		for (int i = 0; i < Math.min(20, list.size()); i++) {
 			Pair<FTBEPlayerData, T> pair = list.get(i);
 			String num = String.valueOf(i + 1);
 
-			if (i < 10)
-			{
+			if (i < 10) {
 				num = "0" + num;
 			}
 
 			StringTextComponent component = new StringTextComponent("");
 			component.mergeStyle(TextFormatting.GRAY);
 
-			if (i == 0)
-			{
+			if (i == 0) {
 				component.append(new StringTextComponent("#" + num + " ").mergeStyle(Style.EMPTY.setColor(Color.fromInt(0xD4AF37))));
-			}
-			else if (i == 1)
-			{
+			} else if (i == 1) {
 				component.append(new StringTextComponent("#" + num + " ").mergeStyle(Style.EMPTY.setColor(Color.fromInt(0xC0C0C0))));
-			}
-			else if (i == 2)
-			{
+			} else if (i == 2) {
 				component.append(new StringTextComponent("#" + num + " ").mergeStyle(Style.EMPTY.setColor(Color.fromInt(0x9F7A34))));
-			}
-			else
-			{
+			} else {
 				component.append(new StringTextComponent("#" + num + " "));
 			}
 
@@ -205,19 +175,15 @@ public class MiscCommands
 		return 1;
 	}
 
-	public static int recording(ServerPlayerEntity player)
-	{
+	public static int recording(ServerPlayerEntity player) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.recording = data.recording == 1 ? 0 : 1;
 		data.save();
 		player.refreshDisplayName();
 
-		if (data.recording == 1)
-		{
+		if (data.recording == 1) {
 			player.server.getPlayerList().func_232641_a_(new StringTextComponent("").append(player.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)).appendString(" is now recording!"), ChatType.CHAT, Util.DUMMY_UUID);
-		}
-		else
-		{
+		} else {
 			player.server.getPlayerList().func_232641_a_(new StringTextComponent("").append(player.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)).appendString(" is no longer recording!"), ChatType.CHAT, Util.DUMMY_UUID);
 		}
 
@@ -225,19 +191,15 @@ public class MiscCommands
 		return 1;
 	}
 
-	public static int streaming(ServerPlayerEntity player)
-	{
+	public static int streaming(ServerPlayerEntity player) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.recording = data.recording == 2 ? 0 : 2;
 		data.save();
 		player.refreshDisplayName();
 
-		if (data.recording == 2)
-		{
+		if (data.recording == 2) {
 			player.server.getPlayerList().func_232641_a_(new StringTextComponent("").append(player.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)).appendString(" is now streaming!"), ChatType.CHAT, Util.DUMMY_UUID);
-		}
-		else
-		{
+		} else {
 			player.server.getPlayerList().func_232641_a_(new StringTextComponent("").append(player.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)).appendString(" is no longer streaming!"), ChatType.CHAT, Util.DUMMY_UUID);
 		}
 
@@ -245,8 +207,7 @@ public class MiscCommands
 		return 1;
 	}
 
-	public static int hat(ServerPlayerEntity player)
-	{
+	public static int hat(ServerPlayerEntity player) {
 		ItemStack hstack = player.getItemStackFromSlot(EquipmentSlotType.HEAD);
 		ItemStack istack = player.getItemStackFromSlot(EquipmentSlotType.MAINHAND);
 		player.setItemStackToSlot(EquipmentSlotType.HEAD, istack);
@@ -255,10 +216,8 @@ public class MiscCommands
 		return 1;
 	}
 
-	public static int nickname(ServerPlayerEntity player, String nick)
-	{
-		if (nick.length() > 30)
-		{
+	public static int nickname(ServerPlayerEntity player, String nick) {
+		if (nick.length() > 30) {
 			player.sendStatusMessage(new StringTextComponent("Nickname too long!"), false);
 			return 0;
 		}
@@ -269,12 +228,9 @@ public class MiscCommands
 		data.save();
 		player.refreshDisplayName();
 
-		if (data.nick.isEmpty())
-		{
+		if (data.nick.isEmpty()) {
 			player.sendStatusMessage(new StringTextComponent("Nickname reset!"), false);
-		}
-		else
-		{
+		} else {
 			player.sendStatusMessage(new StringTextComponent("Nickname changed to '" + data.nick + "'"), false);
 		}
 

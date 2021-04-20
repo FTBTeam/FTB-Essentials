@@ -22,10 +22,8 @@ import java.util.Random;
 /**
  * @author LatvianModder
  */
-public class TPACommands
-{
-	public static class TPARequest
-	{
+public class TPACommands {
+	public static class TPARequest {
 		public final String id;
 		public MinecraftServer server;
 		public FTBEPlayerData source;
@@ -33,20 +31,17 @@ public class TPACommands
 		public boolean here;
 		public long created;
 
-		public TPARequest(String s)
-		{
+		public TPARequest(String s) {
 			id = s;
 		}
 	}
 
 	public static final HashMap<String, TPARequest> REQUESTS = new HashMap<>();
 
-	public static TPARequest create(MinecraftServer server, FTBEPlayerData source, FTBEPlayerData target, boolean here)
-	{
+	public static TPARequest create(MinecraftServer server, FTBEPlayerData source, FTBEPlayerData target, boolean here) {
 		String key;
 
-		do
-		{
+		do {
 			key = String.format("%08X", new Random().nextInt());
 		}
 		while (REQUESTS.containsKey(key));
@@ -61,8 +56,7 @@ public class TPACommands
 		return r;
 	}
 
-	public static void register(CommandDispatcher<CommandSource> dispatcher)
-	{
+	public static void register(CommandDispatcher<CommandSource> dispatcher) {
 		dispatcher.register(Commands.literal("tpa")
 				.then(Commands.argument("target", EntityArgument.player())
 						.executes(context -> tpa(context.getSource().asPlayer(), EntityArgument.getPlayer(context, "target"), false))
@@ -88,13 +82,11 @@ public class TPACommands
 		);
 	}
 
-	public static int tpa(ServerPlayerEntity player, ServerPlayerEntity target, boolean here)
-	{
+	public static int tpa(ServerPlayerEntity player, ServerPlayerEntity target, boolean here) {
 		FTBEPlayerData dataSource = FTBEPlayerData.get(player);
 		FTBEPlayerData dataTarget = FTBEPlayerData.get(target);
 
-		if (REQUESTS.values().stream().anyMatch(r -> r.source == dataSource && r.target == dataTarget))
-		{
+		if (REQUESTS.values().stream().anyMatch(r -> r.source == dataSource && r.target == dataTarget)) {
 			player.sendStatusMessage(new StringTextComponent("Request already sent!"), false);
 			return 0;
 		}
@@ -103,8 +95,7 @@ public class TPACommands
 
 		TeleportPos.TeleportResult result = (here ? dataTarget : dataSource).tpaTeleporter.checkCooldown();
 
-		if (!result.isSuccess())
-		{
+		if (!result.isSuccess()) {
 			return result.runCommand(player);
 		}
 
@@ -140,40 +131,34 @@ public class TPACommands
 		return 1;
 	}
 
-	public static int tpaccept(ServerPlayerEntity player, String id)
-	{
+	public static int tpaccept(ServerPlayerEntity player, String id) {
 		TPARequest request = REQUESTS.get(id);
 
-		if (request == null)
-		{
+		if (request == null) {
 			player.sendStatusMessage(new StringTextComponent("Invalid request!"), false);
 			return 0;
 		}
 
 		ServerPlayerEntity sourcePlayer = player.server.getPlayerList().getPlayerByUUID(request.source.uuid);
 
-		if (sourcePlayer == null)
-		{
+		if (sourcePlayer == null) {
 			player.sendStatusMessage(new StringTextComponent("Player has gone offline!"), false);
 			return 0;
 		}
 
 		TeleportPos.TeleportResult result = (request.here ? request.target : request.source).tpaTeleporter.teleport(request.here ? player : sourcePlayer, p -> new TeleportPos(request.here ? sourcePlayer : player));
 
-		if (result.isSuccess())
-		{
+		if (result.isSuccess()) {
 			REQUESTS.remove(request.id);
 		}
 
 		return result.runCommand(player);
 	}
 
-	public static int tpdeny(ServerPlayerEntity player, String id)
-	{
+	public static int tpdeny(ServerPlayerEntity player, String id) {
 		TPARequest request = REQUESTS.get(id);
 
-		if (request == null)
-		{
+		if (request == null) {
 			player.sendStatusMessage(new StringTextComponent("Invalid request!"), false);
 			return 0;
 		}
@@ -184,8 +169,7 @@ public class TPACommands
 
 		ServerPlayerEntity player2 = player.server.getPlayerList().getPlayerByUUID(request.target.uuid);
 
-		if (player2 != null)
-		{
+		if (player2 != null) {
 			player2.sendStatusMessage(new StringTextComponent("Request denied!"), false);
 		}
 

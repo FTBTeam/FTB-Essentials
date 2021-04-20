@@ -10,13 +10,11 @@ import java.util.function.Predicate;
 /**
  * @author LatvianModder
  */
-public class FTBEssentialsNet
-{
+public class FTBEssentialsNet {
 	public static SimpleChannel MAIN;
 	private static final String MAIN_VERSION = "1";
 
-	public static void init()
-	{
+	public static void init() {
 		Predicate<String> validator = v -> MAIN_VERSION.equals(v) || NetworkRegistry.ABSENT.equals(v) || NetworkRegistry.ACCEPTVANILLA.equals(v);
 
 		MAIN = NetworkRegistry.ChannelBuilder

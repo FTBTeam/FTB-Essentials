@@ -8,48 +8,35 @@ import net.minecraft.item.ItemStack;
 /**
  * @author LatvianModder
  */
-public class OtherPlayerInventory implements IInventory
-{
+public class OtherPlayerInventory implements IInventory {
 	public final ServerPlayerEntity player;
 
-	public OtherPlayerInventory(ServerPlayerEntity p)
-	{
+	public OtherPlayerInventory(ServerPlayerEntity p) {
 		player = p;
 	}
 
 	@Override
-	public int getSizeInventory()
-	{
+	public int getSizeInventory() {
 		return 45;
 	}
 
 	@Override
-	public boolean isEmpty()
-	{
+	public boolean isEmpty() {
 		return player.inventory.isEmpty();
 	}
 
-	public boolean isInvalidSlot(int index)
-	{
+	public boolean isInvalidSlot(int index) {
 		return index >= 4 && index < 8;
 	}
 
-	public int getSlot(int index)
-	{
-		if (index == 8)
-		{
+	public int getSlot(int index) {
+		if (index == 8) {
 			return 40;
-		}
-		else if (index >= 0 && index <= 3)
-		{
+		} else if (index >= 0 && index <= 3) {
 			return 39 - index;
-		}
-		else if (index >= 9 && index <= 35)
-		{
+		} else if (index >= 9 && index <= 35) {
 			return index;
-		}
-		else if (index >= 36 && index <= 44)
-		{
+		} else if (index >= 36 && index <= 44) {
 			return index - 36;
 		}
 
@@ -57,10 +44,8 @@ public class OtherPlayerInventory implements IInventory
 	}
 
 	@Override
-	public ItemStack getStackInSlot(int index)
-	{
-		if (isInvalidSlot(index))
-		{
+	public ItemStack getStackInSlot(int index) {
+		if (isInvalidSlot(index)) {
 			return ItemStack.EMPTY;
 		}
 
@@ -69,10 +54,8 @@ public class OtherPlayerInventory implements IInventory
 	}
 
 	@Override
-	public ItemStack decrStackSize(int index, int count)
-	{
-		if (isInvalidSlot(index))
-		{
+	public ItemStack decrStackSize(int index, int count) {
+		if (isInvalidSlot(index)) {
 			return ItemStack.EMPTY;
 		}
 
@@ -81,10 +64,8 @@ public class OtherPlayerInventory implements IInventory
 	}
 
 	@Override
-	public ItemStack removeStackFromSlot(int index)
-	{
-		if (isInvalidSlot(index))
-		{
+	public ItemStack removeStackFromSlot(int index) {
+		if (isInvalidSlot(index)) {
 			return ItemStack.EMPTY;
 		}
 
@@ -93,46 +74,38 @@ public class OtherPlayerInventory implements IInventory
 	}
 
 	@Override
-	public void setInventorySlotContents(int index, ItemStack is)
-	{
-		if (isInvalidSlot(index))
-		{
+	public void setInventorySlotContents(int index, ItemStack is) {
+		if (isInvalidSlot(index)) {
 			return;
 		}
 
 		int slot = getSlot(index);
 
-		if (slot != -1)
-		{
+		if (slot != -1) {
 			player.inventory.setInventorySlotContents(slot, is);
 			markDirty();
 		}
 	}
 
 	@Override
-	public int getInventoryStackLimit()
-	{
+	public int getInventoryStackLimit() {
 		return player.inventory.getInventoryStackLimit();
 	}
 
 	@Override
-	public void markDirty()
-	{
+	public void markDirty() {
 		player.inventory.markDirty();
 		player.openContainer.detectAndSendChanges();
 	}
 
 	@Override
-	public boolean isUsableByPlayer(PlayerEntity player)
-	{
+	public boolean isUsableByPlayer(PlayerEntity player) {
 		return true;
 	}
 
 	@Override
-	public boolean isItemValidForSlot(int index, ItemStack stack)
-	{
-		if (isInvalidSlot(index))
-		{
+	public boolean isItemValidForSlot(int index, ItemStack stack) {
+		if (isInvalidSlot(index)) {
 			return false;
 		}
 
@@ -141,8 +114,7 @@ public class OtherPlayerInventory implements IInventory
 	}
 
 	@Override
-	public void clear()
-	{
+	public void clear() {
 		player.inventory.clear();
 	}
 }

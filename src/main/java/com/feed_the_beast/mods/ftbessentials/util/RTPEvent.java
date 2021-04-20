@@ -10,15 +10,13 @@ import net.minecraftforge.eventbus.api.Cancelable;
  * @author LatvianModder
  */
 @Cancelable
-public class RTPEvent extends PlayerEvent
-{
+public class RTPEvent extends PlayerEvent {
 	private final ServerWorld world;
 	private final ServerPlayerEntity serverPlayer;
 	private final BlockPos pos;
 	private final int attempt;
 
-	public RTPEvent(ServerWorld w, ServerPlayerEntity player, BlockPos p, int a)
-	{
+	public RTPEvent(ServerWorld w, ServerPlayerEntity player, BlockPos p, int a) {
 		super(player);
 		world = w;
 		serverPlayer = player;
@@ -26,23 +24,19 @@ public class RTPEvent extends PlayerEvent
 		attempt = a;
 	}
 
-	public ServerWorld getServerWorld()
-	{
+	public ServerWorld getServerWorld() {
 		return world;
 	}
 
-	public ServerPlayerEntity getServerPlayer()
-	{
+	public ServerPlayerEntity getServerPlayer() {
 		return serverPlayer;
 	}
 
-	public BlockPos getPos()
-	{
+	public BlockPos getPos() {
 		return pos;
 	}
 
-	public int getAttempt()
-	{
+	public int getAttempt() {
 		return attempt;
 	}
 }

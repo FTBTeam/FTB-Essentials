@@ -22,10 +22,8 @@ import net.minecraft.util.text.StringTextComponent;
 /**
  * @author LatvianModder
  */
-public class CheatCommands
-{
-	public static void register(CommandDispatcher<CommandSource> dispatcher)
-	{
+public class CheatCommands {
+	public static void register(CommandDispatcher<CommandSource> dispatcher) {
 		/*
 		killall
 		dumpchunkloaders
@@ -91,8 +89,7 @@ public class CheatCommands
 		);
 	}
 
-	public static int heal(ServerPlayerEntity player)
-	{
+	public static int heal(ServerPlayerEntity player) {
 		player.setHealth(player.getMaxHealth());
 		player.getFoodStats().addStats(40, 40F);
 		player.extinguish();
@@ -100,20 +97,16 @@ public class CheatCommands
 		return 1;
 	}
 
-	public static int fly(ServerPlayerEntity player)
-	{
+	public static int fly(ServerPlayerEntity player) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 
-		if (data.fly)
-		{
+		if (data.fly) {
 			data.fly = false;
 			data.save();
 			player.abilities.allowFlying = false;
 			player.abilities.isFlying = false;
 			player.sendStatusMessage(new StringTextComponent("Flight disabled"), true);
-		}
-		else
-		{
+		} else {
 			data.fly = true;
 			data.save();
 			player.abilities.allowFlying = true;
@@ -124,20 +117,16 @@ public class CheatCommands
 		return 1;
 	}
 
-	public static int god(ServerPlayerEntity player)
-	{
+	public static int god(ServerPlayerEntity player) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 
-		if (data.god)
-		{
+		if (data.god) {
 			data.god = false;
 			data.save();
 			player.abilities.allowFlying = false;
 			player.abilities.isFlying = false;
 			player.sendStatusMessage(new StringTextComponent("God mode disabled"), true);
-		}
-		else
-		{
+		} else {
 			data.god = true;
 			data.save();
 			player.abilities.allowFlying = true;
@@ -148,19 +137,15 @@ public class CheatCommands
 		return 1;
 	}
 
-	public static int invsee(ServerPlayerEntity source, ServerPlayerEntity player)
-	{
-		source.openContainer(new INamedContainerProvider()
-		{
+	public static int invsee(ServerPlayerEntity source, ServerPlayerEntity player) {
+		source.openContainer(new INamedContainerProvider() {
 			@Override
-			public ITextComponent getDisplayName()
-			{
+			public ITextComponent getDisplayName() {
 				return player.getDisplayName();
 			}
 
 			@Override
-			public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity p)
-			{
+			public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity p) {
 				return new ChestContainer(ContainerType.GENERIC_9X5, id, playerInventory, new OtherPlayerInventory(player), 5);
 			}
 		});
@@ -168,10 +153,8 @@ public class CheatCommands
 		return 1;
 	}
 
-	public static int nicknamefor(CommandSource source, ServerPlayerEntity player, String nick)
-	{
-		if (nick.length() > 30)
-		{
+	public static int nicknamefor(CommandSource source, ServerPlayerEntity player, String nick) {
+		if (nick.length() > 30) {
 			player.sendStatusMessage(new StringTextComponent("Nickname too long!"), false);
 			return 0;
 		}
@@ -181,12 +164,9 @@ public class CheatCommands
 		data.save();
 		player.refreshDisplayName();
 
-		if (data.nick.isEmpty())
-		{
+		if (data.nick.isEmpty()) {
 			source.sendFeedback(new StringTextComponent("Nickname reset!"), true);
-		}
-		else
-		{
+		} else {
 			source.sendFeedback(new StringTextComponent("Nickname changed to '" + data.nick + "'"), true);
 		}
 
@@ -194,8 +174,7 @@ public class CheatCommands
 		return 1;
 	}
 
-	public static int mute(CommandSource source, ServerPlayerEntity player)
-	{
+	public static int mute(CommandSource source, ServerPlayerEntity player) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.muted = true;
 		data.save();
@@ -203,8 +182,7 @@ public class CheatCommands
 		return 1;
 	}
 
-	public static int unmute(CommandSource source, ServerPlayerEntity player)
-	{
+	public static int unmute(CommandSource source, ServerPlayerEntity player) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.muted = false;
 		data.save();

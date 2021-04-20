@@ -14,22 +14,17 @@ import net.minecraft.world.server.ServerWorld;
 /**
  * @author LatvianModder
  */
-public class TeleportPos
-{
+public class TeleportPos {
 	@FunctionalInterface
-	public interface TeleportResult
-	{
-		TeleportResult SUCCESS = new TeleportResult()
-		{
+	public interface TeleportResult {
+		TeleportResult SUCCESS = new TeleportResult() {
 			@Override
-			public int runCommand(ServerPlayerEntity player)
-			{
+			public int runCommand(ServerPlayerEntity player) {
 				return 1;
 			}
 
 			@Override
-			public boolean isSuccess()
-			{
+			public boolean isSuccess() {
 				return true;
 			}
 		};
@@ -41,20 +36,17 @@ public class TeleportPos
 
 		int runCommand(ServerPlayerEntity player);
 
-		default boolean isSuccess()
-		{
+		default boolean isSuccess() {
 			return false;
 		}
 	}
 
 	@FunctionalInterface
-	public interface CooldownTeleportResult extends TeleportResult
-	{
+	public interface CooldownTeleportResult extends TeleportResult {
 		long getCooldown();
 
 		@Override
-		default int runCommand(ServerPlayerEntity player)
-		{
+		default int runCommand(ServerPlayerEntity player) {
 			player.sendStatusMessage(new StringTextComponent("Can't teleport yet! Cooldown: " + CooldownTeleporter.prettyTimeString(getCooldown() / 1000L)), false);
 			return 0;
 		}
@@ -64,36 +56,30 @@ public class TeleportPos
 	public final BlockPos pos;
 	public long time;
 
-	public TeleportPos(RegistryKey<World> d, BlockPos p)
-	{
+	public TeleportPos(RegistryKey<World> d, BlockPos p) {
 		dimension = d;
 		pos = p;
 		time = System.currentTimeMillis();
 	}
 
-	public TeleportPos(World world, BlockPos p)
-	{
+	public TeleportPos(World world, BlockPos p) {
 		this(world.getDimensionKey(), p);
 	}
 
-	public TeleportPos(Entity entity)
-	{
+	public TeleportPos(Entity entity) {
 		this(entity.world, entity.getPosition());
 	}
 
-	public TeleportPos(JsonObject json)
-	{
+	public TeleportPos(JsonObject json) {
 		dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(json.get("dim").getAsString()));
 		pos = new BlockPos(json.get("x").getAsInt(), json.get("y").getAsInt(), json.get("z").getAsInt());
 		time = json.get("time").getAsLong();
 	}
 
-	public TeleportResult teleport(ServerPlayerEntity player)
-	{
+	public TeleportResult teleport(ServerPlayerEntity player) {
 		ServerWorld world = player.server.getWorld(dimension);
 
-		if (world == null)
-		{
+		if (world == null) {
 			return TeleportResult.DIMENSION_NOT_FOUND;
 		}
 
@@ -103,8 +89,7 @@ public class TeleportPos
 		return TeleportResult.SUCCESS;
 	}
 
-	public JsonObject toJson()
-	{
+	public JsonObject toJson() {
 		JsonObject json = new JsonObject();
 		json.addProperty("dim", dimension.getLocation().toString());
 		json.addProperty("x", pos.getX());
@@ -114,22 +99,16 @@ public class TeleportPos
 		return json;
 	}
 
-	public String distanceString(TeleportPos origin)
-	{
-		if (origin.dimension == dimension)
-		{
+	public String distanceString(TeleportPos origin) {
+		if (origin.dimension == dimension) {
 			double dx = pos.getX() - origin.pos.getX();
 			double dz = pos.getZ() - origin.pos.getZ();
 			return (int) Math.sqrt(dx * dx + dz * dz) + "m";
-		}
-		else
-		{
+		} else {
 			ResourceLocation s = dimension.getLocation();
 
-			if (s.getNamespace().equals("minecraft"))
-			{
-				switch (s.getPath())
-				{
+			if (s.getNamespace().equals("minecraft")) {
+				switch (s.getPath()) {
 					case "overworld":
 						return "Overworld";
 					case "the_nether":
