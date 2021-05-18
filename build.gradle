@@ -144,6 +144,7 @@ if (ENV.CURSEFORGE_KEY) {
             id = project.curseforge_id
             releaseType = "release"
             addGameVersion "1.16.5"
+            mainArtifact(remapJar.archivePath)
             relations {
                 optionalDependency 'ftb-ranks-forge'
             }
