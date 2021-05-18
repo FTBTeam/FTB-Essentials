@@ -6,3 +6,5 @@ pluginManagement {
 		gradlePluginPortal()
 	}
 }
+
+rootProject.name = 'FTB-Essentials-1.16.5'
