@@ -1,12 +1,13 @@
 package dev.ftb.mods.ftbessentials;
 
-import com.google.gson.JsonObject;
 import dev.ftb.mods.ftbessentials.command.TPACommands;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
+import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
@@ -22,10 +23,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Iterator;
 
 /**
@@ -42,13 +39,10 @@ public class FTBEEventHandler {
 		FTBEWorldData.instance = new FTBEWorldData(event.getServer());
 
 		try {
-			Path dir = FTBEWorldData.instance.mkdirs("");
-			Path file = dir.resolve("world.json");
+			CompoundTag tag = SNBT.read(FTBEWorldData.instance.mkdirs("").resolve("data.snbt"));
 
-			if (Files.exists(file)) {
-				try (BufferedReader reader = Files.newBufferedReader(file)) {
-					FTBEWorldData.instance.fromJson(FTBEssentials.GSON.fromJson(reader, JsonObject.class));
-				}
+			if (tag != null) {
+				FTBEWorldData.instance.read(tag);
 			}
 		} catch (Exception ex) {
 			FTBEssentials.LOGGER.error("Failed to load world data: " + ex);
@@ -65,19 +59,8 @@ public class FTBEEventHandler {
 	@SubscribeEvent
 	public static void worldSaved(WorldEvent.Save event) {
 		if (FTBEWorldData.instance != null && FTBEWorldData.instance.save) {
-			try {
-				JsonObject json = FTBEWorldData.instance.toJson();
-				Path dir = FTBEWorldData.instance.mkdirs("");
-				Path file = dir.resolve("world.json");
-
-				try (BufferedWriter writer = Files.newBufferedWriter(file)) {
-					FTBEssentials.GSON.toJson(json, writer);
-				}
-
+			if (SNBT.write(FTBEWorldData.instance.mkdirs("").resolve("data.snbt"), FTBEWorldData.instance.write())) {
 				FTBEWorldData.instance.save = false;
-			} catch (Exception ex) {
-				FTBEssentials.LOGGER.error("Failed to save world data: " + ex);
-				ex.printStackTrace();
 			}
 		}
 	}

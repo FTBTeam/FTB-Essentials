@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 
@@ -50,27 +50,27 @@ public class FTBEWorldData {
 		save = true;
 	}
 
-	public JsonObject toJson() {
-		JsonObject json = new JsonObject();
+	public CompoundTag write() {
+		CompoundTag tag = new OrderedCompoundTag();
 
-		JsonObject wm = new JsonObject();
+		CompoundTag wm = new CompoundTag();
 
 		for (Map.Entry<String, TeleportPos> h : warps.entrySet()) {
-			wm.add(h.getKey(), h.getValue().toJson());
+			wm.put(h.getKey(), h.getValue().write());
 		}
 
-		json.add("warps", wm);
+		tag.put("warps", wm);
 
-		return json;
+		return tag;
 	}
 
-	public void fromJson(JsonObject json) {
+	public void read(CompoundTag tag) {
 		warps.clear();
 
-		if (json.has("warps")) {
-			for (Map.Entry<String, JsonElement> e : json.get("warps").getAsJsonObject().entrySet()) {
-				warps.put(e.getKey(), new TeleportPos(e.getValue().getAsJsonObject()));
-			}
+		CompoundTag w = tag.getCompound("warps");
+
+		for (String key : w.getAllKeys()) {
+			warps.put(key, new TeleportPos(w.getCompound(key)));
 		}
 	}
 }

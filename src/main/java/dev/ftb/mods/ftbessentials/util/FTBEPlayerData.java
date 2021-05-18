@@ -1,23 +1,20 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import dev.ftb.mods.ftbessentials.FTBEConfig;
-import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.net.UpdateTabNamePacket;
+import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
+import dev.ftb.mods.ftblibrary.snbt.SNBT;
+import me.shedaniel.architectury.utils.NbtType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -104,59 +101,56 @@ public class FTBEPlayerData {
 		save = true;
 	}
 
-	public JsonObject toJson() {
-		JsonObject json = new JsonObject();
-		json.addProperty("muted", muted);
-		json.addProperty("fly", fly);
-		json.addProperty("god", god);
-		json.addProperty("nick", nick);
-		json.add("lastSeen", lastSeen.toJson());
-		json.addProperty("recording", recording);
+	public CompoundTag write() {
+		CompoundTag json = new OrderedCompoundTag();
+		json.putBoolean("muted", muted);
+		json.putBoolean("fly", fly);
+		json.putBoolean("god", god);
+		json.putString("nick", nick);
+		json.put("last_seen", lastSeen.write());
+		json.putInt("recording", recording);
 
-		JsonArray tph = new JsonArray();
+		ListTag tph = new ListTag();
 
 		for (TeleportPos pos : teleportHistory) {
-			tph.add(pos.toJson());
+			tph.add(pos.write());
 		}
 
-		json.add("teleportHistory", tph);
+		json.put("teleport_history", tph);
 
-		JsonObject hm = new JsonObject();
+		CompoundTag hm = new CompoundTag();
 
 		for (Map.Entry<String, TeleportPos> h : homes.entrySet()) {
-			hm.add(h.getKey(), h.getValue().toJson());
+			hm.put(h.getKey(), h.getValue().write());
 		}
 
-		json.add("homes", hm);
+		json.put("homes", hm);
 
 		return json;
 	}
 
-	public void fromJson(JsonObject json) {
-		muted = json.has("muted") && json.get("muted").getAsBoolean();
-		fly = json.has("fly") && json.get("fly").getAsBoolean();
-		god = json.has("god") && json.get("god").getAsBoolean();
-		nick = json.has("nick") ? json.get("nick").getAsString() : "";
-		recording = json.has("recording") ? json.get("recording").getAsInt() : 0;
-
-		if (json.has("lastSeen")) {
-			lastSeen = new TeleportPos(json.get("lastSeen").getAsJsonObject());
-		}
+	public void read(CompoundTag tag) {
+		muted = tag.getBoolean("muted");
+		fly = tag.getBoolean("fly");
+		god = tag.getBoolean("god");
+		nick = tag.getString("nick");
+		recording = tag.getInt("recording");
+		lastSeen = tag.contains("last_seen") ? new TeleportPos(tag.getCompound("last_seen")) : null;
 
 		teleportHistory.clear();
 
-		if (json.has("teleportHistory")) {
-			for (JsonElement e : json.get("teleportHistory").getAsJsonArray()) {
-				teleportHistory.add(new TeleportPos(e.getAsJsonObject()));
-			}
+		ListTag th = tag.getList("teleport_history", NbtType.COMPOUND);
+
+		for (int i = 0; i < th.size(); i++) {
+			teleportHistory.add(new TeleportPos(th.getCompound(i)));
 		}
 
 		homes.clear();
 
-		if (json.has("homes")) {
-			for (Map.Entry<String, JsonElement> e : json.get("homes").getAsJsonObject().entrySet()) {
-				homes.put(e.getKey(), new TeleportPos(e.getValue().getAsJsonObject()));
-			}
+		CompoundTag h = tag.getCompound("homes");
+
+		for (String key : h.getAllKeys()) {
+			homes.put(key, new TeleportPos(h.getCompound(key)));
 		}
 	}
 
@@ -171,39 +165,16 @@ public class FTBEPlayerData {
 	}
 
 	public void load() {
-		try {
-			Path dir = FTBEWorldData.instance.mkdirs("playerdata");
-			Path file = dir.resolve(uuid + ".json");
+		CompoundTag tag = SNBT.read(FTBEWorldData.instance.mkdirs("playerdata").resolve(uuid + ".snbt"));
 
-			if (Files.exists(file)) {
-				try (BufferedReader reader = Files.newBufferedReader(file)) {
-					fromJson(FTBEssentials.GSON.fromJson(reader, JsonObject.class));
-				}
-			}
-		} catch (Exception ex) {
-			FTBEssentials.LOGGER.error("Failed to load player data for " + uuid + ":" + name + ": " + ex);
-			ex.printStackTrace();
+		if (tag != null) {
+			read(tag);
 		}
 	}
 
 	public void saveNow() {
-		if (!save) {
-			return;
-		}
-
-		try {
-			JsonObject json = toJson();
-			Path dir = FTBEWorldData.instance.mkdirs("playerdata");
-			Path file = dir.resolve(uuid + ".json");
-
-			try (BufferedWriter writer = Files.newBufferedWriter(file)) {
-				FTBEssentials.GSON.toJson(json, writer);
-			}
-
+		if (save && SNBT.write(FTBEWorldData.instance.mkdirs("playerdata").resolve(uuid + ".snbt"), write())) {
 			save = false;
-		} catch (Exception ex) {
-			FTBEssentials.LOGGER.error("Failed to save player data for " + uuid + ":" + name + ": " + ex);
-			ex.printStackTrace();
 		}
 	}
 

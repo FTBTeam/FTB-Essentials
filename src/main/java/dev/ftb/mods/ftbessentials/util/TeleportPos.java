@@ -1,9 +1,10 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import com.google.gson.JsonObject;
+import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -71,10 +72,10 @@ public class TeleportPos {
 		this(entity.level, entity.blockPosition());
 	}
 
-	public TeleportPos(JsonObject json) {
-		dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(json.get("dim").getAsString()));
-		pos = new BlockPos(json.get("x").getAsInt(), json.get("y").getAsInt(), json.get("z").getAsInt());
-		time = json.get("time").getAsLong();
+	public TeleportPos(CompoundTag tag) {
+		dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(tag.getString("dim")));
+		pos = new BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"));
+		time = tag.getLong("time");
 	}
 
 	public TeleportResult teleport(ServerPlayer player) {
@@ -90,14 +91,15 @@ public class TeleportPos {
 		return TeleportResult.SUCCESS;
 	}
 
-	public JsonObject toJson() {
-		JsonObject json = new JsonObject();
-		json.addProperty("dim", dimension.location().toString());
-		json.addProperty("x", pos.getX());
-		json.addProperty("y", pos.getY());
-		json.addProperty("z", pos.getZ());
-		json.addProperty("time", time);
-		return json;
+	public CompoundTag write() {
+		OrderedCompoundTag tag = new OrderedCompoundTag();
+		tag.singleLine = true;
+		tag.putString("dim", dimension.location().toString());
+		tag.putInt("x", pos.getX());
+		tag.putInt("y", pos.getY());
+		tag.putInt("z", pos.getZ());
+		tag.putLong("time", time);
+		return tag;
 	}
 
 	public String distanceString(TeleportPos origin) {
