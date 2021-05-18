@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import net.minecraft.stats.ServerStatisticsManager;
+import net.minecraft.Util;
+import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.Util;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -76,7 +76,7 @@ public class Leaderboard<N extends Number> {
 
 	public final String name;
 	public final N defaultValue;
-	public Function<ServerStatisticsManager, N> valueGetter;
+	public Function<ServerStatsCounter, N> valueGetter;
 	public Predicate<N> filter;
 	public Function<N, String> stringGetter;
 
@@ -88,7 +88,7 @@ public class Leaderboard<N extends Number> {
 		stringGetter = num -> NumberFormat.getIntegerInstance(Locale.US).format(num.intValue());
 	}
 
-	public Leaderboard<N> value(Function<ServerStatisticsManager, N> v) {
+	public Leaderboard<N> value(Function<ServerStatsCounter, N> v) {
 		valueGetter = v;
 		return this;
 	}

@@ -1,22 +1,22 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * @author LatvianModder
  */
-public class OtherPlayerInventory implements IInventory {
-	public final ServerPlayerEntity player;
+public class OtherPlayerInventory implements Container {
+	public final ServerPlayer player;
 
-	public OtherPlayerInventory(ServerPlayerEntity p) {
+	public OtherPlayerInventory(ServerPlayer p) {
 		player = p;
 	}
 
 	@Override
-	public int getSizeInventory() {
+	public int getContainerSize() {
 		return 45;
 	}
 
@@ -44,37 +44,37 @@ public class OtherPlayerInventory implements IInventory {
 	}
 
 	@Override
-	public ItemStack getStackInSlot(int index) {
+	public ItemStack getItem(int index) {
 		if (isInvalidSlot(index)) {
 			return ItemStack.EMPTY;
 		}
 
 		int slot = getSlot(index);
-		return slot == -1 ? ItemStack.EMPTY : player.inventory.getStackInSlot(slot);
+		return slot == -1 ? ItemStack.EMPTY : player.inventory.getItem(slot);
 	}
 
 	@Override
-	public ItemStack decrStackSize(int index, int count) {
+	public ItemStack removeItem(int index, int count) {
 		if (isInvalidSlot(index)) {
 			return ItemStack.EMPTY;
 		}
 
 		int slot = getSlot(index);
-		return slot == -1 ? ItemStack.EMPTY : player.inventory.decrStackSize(slot, count);
+		return slot == -1 ? ItemStack.EMPTY : player.inventory.removeItem(slot, count);
 	}
 
 	@Override
-	public ItemStack removeStackFromSlot(int index) {
+	public ItemStack removeItemNoUpdate(int index) {
 		if (isInvalidSlot(index)) {
 			return ItemStack.EMPTY;
 		}
 
 		int slot = getSlot(index);
-		return slot == -1 ? ItemStack.EMPTY : player.inventory.removeStackFromSlot(slot);
+		return slot == -1 ? ItemStack.EMPTY : player.inventory.removeItemNoUpdate(slot);
 	}
 
 	@Override
-	public void setInventorySlotContents(int index, ItemStack is) {
+	public void setItem(int index, ItemStack is) {
 		if (isInvalidSlot(index)) {
 			return;
 		}
@@ -82,39 +82,39 @@ public class OtherPlayerInventory implements IInventory {
 		int slot = getSlot(index);
 
 		if (slot != -1) {
-			player.inventory.setInventorySlotContents(slot, is);
-			markDirty();
+			player.inventory.setItem(slot, is);
+			setChanged();
 		}
 	}
 
 	@Override
-	public int getInventoryStackLimit() {
-		return player.inventory.getInventoryStackLimit();
+	public int getMaxStackSize() {
+		return player.inventory.getMaxStackSize();
 	}
 
 	@Override
-	public void markDirty() {
-		player.inventory.markDirty();
-		player.openContainer.detectAndSendChanges();
+	public void setChanged() {
+		player.inventory.setChanged();
+		player.containerMenu.broadcastChanges();
 	}
 
 	@Override
-	public boolean isUsableByPlayer(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 
 	@Override
-	public boolean isItemValidForSlot(int index, ItemStack stack) {
+	public boolean canPlaceItem(int index, ItemStack stack) {
 		if (isInvalidSlot(index)) {
 			return false;
 		}
 
 		int slot = getSlot(index);
-		return slot != -1 && player.inventory.isItemValidForSlot(slot, stack);
+		return slot != -1 && player.inventory.canPlaceItem(slot, stack);
 	}
 
 	@Override
-	public void clear() {
-		player.inventory.clear();
+	public void clearContent() {
+		player.inventory.clearContent();
 	}
 }

@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbessentials;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -115,7 +115,7 @@ public class FTBEConfig {
 		}
 	}
 
-	public static int getMaxBack(ServerPlayerEntity player) {
+	public static int getMaxBack(ServerPlayer player) {
 		if (FTBEssentials.ranksMod) {
 			return FTBRanksIntegration.getMaxBack(player, maxBack);
 		}
@@ -123,7 +123,7 @@ public class FTBEConfig {
 		return maxBack;
 	}
 
-	public static long getMaxHomes(ServerPlayerEntity player) {
+	public static long getMaxHomes(ServerPlayer player) {
 		if (FTBEssentials.ranksMod) {
 			return FTBRanksIntegration.getMaxHomes(player, maxHomes);
 		}
@@ -131,7 +131,7 @@ public class FTBEConfig {
 		return maxHomes;
 	}
 
-	public static long getBackCooldown(ServerPlayerEntity player) {
+	public static long getBackCooldown(ServerPlayer player) {
 		if (FTBEssentials.ranksMod) {
 			return FTBRanksIntegration.getBackCooldown(player, backCooldown);
 		}
@@ -139,7 +139,7 @@ public class FTBEConfig {
 		return backCooldown;
 	}
 
-	public static long getSpawnCooldown(ServerPlayerEntity player) {
+	public static long getSpawnCooldown(ServerPlayer player) {
 		if (FTBEssentials.ranksMod) {
 			return FTBRanksIntegration.getSpawnCooldown(player, spawnCooldown);
 		}
@@ -147,7 +147,7 @@ public class FTBEConfig {
 		return spawnCooldown;
 	}
 
-	public static long getWarpCooldown(ServerPlayerEntity player) {
+	public static long getWarpCooldown(ServerPlayer player) {
 		if (FTBEssentials.ranksMod) {
 			return FTBRanksIntegration.getWarpCooldown(player, warpCooldown);
 		}
@@ -155,7 +155,7 @@ public class FTBEConfig {
 		return warpCooldown;
 	}
 
-	public static long getHomeCooldown(ServerPlayerEntity player) {
+	public static long getHomeCooldown(ServerPlayer player) {
 		if (FTBEssentials.ranksMod) {
 			return FTBRanksIntegration.getHomeCooldown(player, homeCooldown);
 		}
@@ -163,7 +163,7 @@ public class FTBEConfig {
 		return homeCooldown;
 	}
 
-	public static long getTpaCooldown(ServerPlayerEntity player) {
+	public static long getTpaCooldown(ServerPlayer player) {
 		if (FTBEssentials.ranksMod) {
 			return FTBRanksIntegration.getTpaCooldown(player, tpaCooldown);
 		}
@@ -171,7 +171,7 @@ public class FTBEConfig {
 		return tpaCooldown;
 	}
 
-	public static long getRtpCooldown(ServerPlayerEntity player) {
+	public static long getRtpCooldown(ServerPlayer player) {
 		if (FTBEssentials.ranksMod) {
 			return FTBRanksIntegration.getRtpCooldown(player, rtpCooldown);
 		}

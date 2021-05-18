@@ -1,16 +1,17 @@
 package dev.ftb.mods.ftbessentials.net;
 
 import dev.ftb.mods.ftbessentials.FTBEssentials;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import dev.ftb.mods.ftblibrary.net.snm.BaseS2CPacket;
+import dev.ftb.mods.ftblibrary.net.snm.PacketID;
+import me.shedaniel.architectury.networking.NetworkManager;
+import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
 /**
  * @author LatvianModder
  */
-public class UpdateTabNamePacket {
+public class UpdateTabNamePacket extends BaseS2CPacket {
 	public final UUID uuid;
 	public final String name;
 	public final String nickname;
@@ -25,25 +26,31 @@ public class UpdateTabNamePacket {
 		afk = a;
 	}
 
-	public UpdateTabNamePacket(PacketBuffer buf) {
+	public UpdateTabNamePacket(FriendlyByteBuf buf) {
 		uuid = new UUID(buf.readLong(), buf.readLong());
-		name = buf.readString(Short.MAX_VALUE);
-		nickname = buf.readString(Short.MAX_VALUE);
+		name = buf.readUtf(Short.MAX_VALUE);
+		nickname = buf.readUtf(Short.MAX_VALUE);
 		recording = buf.readByte();
 		afk = buf.readBoolean();
 	}
 
-	public void write(PacketBuffer buf) {
+	@Override
+	public PacketID getId() {
+		return FTBEssentialsNet.UPDATE_TAB_NAME;
+	}
+
+	@Override
+	public void write(FriendlyByteBuf buf) {
 		buf.writeLong(uuid.getMostSignificantBits());
 		buf.writeLong(uuid.getLeastSignificantBits());
-		buf.writeString(name, Short.MAX_VALUE);
-		buf.writeString(nickname, Short.MAX_VALUE);
+		buf.writeUtf(name, Short.MAX_VALUE);
+		buf.writeUtf(nickname, Short.MAX_VALUE);
 		buf.writeByte(recording);
 		buf.writeBoolean(afk);
 	}
 
-	public void handle(Supplier<NetworkEvent.Context> context) {
-		context.get().enqueueWork(() -> FTBEssentials.PROXY.updateTabName(this));
-		context.get().setPacketHandled(true);
+	@Override
+	public void handle(NetworkManager.PacketContext packetContext) {
+		FTBEssentials.PROXY.updateTabName(this);
 	}
 }

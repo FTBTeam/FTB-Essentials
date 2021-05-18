@@ -5,7 +5,7 @@ license = "All Rights Reserved"
 
 [[mods]]
 modId = "ftbessentials"
-version = "${file.jarVersion}"
+version = "${version}"
 displayName = "FTB Essentials"
 authors = "LatvianModder"
 description = '''
@@ -23,5 +23,12 @@ side = "BOTH"
 modId = "minecraft"
 mandatory = true
 versionRange = "[1.16,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.ftbessentials]]
+modId = "ftblibrary"
+mandatory = true
+versionRange = "[1605,)"
 ordering = "NONE"
 side = "BOTH"

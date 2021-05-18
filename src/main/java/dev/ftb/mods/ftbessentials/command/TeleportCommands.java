@@ -6,20 +6,20 @@ import dev.ftb.mods.ftbessentials.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.RTPEvent;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.GameProfileArgument;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.border.WorldBorder;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Optional;
@@ -28,32 +28,32 @@ import java.util.Optional;
  * @author LatvianModder
  */
 public class TeleportCommands {
-	public static void register(CommandDispatcher<CommandSource> dispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("back")
-				.executes(context -> back(context.getSource().asPlayer()))
+				.executes(context -> back(context.getSource().getPlayerOrException()))
 		);
 
 		dispatcher.register(Commands.literal("spawn")
-				.executes(context -> spawn(context.getSource().asPlayer()))
+				.executes(context -> spawn(context.getSource().getPlayerOrException()))
 		);
 
 		dispatcher.register(Commands.literal("rtp")
-				.executes(context -> rtp(context.getSource().asPlayer()))
+				.executes(context -> rtp(context.getSource().getPlayerOrException()))
 		);
 
 		dispatcher.register(Commands.literal("teleport_last")
-				.requires(source -> source.hasPermissionLevel(2))
+				.requires(source -> source.hasPermission(2))
 				.then(Commands.argument("player", GameProfileArgument.gameProfile())
-						.executes(context -> tpLast(context.getSource().asPlayer(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
+						.executes(context -> tpLast(context.getSource().getPlayerOrException(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
 				)
 		);
 	}
 
-	public static int back(ServerPlayerEntity player) {
+	public static int back(ServerPlayer player) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 
 		if (data.teleportHistory.isEmpty()) {
-			player.sendStatusMessage(new StringTextComponent("Teleportation history is empty!"), false);
+			player.displayClientMessage(new TextComponent("Teleportation history is empty!"), false);
 			return 0;
 		}
 
@@ -66,48 +66,48 @@ public class TeleportCommands {
 		return 0;
 	}
 
-	public static int spawn(ServerPlayerEntity player) {
+	public static int spawn(ServerPlayer player) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
-		ServerWorld w = player.server.getWorld(World.OVERWORLD);
+		ServerLevel w = player.server.getLevel(Level.OVERWORLD);
 
 		if (w == null) {
 			return 0;
 		}
 
-		return data.spawnTeleporter.teleport(player, p -> new TeleportPos(w, w.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, w.getSpawnPoint()))).runCommand(player);
+		return data.spawnTeleporter.teleport(player, p -> new TeleportPos(w, w.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, w.getSharedSpawnPos()))).runCommand(player);
 	}
 
-	public static int rtp(ServerPlayerEntity player) {
+	public static int rtp(ServerPlayer player) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		return data.rtpTeleporter.teleport(player, p -> {
-			p.sendStatusMessage(new StringTextComponent("Looking for random location..."), false);
-			return findBlockPos(p.server.getWorld(World.OVERWORLD), p, 1);
+			p.displayClientMessage(new TextComponent("Looking for random location..."), false);
+			return findBlockPos(p.server.getLevel(Level.OVERWORLD), p, 1);
 		}).runCommand(player);
 	}
 
-	private static TeleportPos findBlockPos(ServerWorld world, ServerPlayerEntity player, int attempt) {
+	private static TeleportPos findBlockPos(ServerLevel world, ServerPlayer player, int attempt) {
 		if (attempt > FTBEConfig.rtpMaxTries) {
-			player.sendStatusMessage(new StringTextComponent("Could not find a valid location to teleport to!"), false);
+			player.displayClientMessage(new TextComponent("Could not find a valid location to teleport to!"), false);
 			return new TeleportPos(player);
 		}
 
-		double dist = FTBEConfig.rtpMinDistance + world.rand.nextDouble() * (FTBEConfig.rtpMaxDistance - FTBEConfig.rtpMinDistance);
-		double angle = world.rand.nextDouble() * Math.PI * 2D;
+		double dist = FTBEConfig.rtpMinDistance + world.random.nextDouble() * (FTBEConfig.rtpMaxDistance - FTBEConfig.rtpMinDistance);
+		double angle = world.random.nextDouble() * Math.PI * 2D;
 
-		int x = MathHelper.floor(Math.cos(angle) * dist);
+		int x = Mth.floor(Math.cos(angle) * dist);
 		int y = 256;
-		int z = MathHelper.floor(Math.sin(angle) * dist);
+		int z = Mth.floor(Math.sin(angle) * dist);
 		BlockPos currentPos = new BlockPos(x, y, z);
 
 		WorldBorder border = world.getWorldBorder();
 
-		if (!border.contains(currentPos)) {
+		if (!border.isWithinBounds(currentPos)) {
 			return findBlockPos(world, player, attempt + 1);
 		}
 
-		Optional<RegistryKey<Biome>> biomeKey = world.func_242406_i(currentPos);
+		Optional<ResourceKey<Biome>> biomeKey = world.getBiomeName(currentPos);
 
-		if (biomeKey.isPresent() && biomeKey.get().getLocation().getPath().contains("ocean")) {
+		if (biomeKey.isPresent() && biomeKey.get().location().getPath().contains("ocean")) {
 			return findBlockPos(world, player, attempt + 1);
 		}
 
@@ -117,18 +117,18 @@ public class TeleportCommands {
 		}
 
 		world.getChunk(currentPos.getX() >> 4, currentPos.getZ() >> 4, ChunkStatus.HEIGHTMAPS);
-		BlockPos newPos = world.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, currentPos);
+		BlockPos newPos = world.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, currentPos);
 
 		if (newPos.getY() > 0) {
-			player.sendStatusMessage(new StringTextComponent(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, z %d]", attempt, newPos.getX(), newPos.getZ())), false);
-			return new TeleportPos(world.getDimensionKey(), newPos.up());
+			player.displayClientMessage(new TextComponent(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, z %d]", attempt, newPos.getX(), newPos.getZ())), false);
+			return new TeleportPos(world.dimension(), newPos.above());
 		}
 
 		return findBlockPos(world, player, attempt + 1);
 	}
 
-	public static int tpLast(ServerPlayerEntity player, GameProfile to) {
-		ServerPlayerEntity p = player.server.getPlayerList().getPlayerByUUID(to.getId());
+	public static int tpLast(ServerPlayer player, GameProfile to) {
+		ServerPlayer p = player.server.getPlayerList().getPlayer(to.getId());
 
 		if (p != null) {
 			new TeleportPos(p).teleport(player);

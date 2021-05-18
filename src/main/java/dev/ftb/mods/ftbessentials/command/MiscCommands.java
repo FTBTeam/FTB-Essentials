@@ -7,24 +7,24 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.Leaderboard;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.inventory.container.ChestContainer;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.ItemStack;
-import net.minecraft.stats.ServerStatisticsManager;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.ChatType;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.ServerStatsCounter;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -39,16 +39,16 @@ import java.util.UUID;
  * @author LatvianModder
  */
 public class MiscCommands {
-	public static void register(CommandDispatcher<CommandSource> dispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("kickme")
-				.executes(context -> kickme(context.getSource().asPlayer()))
+				.executes(context -> kickme(context.getSource().getPlayerOrException()))
 		);
 
 		dispatcher.register(Commands.literal("trashcan")
-				.executes(context -> trashcan(context.getSource().asPlayer()))
+				.executes(context -> trashcan(context.getSource().getPlayerOrException()))
 		);
 
-		LiteralArgumentBuilder<CommandSource> leaderboardCommand = Commands.literal("leaderboard");
+		LiteralArgumentBuilder<CommandSourceStack> leaderboardCommand = Commands.literal("leaderboard");
 
 		for (Leaderboard<?> leaderboard : Leaderboard.MAP.values()) {
 			leaderboardCommand = leaderboardCommand.then(Commands.literal(leaderboard.name).executes(context -> leaderboard(context.getSource(), leaderboard, false)));
@@ -57,47 +57,47 @@ public class MiscCommands {
 		dispatcher.register(leaderboardCommand);
 
 		dispatcher.register(Commands.literal("recording")
-				.executes(context -> recording(context.getSource().asPlayer()))
+				.executes(context -> recording(context.getSource().getPlayerOrException()))
 		);
 
 		dispatcher.register(Commands.literal("streaming")
-				.executes(context -> streaming(context.getSource().asPlayer()))
+				.executes(context -> streaming(context.getSource().getPlayerOrException()))
 		);
 
 		dispatcher.register(Commands.literal("hat")
-				.executes(context -> hat(context.getSource().asPlayer()))
+				.executes(context -> hat(context.getSource().getPlayerOrException()))
 		);
 
 		dispatcher.register(Commands.literal("nickname")
-				.executes(context -> nickname(context.getSource().asPlayer(), ""))
+				.executes(context -> nickname(context.getSource().getPlayerOrException(), ""))
 				.then(Commands.argument("nickname", StringArgumentType.greedyString())
-						.executes(context -> nickname(context.getSource().asPlayer(), StringArgumentType.getString(context, "nickname")))
+						.executes(context -> nickname(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "nickname")))
 				)
 		);
 	}
 
-	public static int kickme(ServerPlayerEntity player) {
-		player.connection.disconnect(new StringTextComponent("You kicked yourself!"));
+	public static int kickme(ServerPlayer player) {
+		player.connection.disconnect(new TextComponent("You kicked yourself!"));
 		return 1;
 	}
 
-	public static int trashcan(ServerPlayerEntity player) {
-		player.openContainer(new INamedContainerProvider() {
+	public static int trashcan(ServerPlayer player) {
+		player.openMenu(new MenuProvider() {
 			@Override
-			public ITextComponent getDisplayName() {
-				return new StringTextComponent("Trash Can");
+			public Component getDisplayName() {
+				return new TextComponent("Trash Can");
 			}
 
 			@Override
-			public Container createMenu(int id, PlayerInventory playerInventory, PlayerEntity player) {
-				return ChestContainer.createGeneric9X4(id, playerInventory);
+			public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
+				return ChestMenu.fourRows(id, playerInventory);
 			}
 		});
 
 		return 1;
 	}
 
-	public static <T extends Number> int leaderboard(CommandSource source, Leaderboard<T> leaderboard, boolean reverse) {
+	public static <T extends Number> int leaderboard(CommandSourceStack source, Leaderboard<T> leaderboard, boolean reverse) {
 		try {
 			Files.list(FTBEWorldData.instance.mkdirs("playerdata"))
 					.filter(path -> path.toString().endsWith(".json"))
@@ -114,7 +114,7 @@ public class MiscCommands {
 		int self = -1;
 
 		for (FTBEPlayerData playerData : FTBEPlayerData.MAP.values()) {
-			ServerStatisticsManager stats = source.getServer().getPlayerList().getPlayerStats(FakePlayerFactory.get(source.getWorld(), new GameProfile(playerData.uuid, playerData.name)));
+			ServerStatsCounter stats = source.getServer().getPlayerList().getPlayerStats(FakePlayerFactory.get(source.getLevel(), new GameProfile(playerData.uuid, playerData.name)));
 
 			T num = leaderboard.valueGetter.apply(stats);
 
@@ -129,19 +129,19 @@ public class MiscCommands {
 			list.sort((pair1, pair2) -> Double.compare(pair2.getRight().doubleValue(), pair1.getRight().doubleValue()));
 		}
 
-		if (source.getEntity() instanceof ServerPlayerEntity) {
+		if (source.getEntity() instanceof ServerPlayer) {
 			for (int i = 0; i < list.size(); i++) {
-				if (list.get(i).getLeft().uuid.equals(source.getEntity().getUniqueID())) {
+				if (list.get(i).getLeft().uuid.equals(source.getEntity().getUUID())) {
 					self = list.size();
 					break;
 				}
 			}
 		}
 
-		source.sendFeedback(new StringTextComponent("== Leaderboard [" + leaderboard.name + "] ==").mergeStyle(TextFormatting.DARK_GREEN), false);
+		source.sendSuccess(new TextComponent("== Leaderboard [" + leaderboard.name + "] ==").withStyle(ChatFormatting.DARK_GREEN), false);
 
 		if (list.isEmpty()) {
-			source.sendFeedback(new StringTextComponent("No data!").mergeStyle(TextFormatting.GRAY), false);
+			source.sendSuccess(new TextComponent("No data!").withStyle(ChatFormatting.GRAY), false);
 			return 1;
 		}
 
@@ -153,72 +153,72 @@ public class MiscCommands {
 				num = "0" + num;
 			}
 
-			StringTextComponent component = new StringTextComponent("");
-			component.mergeStyle(TextFormatting.GRAY);
+			TextComponent component = new TextComponent("");
+			component.withStyle(ChatFormatting.GRAY);
 
 			if (i == 0) {
-				component.append(new StringTextComponent("#" + num + " ").mergeStyle(Style.EMPTY.setColor(Color.fromInt(0xD4AF37))));
+				component.append(new TextComponent("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xD4AF37))));
 			} else if (i == 1) {
-				component.append(new StringTextComponent("#" + num + " ").mergeStyle(Style.EMPTY.setColor(Color.fromInt(0xC0C0C0))));
+				component.append(new TextComponent("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xC0C0C0))));
 			} else if (i == 2) {
-				component.append(new StringTextComponent("#" + num + " ").mergeStyle(Style.EMPTY.setColor(Color.fromInt(0x9F7A34))));
+				component.append(new TextComponent("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x9F7A34))));
 			} else {
-				component.append(new StringTextComponent("#" + num + " "));
+				component.append(new TextComponent("#" + num + " "));
 			}
 
-			component.append(new StringTextComponent(pair.getLeft().name).mergeStyle(i == self ? TextFormatting.GREEN : TextFormatting.YELLOW));
-			component.append(new StringTextComponent(": "));
-			component.append(new StringTextComponent(leaderboard.stringGetter.apply(pair.getRight())));
-			source.sendFeedback(component, false);
+			component.append(new TextComponent(pair.getLeft().name).withStyle(i == self ? ChatFormatting.GREEN : ChatFormatting.YELLOW));
+			component.append(new TextComponent(": "));
+			component.append(new TextComponent(leaderboard.stringGetter.apply(pair.getRight())));
+			source.sendSuccess(component, false);
 		}
 
 		return 1;
 	}
 
-	public static int recording(ServerPlayerEntity player) {
+	public static int recording(ServerPlayer player) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.recording = data.recording == 1 ? 0 : 1;
 		data.save();
 		player.refreshDisplayName();
 
 		if (data.recording == 1) {
-			player.server.getPlayerList().func_232641_a_(new StringTextComponent("").append(player.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)).appendString(" is now recording!"), ChatType.CHAT, Util.DUMMY_UUID);
+			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is now recording!"), ChatType.CHAT, Util.NIL_UUID);
 		} else {
-			player.server.getPlayerList().func_232641_a_(new StringTextComponent("").append(player.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)).appendString(" is no longer recording!"), ChatType.CHAT, Util.DUMMY_UUID);
+			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is no longer recording!"), ChatType.CHAT, Util.NIL_UUID);
 		}
 
-		data.sendTabName();
+		data.sendTabName(player.server);
 		return 1;
 	}
 
-	public static int streaming(ServerPlayerEntity player) {
+	public static int streaming(ServerPlayer player) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.recording = data.recording == 2 ? 0 : 2;
 		data.save();
 		player.refreshDisplayName();
 
 		if (data.recording == 2) {
-			player.server.getPlayerList().func_232641_a_(new StringTextComponent("").append(player.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)).appendString(" is now streaming!"), ChatType.CHAT, Util.DUMMY_UUID);
+			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is now streaming!"), ChatType.CHAT, Util.NIL_UUID);
 		} else {
-			player.server.getPlayerList().func_232641_a_(new StringTextComponent("").append(player.getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW)).appendString(" is no longer streaming!"), ChatType.CHAT, Util.DUMMY_UUID);
+			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is no longer streaming!"), ChatType.CHAT, Util.NIL_UUID);
 		}
 
-		data.sendTabName();
+		data.sendTabName(player.server);
 		return 1;
 	}
 
-	public static int hat(ServerPlayerEntity player) {
-		ItemStack hstack = player.getItemStackFromSlot(EquipmentSlotType.HEAD);
-		ItemStack istack = player.getItemStackFromSlot(EquipmentSlotType.MAINHAND);
-		player.setItemStackToSlot(EquipmentSlotType.HEAD, istack);
-		player.setItemStackToSlot(EquipmentSlotType.MAINHAND, hstack);
-		player.container.detectAndSendChanges();
+	public static int hat(ServerPlayer player) {
+		ItemStack hstack = player.getItemBySlot(EquipmentSlot.HEAD);
+		ItemStack istack = player.getItemBySlot(EquipmentSlot.MAINHAND);
+		player.setItemSlot(EquipmentSlot.HEAD, istack);
+		player.setItemSlot(EquipmentSlot.MAINHAND, hstack);
+		player.inventoryMenu.broadcastChanges();
 		return 1;
 	}
 
-	public static int nickname(ServerPlayerEntity player, String nick) {
+	public static int nickname(ServerPlayer player, String nick) {
 		if (nick.length() > 30) {
-			player.sendStatusMessage(new StringTextComponent("Nickname too long!"), false);
+			player.displayClientMessage(new TextComponent("Nickname too long!"), false);
 			return 0;
 		}
 
@@ -229,12 +229,12 @@ public class MiscCommands {
 		player.refreshDisplayName();
 
 		if (data.nick.isEmpty()) {
-			player.sendStatusMessage(new StringTextComponent("Nickname reset!"), false);
+			player.displayClientMessage(new TextComponent("Nickname reset!"), false);
 		} else {
-			player.sendStatusMessage(new StringTextComponent("Nickname changed to '" + data.nick + "'"), false);
+			player.displayClientMessage(new TextComponent("Nickname changed to '" + data.nick + "'"), false);
 		}
 
-		data.sendTabName();
+		data.sendTabName(player.server);
 		return 1;
 	}
 }

@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.Cancelable;
 
@@ -11,12 +11,12 @@ import net.minecraftforge.eventbus.api.Cancelable;
  */
 @Cancelable
 public class RTPEvent extends PlayerEvent {
-	private final ServerWorld world;
-	private final ServerPlayerEntity serverPlayer;
+	private final ServerLevel world;
+	private final ServerPlayer serverPlayer;
 	private final BlockPos pos;
 	private final int attempt;
 
-	public RTPEvent(ServerWorld w, ServerPlayerEntity player, BlockPos p, int a) {
+	public RTPEvent(ServerLevel w, ServerPlayer player, BlockPos p, int a) {
 		super(player);
 		world = w;
 		serverPlayer = player;
@@ -24,11 +24,11 @@ public class RTPEvent extends PlayerEvent {
 		attempt = a;
 	}
 
-	public ServerWorld getServerWorld() {
+	public ServerLevel getServerWorld() {
 		return world;
 	}
 
-	public ServerPlayerEntity getServerPlayer() {
+	public ServerPlayer getServerPlayer() {
 		return serverPlayer;
 	}
 

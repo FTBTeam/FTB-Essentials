@@ -6,16 +6,14 @@ import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 import dev.ftb.mods.ftbessentials.FTBEConfig;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
-import dev.ftb.mods.ftbessentials.net.FTBEssentialsNet;
 import dev.ftb.mods.ftbessentials.net.UpdateTabNamePacket;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
-import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.nio.file.Files;
@@ -48,16 +46,16 @@ public class FTBEPlayerData {
 		return data;
 	}
 
-	public static FTBEPlayerData get(PlayerEntity player) {
+	public static FTBEPlayerData get(Player player) {
 		return get(player.getGameProfile());
 	}
 
-	public static void addTeleportHistory(ServerPlayerEntity player, RegistryKey<World> dimension, BlockPos pos) {
+	public static void addTeleportHistory(ServerPlayer player, ResourceKey<Level> dimension, BlockPos pos) {
 		get(player).addTeleportHistory(player, new TeleportPos(dimension, pos));
 	}
 
-	public static void addTeleportHistory(ServerPlayerEntity player) {
-		addTeleportHistory(player, player.world.getDimensionKey(), player.getPosition());
+	public static void addTeleportHistory(ServerPlayer player) {
+		addTeleportHistory(player, player.level.dimension(), player.blockPosition());
 	}
 
 	public final UUID uuid;
@@ -89,7 +87,7 @@ public class FTBEPlayerData {
 		fly = false;
 		god = false;
 		nick = "";
-		lastSeen = new TeleportPos(World.OVERWORLD, BlockPos.ZERO);
+		lastSeen = new TeleportPos(Level.OVERWORLD, BlockPos.ZERO);
 		homes = new LinkedHashMap<>();
 		recording = 0;
 
@@ -162,7 +160,7 @@ public class FTBEPlayerData {
 		}
 	}
 
-	public void addTeleportHistory(ServerPlayerEntity player, TeleportPos pos) {
+	public void addTeleportHistory(ServerPlayer player, TeleportPos pos) {
 		teleportHistory.add(pos);
 
 		while (teleportHistory.size() > FTBEConfig.getMaxBack(player)) {
@@ -209,11 +207,11 @@ public class FTBEPlayerData {
 		}
 	}
 
-	public void sendTabName() {
-		sendTabName(null);
+	public void sendTabName(MinecraftServer server) {
+		new UpdateTabNamePacket(uuid, name, nick, recording, false).sendToAll(server);
 	}
 
-	public void sendTabName(@Nullable ServerPlayerEntity to) {
-		FTBEssentialsNet.MAIN.send(to == null ? PacketDistributor.ALL.noArg() : PacketDistributor.PLAYER.with(() -> to), new UpdateTabNamePacket(uuid, name, nick, recording, false));
+	public void sendTabName(ServerPlayer to) {
+		new UpdateTabNamePacket(uuid, name, nick, recording, false).sendTo(to);
 	}
 }

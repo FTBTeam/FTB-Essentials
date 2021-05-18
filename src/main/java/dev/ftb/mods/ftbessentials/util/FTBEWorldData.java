@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbessentials.util;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.storage.FolderName;
+import net.minecraft.world.level.storage.LevelResource;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,7 +14,7 @@ import java.util.Map;
  * @author LatvianModder
  */
 public class FTBEWorldData {
-	public static final FolderName FTBESSENTIALS_DIRECTORY = new FolderName("ftbessentials");
+	public static final LevelResource FTBESSENTIALS_DIRECTORY = new LevelResource("ftbessentials");
 
 	public static FTBEWorldData instance;
 
@@ -29,7 +29,7 @@ public class FTBEWorldData {
 	}
 
 	public Path mkdirs(String path) {
-		Path dir = server.func_240776_a_(FTBESSENTIALS_DIRECTORY);
+		Path dir = server.getWorldPath(FTBESSENTIALS_DIRECTORY);
 
 		if (!path.isEmpty()) {
 			dir = dir.resolve(path);

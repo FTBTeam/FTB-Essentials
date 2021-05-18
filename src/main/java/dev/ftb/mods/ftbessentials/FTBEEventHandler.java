@@ -5,12 +5,12 @@ import dev.ftb.mods.ftbessentials.command.TPACommands;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -33,8 +33,8 @@ import java.util.Iterator;
  */
 @Mod.EventBusSubscriber(modid = FTBEssentials.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class FTBEEventHandler {
-	public static final Style RECORDING_STYLE = Style.EMPTY.setColor(Color.fromTextFormatting(TextFormatting.RED));
-	public static final Style STREAMING_STYLE = Style.EMPTY.setColor(Color.fromInt(0x9146FF));
+	public static final Style RECORDING_STYLE = Style.EMPTY.applyFormat(ChatFormatting.RED);
+	public static final Style STREAMING_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x9146FF));
 
 	@SubscribeEvent
 	public static void serverAboutToStart(FMLServerAboutToStartEvent event) {
@@ -89,7 +89,7 @@ public class FTBEEventHandler {
 		data.save();
 
 		for (FTBEPlayerData d : FTBEPlayerData.MAP.values()) {
-			d.sendTabName((ServerPlayerEntity) event.getPlayer());
+			d.sendTabName((ServerPlayer) event.getPlayer());
 		}
 	}
 
@@ -116,12 +116,12 @@ public class FTBEEventHandler {
 
 	@SubscribeEvent
 	public static void playerTick(TickEvent.PlayerTickEvent event) {
-		if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayerEntity) {
+		if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayer) {
 			FTBEPlayerData data = FTBEPlayerData.get(event.player);
 
-			if ((data.fly || data.god) && !event.player.abilities.allowFlying) {
-				event.player.abilities.allowFlying = true;
-				event.player.sendPlayerAbilities();
+			if ((data.fly || data.god) && !event.player.abilities.mayfly) {
+				event.player.abilities.mayfly = true;
+				event.player.onUpdateAbilities();
 			}
 		}
 	}
@@ -137,15 +137,15 @@ public class FTBEEventHandler {
 				TPACommands.TPARequest r = iterator.next();
 
 				if (now > r.created + 60000L) {
-					ServerPlayerEntity source = r.server.getPlayerList().getPlayerByUUID(r.source.uuid);
-					ServerPlayerEntity target = r.server.getPlayerList().getPlayerByUUID(r.target.uuid);
+					ServerPlayer source = r.server.getPlayerList().getPlayer(r.source.uuid);
+					ServerPlayer target = r.server.getPlayerList().getPlayer(r.target.uuid);
 
 					if (source != null) {
-						source.sendMessage(new StringTextComponent("TPA request expired!"), Util.DUMMY_UUID);
+						source.sendMessage(new TextComponent("TPA request expired!"), Util.NIL_UUID);
 					}
 
 					if (target != null) {
-						target.sendMessage(new StringTextComponent("TPA request expired!"), Util.DUMMY_UUID);
+						target.sendMessage(new TextComponent("TPA request expired!"), Util.NIL_UUID);
 					}
 
 					iterator.remove();
@@ -160,36 +160,36 @@ public class FTBEEventHandler {
 
 		if (data.muted) {
 			event.setCanceled(true);
-			event.getPlayer().sendStatusMessage(new StringTextComponent("You can't use chat, you've been muted by an admin!").mergeStyle(TextFormatting.RED), false);
+			event.getPlayer().displayClientMessage(new TextComponent("You can't use chat, you've been muted by an admin!").withStyle(ChatFormatting.RED), false);
 		}
 	}
 
 	@SubscribeEvent
 	public static void playerName(PlayerEvent.NameFormat event) {
-		if (event.getPlayer() instanceof ServerPlayerEntity) {
+		if (event.getPlayer() instanceof ServerPlayer) {
 			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
 
 			if (!data.nick.isEmpty()) {
-				event.setDisplayname(new StringTextComponent(data.nick));
+				event.setDisplayname(new TextComponent(data.nick));
 			}
 		}
 	}
 
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void playerNameLow(PlayerEvent.NameFormat event) {
-		if (event.getPlayer() instanceof ServerPlayerEntity) {
+		if (event.getPlayer() instanceof ServerPlayer) {
 			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
 
 			if (data.recording > 0) {
-				event.setDisplayname(new StringTextComponent("").append(new StringTextComponent("\u23FA").mergeStyle(data.recording == 1 ? RECORDING_STYLE : STREAMING_STYLE)).appendString(" ").append(event.getDisplayname()));
+				event.setDisplayname(new TextComponent("").append(new TextComponent("\u23FA").withStyle(data.recording == 1 ? RECORDING_STYLE : STREAMING_STYLE)).append(" ").append(event.getDisplayname()));
 			}
 		}
 	}
 
 	@SubscribeEvent
 	public static void playerDeath(LivingDeathEvent event) {
-		if (event.getEntity() instanceof ServerPlayerEntity) {
-			FTBEPlayerData.addTeleportHistory((ServerPlayerEntity) event.getEntity());
+		if (event.getEntity() instanceof ServerPlayer) {
+			FTBEPlayerData.addTeleportHistory((ServerPlayer) event.getEntity());
 		}
 	}
 }

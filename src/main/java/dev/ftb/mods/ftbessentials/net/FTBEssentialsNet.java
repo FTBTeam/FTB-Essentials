@@ -1,29 +1,17 @@
 package dev.ftb.mods.ftbessentials.net;
 
 import dev.ftb.mods.ftbessentials.FTBEssentials;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
-
-import java.util.function.Predicate;
+import dev.ftb.mods.ftblibrary.net.snm.PacketID;
+import dev.ftb.mods.ftblibrary.net.snm.SimpleNetworkManager;
 
 /**
  * @author LatvianModder
  */
-public class FTBEssentialsNet {
-	public static SimpleChannel MAIN;
-	private static final String MAIN_VERSION = "1";
+public interface FTBEssentialsNet {
+	SimpleNetworkManager NET = SimpleNetworkManager.create(FTBEssentials.MOD_ID);
 
-	public static void init() {
-		Predicate<String> validator = v -> MAIN_VERSION.equals(v) || NetworkRegistry.ABSENT.equals(v) || NetworkRegistry.ACCEPTVANILLA.equals(v);
+	PacketID UPDATE_TAB_NAME = NET.registerS2C("update_tab_name", UpdateTabNamePacket::new);
 
-		MAIN = NetworkRegistry.ChannelBuilder
-				.named(new ResourceLocation(FTBEssentials.MOD_ID + ":main"))
-				.clientAcceptedVersions(validator)
-				.serverAcceptedVersions(validator)
-				.networkProtocolVersion(() -> MAIN_VERSION)
-				.simpleChannel();
-
-		MAIN.registerMessage(1, UpdateTabNamePacket.class, UpdateTabNamePacket::write, UpdateTabNamePacket::new, UpdateTabNamePacket::handle);
+	static void init() {
 	}
 }

@@ -4,17 +4,16 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -56,38 +55,38 @@ public class TPACommands {
 		return r;
 	}
 
-	public static void register(CommandDispatcher<CommandSource> dispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("tpa")
 				.then(Commands.argument("target", EntityArgument.player())
-						.executes(context -> tpa(context.getSource().asPlayer(), EntityArgument.getPlayer(context, "target"), false))
+						.executes(context -> tpa(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "target"), false))
 				)
 		);
 
 		dispatcher.register(Commands.literal("tpahere")
 				.then(Commands.argument("target", EntityArgument.player())
-						.executes(context -> tpa(context.getSource().asPlayer(), EntityArgument.getPlayer(context, "target"), true))
+						.executes(context -> tpa(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "target"), true))
 				)
 		);
 
 		dispatcher.register(Commands.literal("tpaccept")
 				.then(Commands.argument("id", StringArgumentType.string())
-						.executes(context -> tpaccept(context.getSource().asPlayer(), StringArgumentType.getString(context, "id")))
+						.executes(context -> tpaccept(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "id")))
 				)
 		);
 
 		dispatcher.register(Commands.literal("tpdeny")
 				.then(Commands.argument("id", StringArgumentType.string())
-						.executes(context -> tpdeny(context.getSource().asPlayer(), StringArgumentType.getString(context, "id")))
+						.executes(context -> tpdeny(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "id")))
 				)
 		);
 	}
 
-	public static int tpa(ServerPlayerEntity player, ServerPlayerEntity target, boolean here) {
+	public static int tpa(ServerPlayer player, ServerPlayer target, boolean here) {
 		FTBEPlayerData dataSource = FTBEPlayerData.get(player);
 		FTBEPlayerData dataTarget = FTBEPlayerData.get(target);
 
 		if (REQUESTS.values().stream().anyMatch(r -> r.source == dataSource && r.target == dataTarget)) {
-			player.sendStatusMessage(new StringTextComponent("Request already sent!"), false);
+			player.displayClientMessage(new TextComponent("Request already sent!"), false);
 			return 0;
 		}
 
@@ -99,50 +98,50 @@ public class TPACommands {
 			return result.runCommand(player);
 		}
 
-		StringTextComponent component = new StringTextComponent("TPA request! [ ");
-		component.append((here ? target : player).getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW));
-		component.appendString(" \u27A1 ");
-		component.append((here ? player : target).getDisplayName().deepCopy().mergeStyle(TextFormatting.YELLOW));
-		component.appendString(" ]");
+		TextComponent component = new TextComponent("TPA request! [ ");
+		component.append((here ? target : player).getDisplayName().copy().withStyle(ChatFormatting.YELLOW));
+		component.append(" \u27A1 ");
+		component.append((here ? player : target).getDisplayName().copy().withStyle(ChatFormatting.YELLOW));
+		component.append(" ]");
 
-		StringTextComponent component2 = new StringTextComponent("Click one of these: ");
-		component2.append(new StringTextComponent("Accept \u2714").setStyle(Style.EMPTY
-				.setColor(Color.fromTextFormatting(TextFormatting.GREEN))
-				.setBold(true)
-				.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpaccept " + request.id))
-				.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Click to Accept")))
+		TextComponent component2 = new TextComponent("Click one of these: ");
+		component2.append(new TextComponent("Accept \u2714").setStyle(Style.EMPTY
+				.applyFormat(ChatFormatting.GREEN)
+				.withBold(true)
+				.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpaccept " + request.id))
+				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to Accept")))
 		));
 
-		component2.appendString(" | ");
+		component2.append(" | ");
 
-		component2.append(new StringTextComponent("Deny \u274C").setStyle(Style.EMPTY
-				.setColor(Color.fromTextFormatting(TextFormatting.RED))
-				.setBold(true)
-				.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpdeny " + request.id))
-				.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent("Click to Deny")))
+		component2.append(new TextComponent("Deny \u274C").setStyle(Style.EMPTY
+				.applyFormat(ChatFormatting.RED)
+				.withBold(true)
+				.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpdeny " + request.id))
+				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to Deny")))
 		));
 
-		component2.appendString(" |");
+		component2.append(" |");
 
-		target.sendStatusMessage(component, false);
-		target.sendStatusMessage(component2, false);
+		target.displayClientMessage(component, false);
+		target.displayClientMessage(component2, false);
 
-		player.sendStatusMessage(new StringTextComponent("Request sent!"), false);
+		player.displayClientMessage(new TextComponent("Request sent!"), false);
 		return 1;
 	}
 
-	public static int tpaccept(ServerPlayerEntity player, String id) {
+	public static int tpaccept(ServerPlayer player, String id) {
 		TPARequest request = REQUESTS.get(id);
 
 		if (request == null) {
-			player.sendStatusMessage(new StringTextComponent("Invalid request!"), false);
+			player.displayClientMessage(new TextComponent("Invalid request!"), false);
 			return 0;
 		}
 
-		ServerPlayerEntity sourcePlayer = player.server.getPlayerList().getPlayerByUUID(request.source.uuid);
+		ServerPlayer sourcePlayer = player.server.getPlayerList().getPlayer(request.source.uuid);
 
 		if (sourcePlayer == null) {
-			player.sendStatusMessage(new StringTextComponent("Player has gone offline!"), false);
+			player.displayClientMessage(new TextComponent("Player has gone offline!"), false);
 			return 0;
 		}
 
@@ -155,22 +154,22 @@ public class TPACommands {
 		return result.runCommand(player);
 	}
 
-	public static int tpdeny(ServerPlayerEntity player, String id) {
+	public static int tpdeny(ServerPlayer player, String id) {
 		TPARequest request = REQUESTS.get(id);
 
 		if (request == null) {
-			player.sendStatusMessage(new StringTextComponent("Invalid request!"), false);
+			player.displayClientMessage(new TextComponent("Invalid request!"), false);
 			return 0;
 		}
 
 		REQUESTS.remove(request.id);
 
-		player.sendStatusMessage(new StringTextComponent("Request denied!"), false);
+		player.displayClientMessage(new TextComponent("Request denied!"), false);
 
-		ServerPlayerEntity player2 = player.server.getPlayerList().getPlayerByUUID(request.target.uuid);
+		ServerPlayer player2 = player.server.getPlayerList().getPlayer(request.target.uuid);
 
 		if (player2 != null) {
-			player2.sendStatusMessage(new StringTextComponent("Request denied!"), false);
+			player2.displayClientMessage(new TextComponent("Request denied!"), false);
 		}
 
 		return 1;

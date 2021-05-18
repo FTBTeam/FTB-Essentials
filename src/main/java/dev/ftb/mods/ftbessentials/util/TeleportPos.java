@@ -1,15 +1,16 @@
 package dev.ftb.mods.ftbessentials.util;
 
 import com.google.gson.JsonObject;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import dev.ftb.mods.ftblibrary.util.TimeUtils;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 
 /**
  * @author LatvianModder
@@ -19,7 +20,7 @@ public class TeleportPos {
 	public interface TeleportResult {
 		TeleportResult SUCCESS = new TeleportResult() {
 			@Override
-			public int runCommand(ServerPlayerEntity player) {
+			public int runCommand(ServerPlayer player) {
 				return 1;
 			}
 
@@ -30,11 +31,11 @@ public class TeleportPos {
 		};
 
 		TeleportResult DIMENSION_NOT_FOUND = player -> {
-			player.sendStatusMessage(new StringTextComponent("Dimension not found!"), false);
+			player.displayClientMessage(new TextComponent("Dimension not found!"), false);
 			return 0;
 		};
 
-		int runCommand(ServerPlayerEntity player);
+		int runCommand(ServerPlayer player);
 
 		default boolean isSuccess() {
 			return false;
@@ -46,52 +47,52 @@ public class TeleportPos {
 		long getCooldown();
 
 		@Override
-		default int runCommand(ServerPlayerEntity player) {
-			player.sendStatusMessage(new StringTextComponent("Can't teleport yet! Cooldown: " + CooldownTeleporter.prettyTimeString(getCooldown() / 1000L)), false);
+		default int runCommand(ServerPlayer player) {
+			player.displayClientMessage(new TextComponent("Can't teleport yet! Cooldown: " + TimeUtils.prettyTimeString(getCooldown() / 1000L)), false);
 			return 0;
 		}
 	}
 
-	public final RegistryKey<World> dimension;
+	public final ResourceKey<Level> dimension;
 	public final BlockPos pos;
 	public long time;
 
-	public TeleportPos(RegistryKey<World> d, BlockPos p) {
+	public TeleportPos(ResourceKey<Level> d, BlockPos p) {
 		dimension = d;
 		pos = p;
 		time = System.currentTimeMillis();
 	}
 
-	public TeleportPos(World world, BlockPos p) {
-		this(world.getDimensionKey(), p);
+	public TeleportPos(Level world, BlockPos p) {
+		this(world.dimension(), p);
 	}
 
 	public TeleportPos(Entity entity) {
-		this(entity.world, entity.getPosition());
+		this(entity.level, entity.blockPosition());
 	}
 
 	public TeleportPos(JsonObject json) {
-		dimension = RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(json.get("dim").getAsString()));
+		dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(json.get("dim").getAsString()));
 		pos = new BlockPos(json.get("x").getAsInt(), json.get("y").getAsInt(), json.get("z").getAsInt());
 		time = json.get("time").getAsLong();
 	}
 
-	public TeleportResult teleport(ServerPlayerEntity player) {
-		ServerWorld world = player.server.getWorld(dimension);
+	public TeleportResult teleport(ServerPlayer player) {
+		ServerLevel world = player.server.getLevel(dimension);
 
 		if (world == null) {
 			return TeleportResult.DIMENSION_NOT_FOUND;
 		}
 
 		int lvl = player.experienceLevel;
-		player.teleport(world, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, player.rotationYaw, player.rotationPitch);
-		player.setExperienceLevel(lvl);
+		player.teleportTo(world, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, player.yRot, player.xRot);
+		player.setExperienceLevels(lvl);
 		return TeleportResult.SUCCESS;
 	}
 
 	public JsonObject toJson() {
 		JsonObject json = new JsonObject();
-		json.addProperty("dim", dimension.getLocation().toString());
+		json.addProperty("dim", dimension.location().toString());
 		json.addProperty("x", pos.getX());
 		json.addProperty("y", pos.getY());
 		json.addProperty("z", pos.getZ());
@@ -105,7 +106,7 @@ public class TeleportPos {
 			double dz = pos.getZ() - origin.pos.getZ();
 			return (int) Math.sqrt(dx * dx + dz * dz) + "m";
 		} else {
-			ResourceLocation s = dimension.getLocation();
+			ResourceLocation s = dimension.location();
 
 			if (s.getNamespace().equals("minecraft")) {
 				switch (s.getPath()) {

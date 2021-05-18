@@ -1,1 +1,8 @@
-rootProject.name = 'FTB-Essentials-1.16.5'
+pluginManagement {
+	repositories {
+		maven { url "https://maven.fabricmc.net/" }
+		maven { url "https://maven.shedaniel.me/" }
+		maven { url "https://forge.modpacks.ch/maven/" }
+		gradlePluginPortal()
+	}
+}
