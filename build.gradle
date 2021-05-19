@@ -146,6 +146,7 @@ if (ENV.CURSEFORGE_KEY) {
             addGameVersion "1.16.5"
             mainArtifact(remapJar.archivePath)
             relations {
+                requiredDependency 'ftb-library-forge'
                 optionalDependency 'ftb-ranks-forge'
             }
             changelog = getGitChangelog
