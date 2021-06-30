@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
-import net.minecraft.nbt.CompoundTag;
+import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 
@@ -50,10 +49,10 @@ public class FTBEWorldData {
 		save = true;
 	}
 
-	public CompoundTag write() {
-		CompoundTag tag = new OrderedCompoundTag();
+	public SNBTCompoundTag write() {
+		SNBTCompoundTag tag = new SNBTCompoundTag();
 
-		CompoundTag wm = new CompoundTag();
+		SNBTCompoundTag wm = new SNBTCompoundTag();
 
 		for (Map.Entry<String, TeleportPos> h : warps.entrySet()) {
 			wm.put(h.getKey(), h.getValue().write());
@@ -64,10 +63,10 @@ public class FTBEWorldData {
 		return tag;
 	}
 
-	public void read(CompoundTag tag) {
+	public void read(SNBTCompoundTag tag) {
 		warps.clear();
 
-		CompoundTag w = tag.getCompound("warps");
+		SNBTCompoundTag w = tag.getCompound("warps");
 
 		for (String key : w.getAllKeys()) {
 			warps.put(key, new TeleportPos(w.getCompound(key)));

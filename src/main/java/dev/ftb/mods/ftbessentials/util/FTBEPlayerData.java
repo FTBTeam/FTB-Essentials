@@ -3,8 +3,8 @@ package dev.ftb.mods.ftbessentials.util;
 import com.mojang.authlib.GameProfile;
 import dev.ftb.mods.ftbessentials.FTBEConfig;
 import dev.ftb.mods.ftbessentials.net.UpdateTabNamePacket;
-import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
+import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import me.shedaniel.architectury.utils.NbtType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -101,8 +101,8 @@ public class FTBEPlayerData {
 		save = true;
 	}
 
-	public CompoundTag write() {
-		CompoundTag json = new OrderedCompoundTag();
+	public SNBTCompoundTag write() {
+		SNBTCompoundTag json = new SNBTCompoundTag();
 		json.putBoolean("muted", muted);
 		json.putBoolean("fly", fly);
 		json.putBoolean("god", god);
@@ -118,7 +118,7 @@ public class FTBEPlayerData {
 
 		json.put("teleport_history", tph);
 
-		CompoundTag hm = new CompoundTag();
+		SNBTCompoundTag hm = new SNBTCompoundTag();
 
 		for (Map.Entry<String, TeleportPos> h : homes.entrySet()) {
 			hm.put(h.getKey(), h.getValue().write());

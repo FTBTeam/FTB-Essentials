@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import dev.ftb.mods.ftblibrary.snbt.OrderedCompoundTag;
+import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -91,9 +91,9 @@ public class TeleportPos {
 		return TeleportResult.SUCCESS;
 	}
 
-	public CompoundTag write() {
-		OrderedCompoundTag tag = new OrderedCompoundTag();
-		tag.singleLine = true;
+	public SNBTCompoundTag write() {
+		SNBTCompoundTag tag = new SNBTCompoundTag();
+		tag.singleLine();
 		tag.putString("dim", dimension.location().toString());
 		tag.putInt("x", pos.getX());
 		tag.putInt("y", pos.getY());

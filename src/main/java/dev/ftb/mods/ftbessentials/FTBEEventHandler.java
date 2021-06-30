@@ -5,9 +5,9 @@ import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
+import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
@@ -39,7 +39,7 @@ public class FTBEEventHandler {
 		FTBEWorldData.instance = new FTBEWorldData(event.getServer());
 
 		try {
-			CompoundTag tag = SNBT.read(FTBEWorldData.instance.mkdirs("").resolve("data.snbt"));
+			SNBTCompoundTag tag = SNBT.read(FTBEWorldData.instance.mkdirs("").resolve("data.snbt"));
 
 			if (tag != null) {
 				FTBEWorldData.instance.read(tag);
