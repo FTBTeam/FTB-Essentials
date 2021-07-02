@@ -6,12 +6,14 @@ import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import me.shedaniel.architectury.hooks.LevelResourceHooks;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -30,11 +32,13 @@ import java.util.Iterator;
  */
 @Mod.EventBusSubscriber(modid = FTBEssentials.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class FTBEEventHandler {
+	public static final LevelResource CONFIG_FILE = LevelResourceHooks.create("serverconfig/ftbessentials.snbt");
 	public static final Style RECORDING_STYLE = Style.EMPTY.applyFormat(ChatFormatting.RED);
 	public static final Style STREAMING_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x9146FF));
 
 	@SubscribeEvent
 	public static void serverAboutToStart(FMLServerAboutToStartEvent event) {
+		FTBEConfig.CONFIG.load(event.getServer().getWorldPath(CONFIG_FILE));
 		FTBEPlayerData.MAP.clear();
 		FTBEWorldData.instance = new FTBEWorldData(event.getServer());
 

@@ -1,181 +1,73 @@
 package dev.ftb.mods.ftbessentials;
 
+import dev.ftb.mods.ftblibrary.snbt.config.IntValue;
+import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * @author LatvianModder
  */
-public class FTBEConfig {
-	public static int maxBack;
-	public static int maxHomes;
-	public static long backCooldown;
-	public static long spawnCooldown;
-	public static long warpCooldown;
-	public static long homeCooldown;
-	public static long tpaCooldown;
-	public static long rtpCooldown;
-	public static int rtpMaxTries;
-	public static double rtpMinDistance;
-	public static double rtpMaxDistance;
+public interface FTBEConfig {
+	class TimerConfig {
+		public final String name;
+		public final IntValue config;
+		public final String permissionNode;
 
-	private static Pair<ServerConfig, ForgeConfigSpec> server;
+		public TimerConfig(SNBTConfig c, String type, String n, int def) {
+			name = n;
+			config = c.getInt(type, def).range(0, 604800).comment("/" + name + " " + type + " in seconds");
+			permissionNode = "ftbessentials." + name + "." + type;
+		}
 
-	public static void init() {
-		FMLJavaModLoadingContext.get().getModEventBus().register(FTBEConfig.class);
+		public int get(ServerPlayer player) {
+			if (FTBEssentials.ranksMod) {
+				return FTBRanksIntegration.getInt(player, config.get(), permissionNode);
+			}
 
-		server = new ForgeConfigSpec.Builder().configure(ServerConfig::new);
-
-		ModLoadingContext modLoadingContext = ModLoadingContext.get();
-		modLoadingContext.registerConfig(ModConfig.Type.SERVER, server.getRight());
-	}
-
-	@SubscribeEvent
-	public static void reload(ModConfig.ModConfigEvent event) {
-		ModConfig config = event.getConfig();
-
-		if (config.getSpec() == server.getRight()) {
-			ServerConfig c = server.getLeft();
-			maxBack = c.maxBack.get();
-			maxHomes = c.maxHomes.get();
-			backCooldown = c.backCooldown.get();
-			spawnCooldown = c.spawnCooldown.get();
-			warpCooldown = c.warpCooldown.get();
-			homeCooldown = c.homeCooldown.get();
-			tpaCooldown = c.tpaCooldown.get();
-			rtpCooldown = c.rtpCooldown.get();
-			rtpMaxTries = c.rtpMaxTries.get();
-			rtpMinDistance = c.rtpMinDistance.get();
-			rtpMaxDistance = c.rtpMaxDistance.get();
+			return config.get();
 		}
 	}
 
-	private static class ServerConfig {
-		private final ForgeConfigSpec.IntValue maxBack;
-		private final ForgeConfigSpec.IntValue maxHomes;
-		private final ForgeConfigSpec.LongValue backCooldown;
-		private final ForgeConfigSpec.LongValue spawnCooldown;
-		private final ForgeConfigSpec.LongValue warpCooldown;
-		private final ForgeConfigSpec.LongValue homeCooldown;
-		private final ForgeConfigSpec.LongValue tpaCooldown;
-		private final ForgeConfigSpec.LongValue rtpCooldown;
-		private final ForgeConfigSpec.IntValue rtpMaxTries;
-		private final ForgeConfigSpec.DoubleValue rtpMinDistance;
-		private final ForgeConfigSpec.DoubleValue rtpMaxDistance;
+	SNBTConfig CONFIG = SNBTConfig.create(FTBEssentials.MOD_ID);
 
-		private ServerConfig(ForgeConfigSpec.Builder builder) {
-			maxBack = builder
-					.comment("Max number of times you can use /back")
-					.defineInRange("maxBack", 10, 0, Integer.MAX_VALUE);
+	SNBTConfig COMMANDS = CONFIG.getGroup("commands"); // TODO: Implement warmup configs too
 
-			maxHomes = builder
-					.comment("Max homes")
-					.defineInRange("maxHomes", 1, 0, Integer.MAX_VALUE);
+	SNBTConfig BACK = COMMANDS.getGroup("back");
+	TimerConfig BACK_COOLDOWN = new TimerConfig(BACK, "cooldown", "back", 30);
+	IntValue MAX_BACK = BACK.getInt("max", 10).range(0, Integer.MAX_VALUE).comment("Max number of times you can use /back");
 
-			backCooldown = builder
-					.comment("/back cooldown in seconds")
-					.defineInRange("backCooldown", 30L, 0L, 604800L);
+	SNBTConfig SPAWN = COMMANDS.getGroup("spawn");
+	TimerConfig SPAWN_COOLDOWN = new TimerConfig(SPAWN, "cooldown", "spawn", 10);
 
-			spawnCooldown = builder
-					.comment("/spawn cooldown in seconds")
-					.defineInRange("spawnCooldown", 10L, 0L, 604800L);
+	SNBTConfig WARP = COMMANDS.getGroup("warp");
+	TimerConfig WARP_COOLDOWN = new TimerConfig(WARP, "cooldown", "warp", 10);
 
-			warpCooldown = builder
-					.comment("/warp cooldown in seconds")
-					.defineInRange("warpCooldown", 10L, 0L, 604800L);
+	SNBTConfig HOME = COMMANDS.getGroup("home");
+	TimerConfig HOME_COOLDOWN = new TimerConfig(HOME, "cooldown", "home", 10);
+	IntValue MAX_HOMES = HOME.getInt("max", 1).range(0, Integer.MAX_VALUE).comment("Max homes");
 
-			homeCooldown = builder
-					.comment("/home cooldown in seconds")
-					.defineInRange("homeCooldown", 10L, 0L, 604800L);
+	SNBTConfig TPA = COMMANDS.getGroup("tpa");
+	TimerConfig TPA_COOLDOWN = new TimerConfig(TPA, "cooldown", "tpa", 10);
 
-			tpaCooldown = builder
-					.comment("/tpa cooldown in seconds")
-					.defineInRange("tpaCooldown", 10L, 0L, 604800L);
+	SNBTConfig RTP = COMMANDS.getGroup("rtp");
+	TimerConfig RTP_COOLDOWN = new TimerConfig(RTP, "cooldown", "rtp", 600);
+	IntValue RTP_MAX_TRIES = RTP.getInt("max_tries", 100).range(1, 1000).comment("Number of tries before /rtp gives up");
+	IntValue RTP_MIN_DISTANCE = RTP.getInt("min_distance", 1000).range(0, 30000000).comment("/rtp min distance from spawn point");
+	IntValue RTP_MAX_DISTANCE = RTP.getInt("max_distance", 100000).range(0, 30000000).comment("/rtp max distance from spawn point");
 
-			rtpCooldown = builder
-					.comment("/rtp cooldown in seconds")
-					.defineInRange("rtpCooldown", 600L, 0L, 604800L);
-
-			rtpMaxTries = builder
-					.comment("Number of tries before /rtp gives up")
-					.defineInRange("rtpMaxTries", 100, 1, 1000);
-
-			rtpMinDistance = builder
-					.comment("/rtp min distance from spawn point")
-					.defineInRange("rtpMinDistance", 1000D, 0D, 30000000D);
-
-			rtpMaxDistance = builder
-					.comment("/rtp max distance from spawn point")
-					.defineInRange("rtpMaxDistance", 100000D, 0D, 30000000D);
-		}
-	}
-
-	public static int getMaxBack(ServerPlayer player) {
+	static int getMaxBack(ServerPlayer player) {
 		if (FTBEssentials.ranksMod) {
-			return FTBRanksIntegration.getMaxBack(player, maxBack);
+			return FTBRanksIntegration.getInt(player, MAX_BACK.get(), "ftbessentials.back.max");
 		}
 
-		return maxBack;
+		return MAX_BACK.get();
 	}
 
-	public static long getMaxHomes(ServerPlayer player) {
+	static int getMaxHomes(ServerPlayer player) {
 		if (FTBEssentials.ranksMod) {
-			return FTBRanksIntegration.getMaxHomes(player, maxHomes);
+			return FTBRanksIntegration.getInt(player, MAX_HOMES.get(), "ftbessentials.home.max");
 		}
 
-		return maxHomes;
-	}
-
-	public static long getBackCooldown(ServerPlayer player) {
-		if (FTBEssentials.ranksMod) {
-			return FTBRanksIntegration.getBackCooldown(player, backCooldown);
-		}
-
-		return backCooldown;
-	}
-
-	public static long getSpawnCooldown(ServerPlayer player) {
-		if (FTBEssentials.ranksMod) {
-			return FTBRanksIntegration.getSpawnCooldown(player, spawnCooldown);
-		}
-
-		return spawnCooldown;
-	}
-
-	public static long getWarpCooldown(ServerPlayer player) {
-		if (FTBEssentials.ranksMod) {
-			return FTBRanksIntegration.getWarpCooldown(player, warpCooldown);
-		}
-
-		return warpCooldown;
-	}
-
-	public static long getHomeCooldown(ServerPlayer player) {
-		if (FTBEssentials.ranksMod) {
-			return FTBRanksIntegration.getHomeCooldown(player, homeCooldown);
-		}
-
-		return homeCooldown;
-	}
-
-	public static long getTpaCooldown(ServerPlayer player) {
-		if (FTBEssentials.ranksMod) {
-			return FTBRanksIntegration.getTpaCooldown(player, tpaCooldown);
-		}
-
-		return tpaCooldown;
-	}
-
-	public static long getRtpCooldown(ServerPlayer player) {
-		if (FTBEssentials.ranksMod) {
-			return FTBRanksIntegration.getRtpCooldown(player, rtpCooldown);
-		}
-
-		return rtpCooldown;
+		return MAX_HOMES.get();
 	}
 }

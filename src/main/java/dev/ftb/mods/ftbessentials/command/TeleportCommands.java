@@ -86,12 +86,12 @@ public class TeleportCommands {
 	}
 
 	private static TeleportPos findBlockPos(ServerLevel world, ServerPlayer player, int attempt) {
-		if (attempt > FTBEConfig.rtpMaxTries) {
+		if (attempt > FTBEConfig.RTP_MAX_TRIES.get()) {
 			player.displayClientMessage(new TextComponent("Could not find a valid location to teleport to!"), false);
 			return new TeleportPos(player);
 		}
 
-		double dist = FTBEConfig.rtpMinDistance + world.random.nextDouble() * (FTBEConfig.rtpMaxDistance - FTBEConfig.rtpMinDistance);
+		double dist = FTBEConfig.RTP_MIN_DISTANCE.get() + world.random.nextDouble() * (FTBEConfig.RTP_MAX_DISTANCE.get() - FTBEConfig.RTP_MIN_DISTANCE.get());
 		double angle = world.random.nextDouble() * Math.PI * 2D;
 
 		int x = Mth.floor(Math.cos(angle) * dist);

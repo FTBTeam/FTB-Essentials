@@ -88,12 +88,12 @@ public class FTBEPlayerData {
 		homes = new LinkedHashMap<>();
 		recording = 0;
 
-		backTeleporter = new CooldownTeleporter(this, FTBEConfig::getBackCooldown);
-		spawnTeleporter = new CooldownTeleporter(this, FTBEConfig::getSpawnCooldown);
-		warpTeleporter = new CooldownTeleporter(this, FTBEConfig::getWarpCooldown);
-		homeTeleporter = new CooldownTeleporter(this, FTBEConfig::getHomeCooldown);
-		tpaTeleporter = new CooldownTeleporter(this, FTBEConfig::getTpaCooldown);
-		rtpTeleporter = new CooldownTeleporter(this, FTBEConfig::getRtpCooldown);
+		backTeleporter = new CooldownTeleporter(this, FTBEConfig.BACK_COOLDOWN);
+		spawnTeleporter = new CooldownTeleporter(this, FTBEConfig.SPAWN_COOLDOWN);
+		warpTeleporter = new CooldownTeleporter(this, FTBEConfig.WARP_COOLDOWN);
+		homeTeleporter = new CooldownTeleporter(this, FTBEConfig.HOME_COOLDOWN);
+		tpaTeleporter = new CooldownTeleporter(this, FTBEConfig.TPA_COOLDOWN);
+		rtpTeleporter = new CooldownTeleporter(this, FTBEConfig.RTP_COOLDOWN);
 		teleportHistory = new LinkedList<>();
 	}
 

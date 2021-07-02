@@ -18,7 +18,6 @@ import org.apache.logging.log4j.Logger;
  * @author LatvianModder
  */
 @Mod(FTBEssentials.MOD_ID)
-@Mod.EventBusSubscriber(modid = FTBEssentials.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class FTBEssentials {
 	public static final String MOD_ID = "ftbessentials";
 	public static final Logger LOGGER = LogManager.getLogger("FTB Essentials");
@@ -30,7 +29,6 @@ public class FTBEssentials {
 	public FTBEssentials() {
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
 		FTBEssentialsNet.init();
-		FTBEConfig.init();
 		PROXY = DistExecutor.safeRunForDist(() -> FTBEssentialsClient::new, () -> FTBEssentialsCommon::new);
 		ranksMod = ModList.get().isLoaded(FTBRanks.MOD_ID);
 	}
