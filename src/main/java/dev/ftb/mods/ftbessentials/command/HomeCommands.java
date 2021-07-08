@@ -8,12 +8,14 @@ import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author LatvianModder
@@ -23,6 +25,7 @@ public class HomeCommands {
 		dispatcher.register(Commands.literal("home")
 				.executes(context -> home(context.getSource().getPlayerOrException(), "home"))
 				.then(Commands.argument("name", StringArgumentType.greedyString())
+						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context.getSource().getPlayerOrException()), builder))
 						.executes(context -> home(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
 				)
 		);
@@ -37,6 +40,7 @@ public class HomeCommands {
 		dispatcher.register(Commands.literal("delhome")
 				.executes(context -> delhome(context.getSource().getPlayerOrException(), "home"))
 				.then(Commands.argument("name", StringArgumentType.greedyString())
+						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context.getSource().getPlayerOrException()), builder))
 						.executes(context -> delhome(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
 				)
 		);
@@ -48,6 +52,11 @@ public class HomeCommands {
 						.executes(context -> listhomes(context.getSource(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
 				)
 		);
+	}
+
+	public static Set<String> getHomeSuggestions(ServerPlayer player) {
+		FTBEPlayerData data = FTBEPlayerData.get(player);
+		return data.homes.keySet();
 	}
 
 	public static int home(ServerPlayer player, String name) {
