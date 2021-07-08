@@ -3,6 +3,8 @@ package dev.ftb.mods.ftbessentials.command;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftbessentials.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
@@ -16,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -25,7 +28,7 @@ public class HomeCommands {
 		dispatcher.register(Commands.literal("home")
 				.executes(context -> home(context.getSource().getPlayerOrException(), "home"))
 				.then(Commands.argument("name", StringArgumentType.greedyString())
-						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context.getSource().getPlayerOrException()), builder))
+						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context), builder))
 						.executes(context -> home(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
 				)
 		);
@@ -40,7 +43,7 @@ public class HomeCommands {
 		dispatcher.register(Commands.literal("delhome")
 				.executes(context -> delhome(context.getSource().getPlayerOrException(), "home"))
 				.then(Commands.argument("name", StringArgumentType.greedyString())
-						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context.getSource().getPlayerOrException()), builder))
+						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context), builder))
 						.executes(context -> delhome(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
 				)
 		);
@@ -54,9 +57,13 @@ public class HomeCommands {
 		);
 	}
 
-	public static Set<String> getHomeSuggestions(ServerPlayer player) {
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-		return data.homes.keySet();
+	public static Set<String> getHomeSuggestions(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		FTBEPlayerData data = FTBEPlayerData.get(context.getSource().getPlayerOrException());
+		try {
+			return data.homes.keySet().stream().filter(s -> s.startsWith(context.getArgument("name", String.class))).collect(Collectors.toSet());
+		} catch (IllegalArgumentException e) {
+			return data.homes.keySet();
+		}
 	}
 
 	public static int home(ServerPlayer player, String name) {
