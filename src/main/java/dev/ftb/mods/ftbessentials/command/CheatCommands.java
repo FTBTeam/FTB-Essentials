@@ -123,13 +123,12 @@ public class CheatCommands {
 		if (data.god) {
 			data.god = false;
 			data.save();
-			player.abilities.mayfly = false;
-			player.abilities.flying = false;
+			player.abilities.invulnerable = false;
 			player.displayClientMessage(new TextComponent("God mode disabled"), true);
 		} else {
 			data.god = true;
 			data.save();
-			player.abilities.mayfly = true;
+			player.abilities.invulnerable = true;
 			player.displayClientMessage(new TextComponent("God mode enabled"), true);
 		}
 

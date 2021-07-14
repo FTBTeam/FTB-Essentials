@@ -106,7 +106,12 @@ public class FTBEEventHandler {
 		if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayer) {
 			FTBEPlayerData data = FTBEPlayerData.get(event.player);
 
-			if ((data.fly || data.god) && !event.player.abilities.mayfly) {
+			if(data.god && !event.player.abilities.invulnerable) {
+				event.player.abilities.invulnerable = true;
+				event.player.onUpdateAbilities();
+			}
+
+			if (data.fly && !event.player.abilities.mayfly) {
 				event.player.abilities.mayfly = true;
 				event.player.onUpdateAbilities();
 			}
