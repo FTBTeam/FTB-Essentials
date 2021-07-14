@@ -18,7 +18,6 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -58,12 +57,7 @@ public class HomeCommands {
 	}
 
 	public static Set<String> getHomeSuggestions(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-		FTBEPlayerData data = FTBEPlayerData.get(context.getSource().getPlayerOrException());
-		try {
-			return data.homes.keySet().stream().filter(s -> s.startsWith(context.getArgument("name", String.class))).collect(Collectors.toSet());
-		} catch (IllegalArgumentException e) {
-			return data.homes.keySet();
-		}
+		return FTBEPlayerData.get(context.getSource().getPlayerOrException()).homes.keySet();
 	}
 
 	public static int home(ServerPlayer player, String name) {
