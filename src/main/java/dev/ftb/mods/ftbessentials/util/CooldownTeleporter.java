@@ -1,19 +1,19 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import dev.ftb.mods.ftbessentials.FTBEConfig;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 /**
  * @author LatvianModder
  */
 public class CooldownTeleporter {
 	public final FTBEPlayerData playerData;
-	public final FTBEConfig.TimerConfig cooldownConfig;
+	public final ToIntFunction<ServerPlayer> cooldownConfig;
 	public long cooldown;
 
-	public CooldownTeleporter(FTBEPlayerData d, FTBEConfig.TimerConfig c) {
+	public CooldownTeleporter(FTBEPlayerData d, ToIntFunction<ServerPlayer> c) {
 		playerData = d;
 		cooldownConfig = c;
 		cooldown = 0L;
@@ -36,7 +36,7 @@ public class CooldownTeleporter {
 			return res0;
 		}
 
-		cooldown = System.currentTimeMillis() + Math.max(0L, cooldownConfig.get(player) * 1000L);
+		cooldown = System.currentTimeMillis() + Math.max(0L, cooldownConfig.applyAsInt(player) * 1000L);
 
 		TeleportPos p = positionGetter.apply(player);
 		TeleportPos currentPos = new TeleportPos(player);

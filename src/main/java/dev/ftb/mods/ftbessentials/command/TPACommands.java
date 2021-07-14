@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbessentials.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import dev.ftb.mods.ftbessentials.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import net.minecraft.ChatFormatting;
@@ -56,6 +57,11 @@ public class TPACommands {
 	}
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+
+		if (!FTBEConfig.TPA.isEnabled()) {
+			return;
+		}
+
 		dispatcher.register(Commands.literal("tpa")
 				.then(Commands.argument("target", EntityArgument.player())
 						.executes(context -> tpa(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "target"), false))

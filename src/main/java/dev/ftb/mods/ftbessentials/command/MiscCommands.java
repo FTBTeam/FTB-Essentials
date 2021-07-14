@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.ftb.mods.ftbessentials.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.Leaderboard;
@@ -40,13 +41,18 @@ import java.util.UUID;
  */
 public class MiscCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(Commands.literal("kickme")
-				.executes(context -> kickme(context.getSource().getPlayerOrException()))
-		);
 
-		dispatcher.register(Commands.literal("trashcan")
-				.executes(context -> trashcan(context.getSource().getPlayerOrException()))
-		);
+		if (FTBEConfig.KICKME.isEnabled()) {
+			dispatcher.register(Commands.literal("kickme")
+					.executes(context -> kickme(context.getSource().getPlayerOrException()))
+			);
+		}
+
+		if (FTBEConfig.TRASHCAN.isEnabled()) {
+			dispatcher.register(Commands.literal("trashcan")
+					.executes(context -> trashcan(context.getSource().getPlayerOrException()))
+			);
+		}
 
 		LiteralArgumentBuilder<CommandSourceStack> leaderboardCommand = Commands.literal("leaderboard");
 
@@ -56,24 +62,30 @@ public class MiscCommands {
 
 		dispatcher.register(leaderboardCommand);
 
-		dispatcher.register(Commands.literal("recording")
-				.executes(context -> recording(context.getSource().getPlayerOrException()))
-		);
+		if (FTBEConfig.REC.isEnabled()) {
+			dispatcher.register(Commands.literal("recording")
+					.executes(context -> recording(context.getSource().getPlayerOrException()))
+			);
 
-		dispatcher.register(Commands.literal("streaming")
-				.executes(context -> streaming(context.getSource().getPlayerOrException()))
-		);
+			dispatcher.register(Commands.literal("streaming")
+					.executes(context -> streaming(context.getSource().getPlayerOrException()))
+			);
+		}
 
-		dispatcher.register(Commands.literal("hat")
-				.executes(context -> hat(context.getSource().getPlayerOrException()))
-		);
+		if (FTBEConfig.HAT.isEnabled()) {
+			dispatcher.register(Commands.literal("hat")
+					.executes(context -> hat(context.getSource().getPlayerOrException()))
+			);
+		}
 
-		dispatcher.register(Commands.literal("nickname")
-				.executes(context -> nickname(context.getSource().getPlayerOrException(), ""))
-				.then(Commands.argument("nickname", StringArgumentType.greedyString())
-						.executes(context -> nickname(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "nickname")))
-				)
-		);
+		if (FTBEConfig.NICK.isEnabled()) {
+			dispatcher.register(Commands.literal("nickname")
+					.executes(context -> nickname(context.getSource().getPlayerOrException(), ""))
+					.then(Commands.argument("nickname", StringArgumentType.greedyString())
+							.executes(context -> nickname(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "nickname")))
+					)
+			);
+		}
 	}
 
 	public static int kickme(ServerPlayer player) {

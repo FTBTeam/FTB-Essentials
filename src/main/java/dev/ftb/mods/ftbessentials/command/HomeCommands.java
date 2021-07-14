@@ -24,6 +24,11 @@ import java.util.Set;
  */
 public class HomeCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+
+		if(!FTBEConfig.HOME.isEnabled()) {
+			return;
+		}
+
 		dispatcher.register(Commands.literal("home")
 				.executes(context -> home(context.getSource().getPlayerOrException(), "home"))
 				.then(Commands.argument("name", StringArgumentType.greedyString())

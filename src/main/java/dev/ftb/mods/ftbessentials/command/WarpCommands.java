@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbessentials.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import dev.ftb.mods.ftbessentials.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
@@ -23,6 +24,11 @@ import java.util.stream.Collectors;
  */
 public class WarpCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+
+		if(!FTBEConfig.WARP.isEnabled()) {
+			return;
+		}
+
 		dispatcher.register(Commands.literal("warp")
 				.then(Commands.argument("name", StringArgumentType.greedyString())
 						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getWarpSuggestions(context), builder))

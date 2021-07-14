@@ -29,24 +29,32 @@ import java.util.Optional;
  */
 public class TeleportCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(Commands.literal("back")
-				.executes(context -> back(context.getSource().getPlayerOrException()))
-		);
+		if (FTBEConfig.BACK.isEnabled()) {
+			dispatcher.register(Commands.literal("back")
+					.executes(context -> back(context.getSource().getPlayerOrException()))
+			);
+		}
 
-		dispatcher.register(Commands.literal("spawn")
-				.executes(context -> spawn(context.getSource().getPlayerOrException()))
-		);
+		if (FTBEConfig.SPAWN.isEnabled()) {
+			dispatcher.register(Commands.literal("spawn")
+					.executes(context -> spawn(context.getSource().getPlayerOrException()))
+			);
+		}
 
-		dispatcher.register(Commands.literal("rtp")
-				.executes(context -> rtp(context.getSource().getPlayerOrException()))
-		);
+		if (FTBEConfig.RTP.isEnabled()) {
+			dispatcher.register(Commands.literal("rtp")
+					.executes(context -> rtp(context.getSource().getPlayerOrException()))
+			);
+		}
 
-		dispatcher.register(Commands.literal("teleport_last")
-				.requires(source -> source.hasPermission(2))
-				.then(Commands.argument("player", GameProfileArgument.gameProfile())
-						.executes(context -> tpLast(context.getSource().getPlayerOrException(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
-				)
-		);
+		if (FTBEConfig.TPL.isEnabled()) {
+			dispatcher.register(Commands.literal("teleport_last")
+					.requires(source -> source.hasPermission(2))
+					.then(Commands.argument("player", GameProfileArgument.gameProfile())
+							.executes(context -> tpLast(context.getSource().getPlayerOrException(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
+					)
+			);
+		}
 	}
 
 	public static int back(ServerPlayer player) {
