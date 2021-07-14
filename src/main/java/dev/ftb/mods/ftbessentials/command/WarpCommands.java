@@ -2,16 +2,21 @@ package dev.ftb.mods.ftbessentials.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author LatvianModder
@@ -20,6 +25,7 @@ public class WarpCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("warp")
 				.then(Commands.argument("name", StringArgumentType.greedyString())
+						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getWarpSuggestions(context), builder))
 						.executes(context -> warp(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
 				)
 		);
@@ -34,6 +40,7 @@ public class WarpCommands {
 		dispatcher.register(Commands.literal("delwarp")
 				.requires(source -> source.hasPermission(2))
 				.then(Commands.argument("name", StringArgumentType.greedyString())
+						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getWarpSuggestions(context), builder))
 						.executes(context -> delwarp(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
 				)
 		);
@@ -41,6 +48,10 @@ public class WarpCommands {
 		dispatcher.register(Commands.literal("listwarps")
 				.executes(context -> listwarps(context.getSource()))
 		);
+	}
+
+	public static Set<String> getWarpSuggestions(CommandContext<CommandSourceStack> context) {
+		return FTBEWorldData.instance.warps.keySet();
 	}
 
 	public static int warp(ServerPlayer player, String name) {
