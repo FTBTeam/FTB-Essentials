@@ -51,12 +51,7 @@ public class WarpCommands {
 	}
 
 	public static Set<String> getWarpSuggestions(CommandContext<CommandSourceStack> context) {
-		Map<String, TeleportPos> warps = FTBEWorldData.instance.warps;
-		try {
-			return warps.keySet().stream().filter(s -> s.startsWith(context.getArgument("name", String.class))).collect(Collectors.toSet());
-		} catch (IllegalArgumentException e) {
-			return warps.keySet();
-		}
+		return FTBEWorldData.instance.warps.keySet();
 	}
 
 	public static int warp(ServerPlayer player, String name) {
