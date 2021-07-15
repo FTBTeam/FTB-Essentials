@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbessentials;
 
 import dev.ftb.mods.ftbessentials.command.TPACommands;
+import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
@@ -106,7 +107,7 @@ public class FTBEEventHandler {
 		if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayer) {
 			FTBEPlayerData data = FTBEPlayerData.get(event.player);
 
-			if(data.god && !event.player.abilities.invulnerable) {
+			if (data.god && !event.player.abilities.invulnerable) {
 				event.player.abilities.invulnerable = true;
 				event.player.onUpdateAbilities();
 			}

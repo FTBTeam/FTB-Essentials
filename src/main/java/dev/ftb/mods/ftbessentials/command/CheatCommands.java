@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbessentials.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import dev.ftb.mods.ftbessentials.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.OtherPlayerInventory;
 import net.minecraft.commands.CommandSourceStack;

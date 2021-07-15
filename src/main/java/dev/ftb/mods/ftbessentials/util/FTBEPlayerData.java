@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbessentials.util;
 
 import com.mojang.authlib.GameProfile;
-import dev.ftb.mods.ftbessentials.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.net.UpdateTabNamePacket;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
@@ -88,12 +88,12 @@ public class FTBEPlayerData {
 		homes = new LinkedHashMap<>();
 		recording = 0;
 
-		backTeleporter = new CooldownTeleporter(this, FTBEConfig.BACK::cooldown);
-		spawnTeleporter = new CooldownTeleporter(this, FTBEConfig.SPAWN::cooldown);
-		warpTeleporter = new CooldownTeleporter(this, FTBEConfig.WARP::cooldown);
-		homeTeleporter = new CooldownTeleporter(this, FTBEConfig.HOME::cooldown);
-		tpaTeleporter = new CooldownTeleporter(this, FTBEConfig.TPA::cooldown);
-		rtpTeleporter = new CooldownTeleporter(this, FTBEConfig.RTP::cooldown);
+		backTeleporter = new CooldownTeleporter(this, FTBEConfig.BACK.cooldown::get);
+		spawnTeleporter = new CooldownTeleporter(this, FTBEConfig.SPAWN.cooldown::get);
+		warpTeleporter = new CooldownTeleporter(this, FTBEConfig.WARP.cooldown::get);
+		homeTeleporter = new CooldownTeleporter(this, FTBEConfig.HOME.cooldown::get);
+		tpaTeleporter = new CooldownTeleporter(this, FTBEConfig.TPA.cooldown::get);
+		rtpTeleporter = new CooldownTeleporter(this, FTBEConfig.RTP.cooldown::get);
 		teleportHistory = new LinkedList<>();
 	}
 
@@ -157,7 +157,7 @@ public class FTBEPlayerData {
 	public void addTeleportHistory(ServerPlayer player, TeleportPos pos) {
 		teleportHistory.add(pos);
 
-		while (teleportHistory.size() > FTBEConfig.getMaxBack(player)) {
+		while (teleportHistory.size() > FTBEConfig.MAX_BACK.get(player)) {
 			teleportHistory.removeFirst();
 		}
 

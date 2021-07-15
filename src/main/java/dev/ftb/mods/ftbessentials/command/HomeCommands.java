@@ -5,7 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.ftb.mods.ftbessentials.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import net.minecraft.commands.CommandSourceStack;
@@ -80,7 +80,7 @@ public class HomeCommands {
 	public static int sethome(ServerPlayer player, String name) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 
-		if (data.homes.size() >= FTBEConfig.getMaxHomes(player) && !data.homes.containsKey(name.toLowerCase())) {
+		if (data.homes.size() >= FTBEConfig.MAX_HOMES.get(player) && !data.homes.containsKey(name.toLowerCase())) {
 			player.displayClientMessage(new TextComponent("Can't add any more homes!"), false);
 			return 0;
 		}

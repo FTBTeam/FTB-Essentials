@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbessentials.command;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
-import dev.ftb.mods.ftbessentials.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.RTPEvent;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
