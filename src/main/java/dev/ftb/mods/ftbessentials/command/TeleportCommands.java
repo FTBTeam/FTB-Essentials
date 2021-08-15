@@ -10,18 +10,23 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.MinecraftForge;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 /**
@@ -89,8 +94,12 @@ public class TeleportCommands {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		return data.rtpTeleporter.teleport(player, p -> {
 			p.displayClientMessage(new TextComponent("Looking for random location..."), false);
-			return findBlockPos(p.server.getLevel(Level.OVERWORLD), p, 1);
+			return findBlockPos(player.getLevel(), p, 1);
 		}).runCommand(player);
+	}
+
+	private static boolean isBlockPosAir(ServerLevel world, BlockPos pos) {
+		return world.getBlockState(pos).getBlock().isAir(world.getBlockState(pos), world, pos);
 	}
 
 	private static TeleportPos findBlockPos(ServerLevel world, ServerPlayer player, int attempt) {
@@ -125,11 +134,24 @@ public class TeleportCommands {
 		}
 
 		world.getChunk(currentPos.getX() >> 4, currentPos.getZ() >> 4, ChunkStatus.HEIGHTMAPS);
-		BlockPos newPos = world.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, currentPos);
+		BlockPos hmPos = world.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, currentPos);
 
-		if (newPos.getY() > 0) {
-			player.displayClientMessage(new TextComponent(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, z %d]", attempt, newPos.getX(), newPos.getZ())), false);
-			return new TeleportPos(world.dimension(), newPos.above());
+		if (hmPos.getY() > 0) {
+			if (hmPos.getY() >= world.getHeight()) { // broken heightmap (nether, other mod dimensions)
+				Iterator<BlockPos.MutableBlockPos> it = BlockPos.spiralAround(new BlockPos(hmPos.getX(), world.getSeaLevel(), hmPos.getY()), 16, Direction.EAST, Direction.SOUTH).iterator();
+				while (it.hasNext()) {
+					BlockPos newPos = it.next();
+					BlockState bs = world.getBlockState(newPos);
+
+					if (bs.getMaterial().isSolidBlocking() && !bs.is(BlockTags.LEAVES) && !bs.is(Blocks.BEDROCK) && isBlockPosAir(world, newPos.above(1)) && isBlockPosAir(world, newPos.above(2)) && isBlockPosAir(world, newPos.above(3))) {
+						player.displayClientMessage(new TextComponent(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, z %d]", attempt, newPos.getX(), newPos.getZ())), false);
+						return new TeleportPos(world.dimension(), newPos.above());
+					}
+				}
+			} else {
+				player.displayClientMessage(new TextComponent(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, z %d]", attempt, hmPos.getX(), hmPos.getZ())), false);
+				return new TeleportPos(world.dimension(), hmPos.above());
+			}
 		}
 
 		return findBlockPos(world, player, attempt + 1);
