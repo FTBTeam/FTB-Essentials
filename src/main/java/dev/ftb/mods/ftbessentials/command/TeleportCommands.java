@@ -2,10 +2,12 @@ package dev.ftb.mods.ftbessentials.command;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
+import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.RTPEvent;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
+import me.shedaniel.architectury.hooks.TagHooks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.GameProfileArgument;
@@ -13,13 +15,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -33,6 +36,9 @@ import java.util.Optional;
  * @author LatvianModder
  */
 public class TeleportCommands {
+
+	public static final Tag<Block> IGNORE_RTP = TagHooks.getBlockOptional(new ResourceLocation(FTBEssentials.MOD_ID, "ignore_rtp"));
+
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		if (FTBEConfig.BACK.isEnabled()) {
 			dispatcher.register(Commands.literal("back")
@@ -143,7 +149,7 @@ public class TeleportCommands {
 					BlockPos newPos = it.next();
 					BlockState bs = world.getBlockState(newPos);
 
-					if (bs.getMaterial().isSolidBlocking() && !bs.is(BlockTags.LEAVES) && !bs.is(Blocks.BEDROCK) && isBlockPosAir(world, newPos.above(1)) && isBlockPosAir(world, newPos.above(2)) && isBlockPosAir(world, newPos.above(3))) {
+					if (bs.getMaterial().isSolidBlocking() && !bs.is(IGNORE_RTP) && isBlockPosAir(world, newPos.above(1)) && isBlockPosAir(world, newPos.above(2)) && isBlockPosAir(world, newPos.above(3))) {
 						player.displayClientMessage(new TextComponent(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, z %d]", attempt, newPos.getX(), newPos.getZ())), false);
 						return new TeleportPos(world.dimension(), newPos.above());
 					}
