@@ -29,7 +29,6 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.MinecraftForge;
 
-import java.util.Iterator;
 import java.util.Optional;
 
 /**
@@ -144,9 +143,7 @@ public class TeleportCommands {
 
 		if (hmPos.getY() > 0) {
 			if (hmPos.getY() >= world.getHeight()) { // broken heightmap (nether, other mod dimensions)
-				Iterator<BlockPos.MutableBlockPos> it = BlockPos.spiralAround(new BlockPos(hmPos.getX(), world.getSeaLevel(), hmPos.getY()), 16, Direction.EAST, Direction.SOUTH).iterator();
-				while (it.hasNext()) {
-					BlockPos newPos = it.next();
+				for (BlockPos newPos : BlockPos.spiralAround(new BlockPos(hmPos.getX(), world.getSeaLevel(), hmPos.getY()), 16, Direction.EAST, Direction.SOUTH)) {
 					BlockState bs = world.getBlockState(newPos);
 
 					if (bs.getMaterial().isSolidBlocking() && !bs.is(IGNORE_RTP) && isBlockPosAir(world, newPos.above(1)) && isBlockPosAir(world, newPos.above(2)) && isBlockPosAir(world, newPos.above(3))) {
