@@ -96,13 +96,13 @@ public class TPACommands {
 			return 0;
 		}
 
-		TPARequest request = create(player.server, dataSource, dataTarget, here);
-
 		TeleportPos.TeleportResult result = (here ? dataTarget : dataSource).tpaTeleporter.checkCooldown();
 
 		if (!result.isSuccess()) {
 			return result.runCommand(player);
 		}
+
+		TPARequest request = create(player.server, dataSource, dataTarget, here);
 
 		TextComponent component = new TextComponent("TPA request! [ ");
 		component.append((here ? target : player).getDisplayName().copy().withStyle(ChatFormatting.YELLOW));
