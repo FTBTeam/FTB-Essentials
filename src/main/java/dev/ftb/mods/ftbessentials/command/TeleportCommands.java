@@ -35,7 +35,6 @@ import java.util.Optional;
  * @author LatvianModder
  */
 public class TeleportCommands {
-
 	public static final Tag<Block> IGNORE_RTP = TagHooks.getBlockOptional(new ResourceLocation(FTBEssentials.MOD_ID, "ignore_rtp"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -103,10 +102,6 @@ public class TeleportCommands {
 		}).runCommand(player);
 	}
 
-	private static boolean isBlockPosAir(ServerLevel world, BlockPos pos) {
-		return world.getBlockState(pos).getBlock().isAir(world.getBlockState(pos), world, pos);
-	}
-
 	private static TeleportPos findBlockPos(ServerLevel world, ServerPlayer player, int attempt) {
 		if (attempt > FTBEConfig.RTP_MAX_TRIES.get()) {
 			player.displayClientMessage(new TextComponent("Could not find a valid location to teleport to!"), false);
@@ -146,7 +141,7 @@ public class TeleportCommands {
 				for (BlockPos newPos : BlockPos.spiralAround(new BlockPos(hmPos.getX(), world.getSeaLevel(), hmPos.getY()), 16, Direction.EAST, Direction.SOUTH)) {
 					BlockState bs = world.getBlockState(newPos);
 
-					if (bs.getMaterial().isSolidBlocking() && !bs.is(IGNORE_RTP) && isBlockPosAir(world, newPos.above(1)) && isBlockPosAir(world, newPos.above(2)) && isBlockPosAir(world, newPos.above(3))) {
+					if (bs.getMaterial().isSolidBlocking() && !bs.is(IGNORE_RTP) && world.isEmptyBlock(newPos.above(1)) && world.isEmptyBlock(newPos.above(2)) && world.isEmptyBlock(newPos.above(3))) {
 						player.displayClientMessage(new TextComponent(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, z %d]", attempt, newPos.getX(), newPos.getZ())), false);
 						return new TeleportPos(world.dimension(), newPos.above());
 					}
