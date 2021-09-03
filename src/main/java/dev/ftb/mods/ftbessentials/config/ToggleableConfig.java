@@ -9,9 +9,13 @@ public class ToggleableConfig {
 	public final BooleanValue enabled;
 
 	public ToggleableConfig(SNBTConfig parent, String name) {
+		this(parent, name, true);
+	}
+
+	public ToggleableConfig(SNBTConfig parent, String name, boolean def) {
 		this.name = name;
 		config = parent.getGroup(name);
-		enabled = config.getBoolean("enabled", true);
+		enabled = config.getBoolean("enabled", def);
 	}
 
 	public boolean isEnabled() {

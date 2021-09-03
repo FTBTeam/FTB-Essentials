@@ -73,6 +73,8 @@ public interface FTBEConfig {
 			.comment("Allows users to set a custom hat as their head item by using a command");
 	ToggleableConfig NICK = new ToggleableConfig(MISC, "nick")
 			.comment("Allows users to change their display name, as well as admins to change nicknames for other users");
+	ToggleableConfig ENDER_CHEST = new ToggleableConfig(MISC, "enderchest")
+			.comment("Allows users to access their ender chest, as well as admins to manage other players' ender chests.");
 	// TODO leaderboard config
 
 }

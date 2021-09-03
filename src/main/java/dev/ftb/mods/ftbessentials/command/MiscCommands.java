@@ -12,14 +12,18 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -28,6 +32,7 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,6 +56,16 @@ public class MiscCommands {
 		if (FTBEConfig.TRASHCAN.isEnabled()) {
 			dispatcher.register(Commands.literal("trashcan")
 					.executes(context -> trashcan(context.getSource().getPlayerOrException()))
+			);
+		}
+
+		if (FTBEConfig.ENDER_CHEST.isEnabled()) {
+			dispatcher.register(Commands.literal("enderchest")
+					.executes(context -> enderChest(context.getSource().getPlayerOrException(), null))
+					.then(Commands.argument("player", EntityArgument.player())
+							.requires(source -> source.hasPermission(2))
+							.executes(context -> enderChest(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "player")))
+					)
 			);
 		}
 
@@ -86,6 +101,20 @@ public class MiscCommands {
 					)
 			);
 		}
+	}
+
+	private static int enderChest(ServerPlayer player, @Nullable ServerPlayer target) {
+
+		MutableComponent title = new TranslatableComponent("container.enderchest");
+		if (target != null) {
+			title.append(" × ").append(target.getDisplayName());
+		}
+
+		final ServerPlayer t = target == null ? player : target;
+
+		player.openMenu(new SimpleMenuProvider((i, inv, p) -> ChestMenu.threeRows(i, inv, t.getEnderChestInventory()), title));
+
+		return 1;
 	}
 
 	public static int kickme(ServerPlayer player) {
