@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbessentials;
 
-import dev.ftb.mods.ftbessentials.net.UpdateTabNamePacket;
+import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -11,7 +11,7 @@ import net.minecraft.network.chat.TextComponent;
  */
 public class FTBEssentialsClient extends FTBEssentialsCommon {
 	@Override
-	public void updateTabName(UpdateTabNamePacket packet) {
+	public void updateTabName(UpdateTabNameMessage packet) {
 		PlayerInfo info = Minecraft.getInstance().getConnection().getPlayerInfo(packet.uuid);
 
 		if (info == null) {

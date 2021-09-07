@@ -1,11 +1,11 @@
 package dev.ftb.mods.ftbessentials;
 
-import dev.ftb.mods.ftbessentials.net.UpdateTabNamePacket;
+import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
 
 /**
  * @author LatvianModder
  */
 public class FTBEssentialsCommon {
-	public void updateTabName(UpdateTabNamePacket packet) {
+	public void updateTabName(UpdateTabNameMessage packet) {
 	}
 }

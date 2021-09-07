@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbessentials.net;
 
 import dev.ftb.mods.ftbessentials.FTBEssentials;
-import dev.ftb.mods.ftblibrary.net.snm.PacketID;
-import dev.ftb.mods.ftblibrary.net.snm.SimpleNetworkManager;
+import me.shedaniel.architectury.networking.simple.MessageType;
+import me.shedaniel.architectury.networking.simple.SimpleNetworkManager;
 
 /**
  * @author LatvianModder
@@ -10,7 +10,7 @@ import dev.ftb.mods.ftblibrary.net.snm.SimpleNetworkManager;
 public interface FTBEssentialsNet {
 	SimpleNetworkManager NET = SimpleNetworkManager.create(FTBEssentials.MOD_ID);
 
-	PacketID UPDATE_TAB_NAME = NET.registerS2C("update_tab_name", UpdateTabNamePacket::new);
+	MessageType UPDATE_TAB_NAME = NET.registerS2C("update_tab_name", UpdateTabNameMessage::new);
 
 	static void init() {
 	}

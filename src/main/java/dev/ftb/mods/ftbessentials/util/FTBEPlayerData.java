@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbessentials.util;
 
 import com.mojang.authlib.GameProfile;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
-import dev.ftb.mods.ftbessentials.net.UpdateTabNamePacket;
+import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import me.shedaniel.architectury.utils.NbtType;
@@ -179,10 +179,10 @@ public class FTBEPlayerData {
 	}
 
 	public void sendTabName(MinecraftServer server) {
-		new UpdateTabNamePacket(uuid, name, nick, recording, false).sendToAll(server);
+		new UpdateTabNameMessage(uuid, name, nick, recording, false).sendToAll(server);
 	}
 
 	public void sendTabName(ServerPlayer to) {
-		new UpdateTabNamePacket(uuid, name, nick, recording, false).sendTo(to);
+		new UpdateTabNameMessage(uuid, name, nick, recording, false).sendTo(to);
 	}
 }
