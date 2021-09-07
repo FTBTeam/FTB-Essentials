@@ -91,7 +91,7 @@ public class TeleportCommands {
 			return 0;
 		}
 
-		return data.spawnTeleporter.teleport(player, p -> new TeleportPos(w, w.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, w.getSharedSpawnPos()))).runCommand(player);
+		return data.spawnTeleporter.teleport(player, p -> new TeleportPos(w, w.getSharedSpawnPos())).runCommand(player);
 	}
 
 	public static int rtp(ServerPlayer player) {
