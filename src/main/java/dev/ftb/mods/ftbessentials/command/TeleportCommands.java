@@ -164,6 +164,11 @@ public class TeleportCommands {
 		}
 
 		FTBEPlayerData dataTo = FTBEPlayerData.get(to);
+
+		if (dataTo == null) {
+			return 0;
+		}
+
 		dataTo.lastSeen.teleport(player);
 		return 1;
 	}

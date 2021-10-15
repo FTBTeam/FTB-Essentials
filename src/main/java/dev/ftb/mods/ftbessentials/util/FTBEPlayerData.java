@@ -5,6 +5,7 @@ import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import me.shedaniel.architectury.hooks.PlayerHooks;
 import me.shedaniel.architectury.utils.NbtType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -14,6 +15,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -27,7 +29,12 @@ import java.util.UUID;
 public class FTBEPlayerData {
 	public static final Map<UUID, FTBEPlayerData> MAP = new HashMap<>();
 
-	public static FTBEPlayerData get(GameProfile profile) {
+	@Nullable
+	public static FTBEPlayerData get(@Nullable GameProfile profile) {
+		if (profile == null || profile.getId() == null || profile.getName() == null) {
+			return null;
+		}
+
 		FTBEPlayerData data = MAP.get(profile.getId());
 
 		if (data == null) {
@@ -43,12 +50,17 @@ public class FTBEPlayerData {
 		return data;
 	}
 
+	@Nullable
 	public static FTBEPlayerData get(Player player) {
-		return get(player.getGameProfile());
+		return PlayerHooks.isFake(player) ? null : get(player.getGameProfile());
 	}
 
 	public static void addTeleportHistory(ServerPlayer player, ResourceKey<Level> dimension, BlockPos pos) {
-		get(player).addTeleportHistory(player, new TeleportPos(dimension, pos));
+		FTBEPlayerData data = get(player);
+
+		if (data != null) {
+			data.addTeleportHistory(player, new TeleportPos(dimension, pos));
+		}
 	}
 
 	public static void addTeleportHistory(ServerPlayer player) {

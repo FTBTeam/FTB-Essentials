@@ -73,6 +73,11 @@ public class FTBEEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
 		FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+
+		if (data == null) {
+			return;
+		}
+
 		data.lastSeen = new TeleportPos(event.getPlayer());
 		data.save();
 
@@ -84,6 +89,11 @@ public class FTBEEventHandler {
 	@SubscribeEvent
 	public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
 		FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+
+		if (data == null) {
+			return;
+		}
+
 		data.lastSeen = new TeleportPos(event.getPlayer());
 		data.save();
 	}
@@ -91,14 +101,22 @@ public class FTBEEventHandler {
 	@SubscribeEvent
 	public static void playerLoad(PlayerEvent.LoadFromFile event) {
 		if (FTBEWorldData.instance != null) {
-			FTBEPlayerData.get(event.getPlayer()).load();
+			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+
+			if (data != null) {
+				data.load();
+			}
 		}
 	}
 
 	@SubscribeEvent
 	public static void playerSaved(PlayerEvent.SaveToFile event) {
 		if (FTBEWorldData.instance != null) {
-			FTBEPlayerData.get(event.getPlayer()).saveNow();
+			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+
+			if (data != null) {
+				data.saveNow();
+			}
 		}
 	}
 
@@ -106,6 +124,10 @@ public class FTBEEventHandler {
 	public static void playerTick(TickEvent.PlayerTickEvent event) {
 		if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayer) {
 			FTBEPlayerData data = FTBEPlayerData.get(event.player);
+
+			if (data == null) {
+				return;
+			}
 
 			if (data.god && !event.player.abilities.invulnerable) {
 				event.player.abilities.invulnerable = true;
@@ -151,7 +173,7 @@ public class FTBEEventHandler {
 	public static void playerServerChatHighest(ServerChatEvent event) {
 		FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
 
-		if (data.muted) {
+		if (data != null && data.muted) {
 			event.setCanceled(true);
 			event.getPlayer().displayClientMessage(new TextComponent("You can't use chat, you've been muted by an admin!").withStyle(ChatFormatting.RED), false);
 		}
@@ -162,7 +184,7 @@ public class FTBEEventHandler {
 		if (event.getPlayer() instanceof ServerPlayer) {
 			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
 
-			if (!data.nick.isEmpty()) {
+			if (data != null && !data.nick.isEmpty()) {
 				event.setDisplayname(new TextComponent(data.nick));
 			}
 		}
@@ -173,7 +195,7 @@ public class FTBEEventHandler {
 		if (event.getPlayer() instanceof ServerPlayer) {
 			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
 
-			if (data.recording > 0) {
+			if (data != null && data.recording > 0) {
 				event.setDisplayname(new TextComponent("").append(new TextComponent("\u23FA").withStyle(data.recording == 1 ? RECORDING_STYLE : STREAMING_STYLE)).append(" ").append(event.getDisplayname()));
 			}
 		}

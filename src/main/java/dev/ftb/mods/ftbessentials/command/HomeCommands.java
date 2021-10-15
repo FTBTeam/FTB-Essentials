@@ -16,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,7 +26,7 @@ import java.util.Set;
 public class HomeCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 
-		if(!FTBEConfig.HOME.isEnabled()) {
+		if (!FTBEConfig.HOME.isEnabled()) {
 			return;
 		}
 
@@ -62,11 +63,22 @@ public class HomeCommands {
 	}
 
 	public static Set<String> getHomeSuggestions(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-		return FTBEPlayerData.get(context.getSource().getPlayerOrException()).homes.keySet();
+		FTBEPlayerData data = FTBEPlayerData.get(context.getSource().getPlayerOrException());
+
+		if (data == null) {
+			return Collections.emptySet();
+		}
+
+		return data.homes.keySet();
 	}
 
 	public static int home(ServerPlayer player, String name) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
+
+		if (data == null) {
+			return 0;
+		}
+
 		TeleportPos pos = data.homes.get(name.toLowerCase());
 
 		if (pos == null) {
@@ -79,6 +91,10 @@ public class HomeCommands {
 
 	public static int sethome(ServerPlayer player, String name) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
+
+		if (data == null) {
+			return 0;
+		}
 
 		if (data.homes.size() >= FTBEConfig.MAX_HOMES.get(player) && !data.homes.containsKey(name.toLowerCase())) {
 			player.displayClientMessage(new TextComponent("Can't add any more homes!"), false);
@@ -94,6 +110,10 @@ public class HomeCommands {
 	public static int delhome(ServerPlayer player, String name) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 
+		if (data == null) {
+			return 0;
+		}
+
 		if (data.homes.remove(name.toLowerCase()) != null) {
 			data.save();
 			player.displayClientMessage(new TextComponent("Home deleted!"), false);
@@ -106,6 +126,10 @@ public class HomeCommands {
 
 	public static int listhomes(CommandSourceStack source, GameProfile of) {
 		FTBEPlayerData data = FTBEPlayerData.get(of);
+
+		if (data == null) {
+			return 0;
+		}
 
 		if (data.homes.isEmpty()) {
 			source.sendSuccess(new TextComponent("None"), false);

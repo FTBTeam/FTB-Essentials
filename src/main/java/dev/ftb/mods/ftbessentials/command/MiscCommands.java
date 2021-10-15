@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -146,6 +147,7 @@ public class MiscCommands {
 					.map(path -> new GameProfile(UUID.fromString(path.toString().replace(".json", "")), null))
 					.filter(profile -> !FTBEPlayerData.MAP.containsKey(profile.getId()))
 					.map(FTBEPlayerData::get)
+					.filter(Objects::nonNull)
 					.forEach(FTBEPlayerData::load);
 		} catch (Exception ex) {
 			ex.printStackTrace();
