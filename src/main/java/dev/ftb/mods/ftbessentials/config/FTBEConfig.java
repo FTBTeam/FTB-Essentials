@@ -50,6 +50,9 @@ public interface FTBEConfig {
 	ToggleableConfig TPL = new ToggleableConfig(TELEPORTATION, "tpl")
 			.comment("Allows admins to teleport to the location a user was last seen at");
 
+	ToggleableConfig TPX = new ToggleableConfig(TELEPORTATION, "tpx")
+			.comment("Allows admins to teleport to dimension");
+
 	SNBTConfig ADMIN = CONFIG.getGroup("admin").comment("Admin commands for cheating and moderation");
 	ToggleableConfig HEAL = new ToggleableConfig(ADMIN, "heal")
 			.comment("Allows admins to heal themselves using a command");

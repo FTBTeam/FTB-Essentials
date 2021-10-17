@@ -10,6 +10,7 @@ import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import me.shedaniel.architectury.hooks.TagHooks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -61,6 +62,15 @@ public class TeleportCommands {
 					.requires(source -> source.hasPermission(2))
 					.then(Commands.argument("player", GameProfileArgument.gameProfile())
 							.executes(context -> tpLast(context.getSource().getPlayerOrException(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
+					)
+			);
+		}
+
+		if (FTBEConfig.TPX.isEnabled()) {
+			dispatcher.register(Commands.literal("tpx")
+					.requires(source -> source.hasPermission(2))
+					.then(Commands.argument("dimension", DimensionArgument.dimension())
+							.executes(context -> tpx(context.getSource().getPlayerOrException(), DimensionArgument.getDimension(context, "dimension")))
 					)
 			);
 		}
@@ -170,6 +180,11 @@ public class TeleportCommands {
 		}
 
 		dataTo.lastSeen.teleport(player);
+		return 1;
+	}
+
+	public static int tpx(ServerPlayer player, ServerLevel to) {
+		player.teleportTo(to, player.getX(), player.getY(), player.getZ(), player.yRot, player.xRot);
 		return 1;
 	}
 }
