@@ -57,30 +57,29 @@ public class TPACommands {
 	}
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-
-		if (!FTBEConfig.TPA.isEnabled()) {
-			return;
-		}
-
 		dispatcher.register(Commands.literal("tpa")
+				.requires(FTBEConfig.TPA)
 				.then(Commands.argument("target", EntityArgument.player())
 						.executes(context -> tpa(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "target"), false))
 				)
 		);
 
 		dispatcher.register(Commands.literal("tpahere")
+				.requires(FTBEConfig.TPA)
 				.then(Commands.argument("target", EntityArgument.player())
 						.executes(context -> tpa(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "target"), true))
 				)
 		);
 
 		dispatcher.register(Commands.literal("tpaccept")
+				.requires(FTBEConfig.TPA)
 				.then(Commands.argument("id", StringArgumentType.string())
 						.executes(context -> tpaccept(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "id")))
 				)
 		);
 
 		dispatcher.register(Commands.literal("tpdeny")
+				.requires(FTBEConfig.TPA)
 				.then(Commands.argument("id", StringArgumentType.string())
 						.executes(context -> tpdeny(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "id")))
 				)

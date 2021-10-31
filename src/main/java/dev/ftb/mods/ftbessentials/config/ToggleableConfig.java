@@ -2,8 +2,11 @@ package dev.ftb.mods.ftbessentials.config;
 
 import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
 import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
+import net.minecraft.commands.CommandSourceStack;
 
-public class ToggleableConfig {
+import java.util.function.Predicate;
+
+public class ToggleableConfig implements Predicate<CommandSourceStack> {
 	public final String name;
 	public final SNBTConfig config;
 	public final BooleanValue enabled;
@@ -25,5 +28,14 @@ public class ToggleableConfig {
 	public ToggleableConfig comment(String... comment) {
 		config.comment(comment);
 		return this;
+	}
+
+	@Override
+	public boolean test(CommandSourceStack stack) {
+		return isEnabled();
+	}
+
+	public Predicate<CommandSourceStack> enabledAndOp() {
+		return stack -> test(stack) && stack.hasPermission(2);
 	}
 }

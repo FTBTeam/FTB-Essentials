@@ -47,28 +47,24 @@ import java.util.UUID;
  */
 public class MiscCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+		dispatcher.register(Commands.literal("kickme")
+				.requires(FTBEConfig.KICKME)
+				.executes(context -> kickme(context.getSource().getPlayerOrException()))
+		);
 
-		if (FTBEConfig.KICKME.isEnabled()) {
-			dispatcher.register(Commands.literal("kickme")
-					.executes(context -> kickme(context.getSource().getPlayerOrException()))
-			);
-		}
+		dispatcher.register(Commands.literal("trashcan")
+				.requires(FTBEConfig.TRASHCAN)
+				.executes(context -> trashcan(context.getSource().getPlayerOrException()))
+		);
 
-		if (FTBEConfig.TRASHCAN.isEnabled()) {
-			dispatcher.register(Commands.literal("trashcan")
-					.executes(context -> trashcan(context.getSource().getPlayerOrException()))
-			);
-		}
-
-		if (FTBEConfig.ENDER_CHEST.isEnabled()) {
-			dispatcher.register(Commands.literal("enderchest")
-					.executes(context -> enderChest(context.getSource().getPlayerOrException(), null))
-					.then(Commands.argument("player", EntityArgument.player())
-							.requires(source -> source.hasPermission(2))
-							.executes(context -> enderChest(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "player")))
-					)
-			);
-		}
+		dispatcher.register(Commands.literal("enderchest")
+				.requires(FTBEConfig.ENDER_CHEST)
+				.executes(context -> enderChest(context.getSource().getPlayerOrException(), null))
+				.then(Commands.argument("player", EntityArgument.player())
+						.requires(source -> source.hasPermission(2))
+						.executes(context -> enderChest(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "player")))
+				)
+		);
 
 		LiteralArgumentBuilder<CommandSourceStack> leaderboardCommand = Commands.literal("leaderboard");
 
@@ -78,30 +74,28 @@ public class MiscCommands {
 
 		dispatcher.register(leaderboardCommand);
 
-		if (FTBEConfig.REC.isEnabled()) {
-			dispatcher.register(Commands.literal("recording")
-					.executes(context -> recording(context.getSource().getPlayerOrException()))
-			);
+		dispatcher.register(Commands.literal("recording")
+				.requires(FTBEConfig.REC)
+				.executes(context -> recording(context.getSource().getPlayerOrException()))
+		);
 
-			dispatcher.register(Commands.literal("streaming")
-					.executes(context -> streaming(context.getSource().getPlayerOrException()))
-			);
-		}
+		dispatcher.register(Commands.literal("streaming")
+				.requires(FTBEConfig.REC)
+				.executes(context -> streaming(context.getSource().getPlayerOrException()))
+		);
 
-		if (FTBEConfig.HAT.isEnabled()) {
-			dispatcher.register(Commands.literal("hat")
-					.executes(context -> hat(context.getSource().getPlayerOrException()))
-			);
-		}
+		dispatcher.register(Commands.literal("hat")
+				.requires(FTBEConfig.HAT.enabledAndOp())
+				.executes(context -> hat(context.getSource().getPlayerOrException()))
+		);
 
-		if (FTBEConfig.NICK.isEnabled()) {
-			dispatcher.register(Commands.literal("nickname")
-					.executes(context -> nickname(context.getSource().getPlayerOrException(), ""))
-					.then(Commands.argument("nickname", StringArgumentType.greedyString())
-							.executes(context -> nickname(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "nickname")))
-					)
-			);
-		}
+		dispatcher.register(Commands.literal("nickname")
+				.requires(FTBEConfig.NICK)
+				.executes(context -> nickname(context.getSource().getPlayerOrException(), ""))
+				.then(Commands.argument("nickname", StringArgumentType.greedyString())
+						.executes(context -> nickname(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "nickname")))
+				)
+		);
 	}
 
 	private static int enderChest(ServerPlayer player, @Nullable ServerPlayer target) {

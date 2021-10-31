@@ -25,12 +25,8 @@ import java.util.Set;
  */
 public class HomeCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-
-		if (!FTBEConfig.HOME.isEnabled()) {
-			return;
-		}
-
 		dispatcher.register(Commands.literal("home")
+				.requires(FTBEConfig.HOME)
 				.executes(context -> home(context.getSource().getPlayerOrException(), "home"))
 				.then(Commands.argument("name", StringArgumentType.greedyString())
 						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context), builder))
@@ -39,6 +35,7 @@ public class HomeCommands {
 		);
 
 		dispatcher.register(Commands.literal("sethome")
+				.requires(FTBEConfig.HOME)
 				.executes(context -> sethome(context.getSource().getPlayerOrException(), "home"))
 				.then(Commands.argument("name", StringArgumentType.greedyString())
 						.executes(context -> sethome(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
@@ -46,6 +43,7 @@ public class HomeCommands {
 		);
 
 		dispatcher.register(Commands.literal("delhome")
+				.requires(FTBEConfig.HOME)
 				.executes(context -> delhome(context.getSource().getPlayerOrException(), "home"))
 				.then(Commands.argument("name", StringArgumentType.greedyString())
 						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context), builder))
@@ -54,6 +52,7 @@ public class HomeCommands {
 		);
 
 		dispatcher.register(Commands.literal("listhomes")
+				.requires(FTBEConfig.HOME)
 				.executes(context -> listhomes(context.getSource(), context.getSource().getPlayerOrException().getGameProfile()))
 				.then(Commands.argument("player", GameProfileArgument.gameProfile())
 						.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))

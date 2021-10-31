@@ -8,8 +8,7 @@ import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
  * @author LatvianModder
  */
 public interface FTBEConfig {
-
-	SNBTConfig CONFIG = SNBTConfig.create(FTBEssentials.MOD_ID);
+	SNBTConfig CONFIG = SNBTConfig.create(FTBEssentials.MOD_ID).comment("FTB Essentials config file", "If you're a modpack maker, edit defaultconfigs/ftbessentials-server.snbt instead");
 
 	SNBTConfig TELEPORTATION = CONFIG.getGroup("teleportation").comment("Teleportation-related settings");
 	// back

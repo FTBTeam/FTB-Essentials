@@ -1,22 +1,18 @@
 package dev.ftb.mods.ftbessentials.command;
 
-import dev.ftb.mods.ftbessentials.FTBEssentials;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandSourceStack;
 
 /**
  * @author LatvianModder
  */
-@Mod.EventBusSubscriber(modid = FTBEssentials.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class FTBEssentialsCommands {
-	@SubscribeEvent
-	public static void registerCommands(RegisterCommandsEvent event) {
-		HomeCommands.register(event.getDispatcher());
-		WarpCommands.register(event.getDispatcher());
-		TeleportCommands.register(event.getDispatcher());
-		TPACommands.register(event.getDispatcher());
-		CheatCommands.register(event.getDispatcher());
-		MiscCommands.register(event.getDispatcher());
+	public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
+		HomeCommands.register(dispatcher);
+		WarpCommands.register(dispatcher);
+		TeleportCommands.register(dispatcher);
+		TPACommands.register(dispatcher);
+		CheatCommands.register(dispatcher);
+		MiscCommands.register(dispatcher);
 	}
 }

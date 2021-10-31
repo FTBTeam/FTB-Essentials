@@ -22,12 +22,8 @@ import java.util.Set;
  */
 public class WarpCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-
-		if(!FTBEConfig.WARP.isEnabled()) {
-			return;
-		}
-
 		dispatcher.register(Commands.literal("warp")
+				.requires(FTBEConfig.WARP)
 				.then(Commands.argument("name", StringArgumentType.greedyString())
 						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getWarpSuggestions(context), builder))
 						.executes(context -> warp(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
@@ -35,14 +31,14 @@ public class WarpCommands {
 		);
 
 		dispatcher.register(Commands.literal("setwarp")
-				.requires(source -> source.hasPermission(2))
+				.requires(FTBEConfig.WARP.enabledAndOp())
 				.then(Commands.argument("name", StringArgumentType.greedyString())
 						.executes(context -> setwarp(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
 				)
 		);
 
 		dispatcher.register(Commands.literal("delwarp")
-				.requires(source -> source.hasPermission(2))
+				.requires(FTBEConfig.WARP.enabledAndOp())
 				.then(Commands.argument("name", StringArgumentType.greedyString())
 						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getWarpSuggestions(context), builder))
 						.executes(context -> delwarp(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
@@ -50,6 +46,7 @@ public class WarpCommands {
 		);
 
 		dispatcher.register(Commands.literal("listwarps")
+				.requires(FTBEConfig.WARP)
 				.executes(context -> listwarps(context.getSource()))
 		);
 	}

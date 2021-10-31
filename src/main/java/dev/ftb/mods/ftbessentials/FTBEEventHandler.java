@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbessentials;
 
+import dev.ftb.mods.ftbessentials.command.FTBEssentialsCommands;
 import dev.ftb.mods.ftbessentials.command.TPACommands;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
@@ -7,7 +8,9 @@ import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
 import me.shedaniel.architectury.hooks.LevelResourceHooks;
+import me.shedaniel.architectury.platform.Platform;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Style;
@@ -15,6 +18,7 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -26,6 +30,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 
 /**
@@ -39,7 +46,35 @@ public class FTBEEventHandler {
 
 	@SubscribeEvent
 	public static void serverAboutToStart(FMLServerAboutToStartEvent event) {
-		FTBEConfig.CONFIG.load(event.getServer().getWorldPath(CONFIG_FILE));
+		Path configFilePath = event.getServer().getWorldPath(CONFIG_FILE);
+		Path defaultConfigFilePath = Platform.getConfigFolder().resolve("../defaultconfigs/ftbessentials-server.snbt");
+
+		if (Files.exists(defaultConfigFilePath)) {
+			if (!Files.exists(configFilePath)) {
+				try {
+					Files.copy(defaultConfigFilePath, configFilePath);
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+		} else {
+			SNBTConfig defaultConfigFile = SNBTConfig.create(FTBEssentials.MOD_ID);
+			defaultConfigFile.comment("Default config file that will be copied to world's serverconfig/ftbessentials.snbt location");
+			defaultConfigFile.comment("Copy values you wish to override in here");
+			defaultConfigFile.comment("Example:");
+			defaultConfigFile.comment("");
+			defaultConfigFile.comment("{");
+			defaultConfigFile.comment("	misc: {");
+			defaultConfigFile.comment("		enderchest: {");
+			defaultConfigFile.comment("			enabled: false");
+			defaultConfigFile.comment("		}");
+			defaultConfigFile.comment("	}");
+			defaultConfigFile.comment("}");
+
+			defaultConfigFile.save(defaultConfigFilePath);
+		}
+
+		FTBEConfig.CONFIG.load(configFilePath);
 		FTBEPlayerData.MAP.clear();
 		FTBEWorldData.instance = new FTBEWorldData(event.getServer());
 
@@ -59,6 +94,11 @@ public class FTBEEventHandler {
 	public static void serverStopped(FMLServerStoppedEvent event) {
 		FTBEWorldData.instance = null;
 		TPACommands.REQUESTS.clear();
+	}
+
+	@SubscribeEvent
+	public static void registerCommands(RegisterCommandsEvent event) {
+		FTBEssentialsCommands.registerCommands(event.getDispatcher());
 	}
 
 	@SubscribeEvent

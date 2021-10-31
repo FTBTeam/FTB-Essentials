@@ -30,77 +30,65 @@ public class CheatCommands {
 		dumpchunkloaders
 		 */
 
-		if (FTBEConfig.HEAL.isEnabled()) {
-			dispatcher.register(Commands.literal("heal")
-					.requires(source -> source.hasPermission(2))
-					.executes(context -> heal(context.getSource().getPlayerOrException()))
-					.then(Commands.argument("player", EntityArgument.player())
-							.executes(context -> heal(EntityArgument.getPlayer(context, "player")))
-					)
-			);
-		}
+		dispatcher.register(Commands.literal("heal")
+				.requires(FTBEConfig.HEAL.enabledAndOp())
+				.executes(context -> heal(context.getSource().getPlayerOrException()))
+				.then(Commands.argument("player", EntityArgument.player())
+						.executes(context -> heal(EntityArgument.getPlayer(context, "player")))
+				)
+		);
 
-		if (FTBEConfig.FLY.isEnabled()) {
-			dispatcher.register(Commands.literal("fly")
-					.requires(source -> source.hasPermission(2))
-					.executes(context -> fly(context.getSource().getPlayerOrException()))
-					.then(Commands.argument("player", EntityArgument.player())
-							.executes(context -> fly(EntityArgument.getPlayer(context, "player")))
-					)
-			);
-		}
+		dispatcher.register(Commands.literal("fly")
+				.requires(FTBEConfig.FLY.enabledAndOp())
+				.executes(context -> fly(context.getSource().getPlayerOrException()))
+				.then(Commands.argument("player", EntityArgument.player())
+						.executes(context -> fly(EntityArgument.getPlayer(context, "player")))
+				)
+		);
 
-		if (FTBEConfig.GOD.isEnabled()) {
-			dispatcher.register(Commands.literal("god")
-					.requires(source -> source.hasPermission(2))
-					.executes(context -> god(context.getSource().getPlayerOrException()))
-					.then(Commands.argument("player", EntityArgument.player())
-							.executes(context -> god(EntityArgument.getPlayer(context, "player")))
-					)
-			);
-		}
+		dispatcher.register(Commands.literal("god")
+				.requires(FTBEConfig.GOD.enabledAndOp())
+				.executes(context -> god(context.getSource().getPlayerOrException()))
+				.then(Commands.argument("player", EntityArgument.player())
+						.executes(context -> god(EntityArgument.getPlayer(context, "player")))
+				)
+		);
 
-		if (FTBEConfig.INVSEE.isEnabled()) {
-			dispatcher.register(Commands.literal("invsee")
-					.requires(source -> source.hasPermission(2))
-					.then(Commands.argument("player", EntityArgument.player())
-							.executes(context -> invsee(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "player")))
-					)
-			);
-		}
+		dispatcher.register(Commands.literal("invsee")
+				.requires(FTBEConfig.INVSEE.enabledAndOp())
+				.then(Commands.argument("player", EntityArgument.player())
+						.executes(context -> invsee(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "player")))
+				)
+		);
 
-		if (FTBEConfig.NICK.isEnabled()) {
-			dispatcher.register(Commands.literal("nicknamefor")
-					.requires(source -> source.hasPermission(2))
-					.then(Commands.argument("player", EntityArgument.player())
-							.requires(source -> source.hasPermission(2))
-							.executes(context -> nicknamefor(context.getSource(), EntityArgument.getPlayer(context, "player"), ""))
-							.then(Commands.argument("nickname", StringArgumentType.greedyString())
-									.requires(source -> source.hasPermission(2))
-									.executes(context -> nicknamefor(context.getSource(), EntityArgument.getPlayer(context, "player"), StringArgumentType.getString(context, "nickname")))
-							)
-					)
-			);
-		}
+		dispatcher.register(Commands.literal("nicknamefor")
+				.requires(FTBEConfig.NICK.enabledAndOp())
+				.then(Commands.argument("player", EntityArgument.player())
+						.requires(source -> source.hasPermission(2))
+						.executes(context -> nicknamefor(context.getSource(), EntityArgument.getPlayer(context, "player"), ""))
+						.then(Commands.argument("nickname", StringArgumentType.greedyString())
+								.requires(source -> source.hasPermission(2))
+								.executes(context -> nicknamefor(context.getSource(), EntityArgument.getPlayer(context, "player"), StringArgumentType.getString(context, "nickname")))
+						)
+				)
+		);
 
-		if (FTBEConfig.MUTE.isEnabled()) {
-			dispatcher.register(Commands.literal("mute")
-					.requires(source -> source.hasPermission(2))
-					.then(Commands.argument("player", EntityArgument.player())
-							.requires(source -> source.hasPermission(2))
-							.executes(context -> mute(context.getSource(), EntityArgument.getPlayer(context, "player")))
-					)
-			);
+		dispatcher.register(Commands.literal("mute")
+				.requires(FTBEConfig.MUTE.enabledAndOp())
+				.requires(source -> source.hasPermission(2))
+				.then(Commands.argument("player", EntityArgument.player())
+						.requires(source -> source.hasPermission(2))
+						.executes(context -> mute(context.getSource(), EntityArgument.getPlayer(context, "player")))
+				)
+		);
 
-			dispatcher.register(Commands.literal("unmute")
-					.requires(source -> source.hasPermission(2))
-					.then(Commands.argument("player", EntityArgument.player())
-							.requires(source -> source.hasPermission(2))
-							.executes(context -> unmute(context.getSource(), EntityArgument.getPlayer(context, "player")))
-					)
-			);
-		}
-
+		dispatcher.register(Commands.literal("unmute")
+				.requires(FTBEConfig.MUTE.enabledAndOp())
+				.then(Commands.argument("player", EntityArgument.player())
+						.requires(source -> source.hasPermission(2))
+						.executes(context -> unmute(context.getSource(), EntityArgument.getPlayer(context, "player")))
+				)
+		);
 	}
 
 	public static int heal(ServerPlayer player) {
