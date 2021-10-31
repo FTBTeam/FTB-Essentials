@@ -8,7 +8,6 @@ import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
-import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
 import me.shedaniel.architectury.hooks.LevelResourceHooks;
 import me.shedaniel.architectury.platform.Platform;
 import net.minecraft.ChatFormatting;
@@ -30,8 +29,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
 
@@ -49,32 +46,20 @@ public class FTBEEventHandler {
 		Path configFilePath = event.getServer().getWorldPath(CONFIG_FILE);
 		Path defaultConfigFilePath = Platform.getConfigFolder().resolve("../defaultconfigs/ftbessentials-server.snbt");
 
-		if (Files.exists(defaultConfigFilePath)) {
-			if (!Files.exists(configFilePath)) {
-				try {
-					Files.copy(defaultConfigFilePath, configFilePath);
-				} catch (IOException ex) {
-					ex.printStackTrace();
-				}
-			}
-		} else {
-			SNBTConfig defaultConfigFile = SNBTConfig.create(FTBEssentials.MOD_ID);
-			defaultConfigFile.comment("Default config file that will be copied to world's serverconfig/ftbessentials.snbt location");
-			defaultConfigFile.comment("Copy values you wish to override in here");
-			defaultConfigFile.comment("Example:");
-			defaultConfigFile.comment("");
-			defaultConfigFile.comment("{");
-			defaultConfigFile.comment("	misc: {");
-			defaultConfigFile.comment("		enderchest: {");
-			defaultConfigFile.comment("			enabled: false");
-			defaultConfigFile.comment("		}");
-			defaultConfigFile.comment("	}");
-			defaultConfigFile.comment("}");
+		FTBEConfig.CONFIG.load(configFilePath, defaultConfigFilePath, () -> new String[]{
+				"Default config file that will be copied to world's serverconfig/ftbessentials.snbt location",
+				"Copy values you wish to override in here",
+				"Example:",
+				"",
+				"{",
+				"	misc: {",
+				"		enderchest: {",
+				"			enabled: false",
+				"		}",
+				"	}",
+				"}",
+		});
 
-			defaultConfigFile.save(defaultConfigFilePath);
-		}
-
-		FTBEConfig.CONFIG.load(configFilePath);
 		FTBEPlayerData.MAP.clear();
 		FTBEWorldData.instance = new FTBEWorldData(event.getServer());
 
