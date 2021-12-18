@@ -100,18 +100,19 @@ public class CheatCommands {
 	}
 
 	public static int fly(ServerPlayer player) {
-		FTBEPlayerData data = FTBEPlayerData.get(player);
+		var data = FTBEPlayerData.get(player);
+		var abilities = player.getAbilities();
 
 		if (data.fly) {
 			data.fly = false;
 			data.save();
-			player.abilities.mayfly = false;
-			player.abilities.flying = false;
+			abilities.mayfly = false;
+			abilities.flying = false;
 			player.displayClientMessage(new TextComponent("Flight disabled"), true);
 		} else {
 			data.fly = true;
 			data.save();
-			player.abilities.mayfly = true;
+			abilities.mayfly = true;
 			player.displayClientMessage(new TextComponent("Flight enabled"), true);
 		}
 
@@ -120,17 +121,18 @@ public class CheatCommands {
 	}
 
 	public static int god(ServerPlayer player) {
-		FTBEPlayerData data = FTBEPlayerData.get(player);
+		var data = FTBEPlayerData.get(player);
+		var abilities = player.getAbilities();
 
 		if (data.god) {
 			data.god = false;
 			data.save();
-			player.abilities.invulnerable = false;
+			abilities.invulnerable = false;
 			player.displayClientMessage(new TextComponent("God mode disabled"), true);
 		} else {
 			data.god = true;
 			data.save();
-			player.abilities.invulnerable = true;
+			abilities.invulnerable = true;
 			player.displayClientMessage(new TextComponent("God mode enabled"), true);
 		}
 

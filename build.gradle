@@ -1,14 +1,12 @@
 plugins {
-    id "dev.architectury.loom" version "0.7.3-SNAPSHOT"
-    id "io.github.juuxel.loom-quiltflower" version "1.1.1"
+    id "dev.architectury.loom" version "0.10.0-SNAPSHOT"
     id 'maven-publish'
     id "com.matthewprenger.cursegradle" version "1.4.0"
 }
 
 apply from: 'https://files.latmod.com/public/markdown-git-changelog.gradle'
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = 17
 
 def ENV = System.getenv()
 version = "${mod_version}-build.${ENV.GITHUB_RUN_NUMBER ?: 9999}"
@@ -18,27 +16,29 @@ group = project.maven_group
 loom {
     silentMojangMappingsLicense()
 
-    mixinConfigs = [
-    ]
+    forge {
+        mixinConfigs = [
+        ]
 
-    useFabricMixin = true
+        dataGen {
+            mod project.mod_id
+        }
 
-    dataGen {
-        mod project.mod_id
-    }
-
-    launches {
-        data {
-            arg "--existing", file("src/main/resources").absolutePath
+        launches {
+            data {
+                arg "--existing", file("src/main/resources").absolutePath
+            }
         }
     }
 }
 
 repositories {
     maven {
-        url "https://maven.shedaniel.me/"
+        url "https://maven.architectury.dev/"
         content {
+            includeGroup "dev.architectury"
             includeGroup "me.shedaniel"
+            includeGroup "me.shedaniel.cloth"
         }
     }
 
@@ -61,10 +61,14 @@ repositories {
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings minecraft.officialMojangMappings()
+
     forge "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
-    modImplementation "curse.maven:jei-238222:${jei_file}"
-    modImplementation "me.shedaniel:architectury-forge:${project.architectury_version}"
-    modImplementation "dev.ftb.mods:ftb-library-forge:${rootProject.ftb_library_version}"
+
+    // also pulls in architectury
+    modImplementation("dev.ftb.mods:ftb-library-forge:${rootProject.ftb_library_version}") {
+        exclude module: 'me.shedaniel:RoughlyEnoughItems-forge'
+    }
+
     modImplementation "dev.ftb.mods:ftb-ranks-forge:${rootProject.ftb_ranks_version}"
 }
 
@@ -76,12 +80,8 @@ processResources {
     }
 }
 
-tasks.withType(JavaCompile).configureEach {
-    it.options.encoding = "UTF-8"
-    def targetVersion = 8
-    if (JavaVersion.current().isJava9Compatible()) {
-        it.options.release = targetVersion
-    }
+compileJava {
+    options.encoding = "UTF-8"
 }
 
 java {
@@ -110,12 +110,7 @@ publishing {
     publications {
         mavenForge(MavenPublication) {
             artifactId = rootProject.archivesBaseName
-            artifact(remapJar) {
-                classifier null
-            }
-            artifact(sourcesJar) {
-                builtBy remapSourcesJar
-            }
+            from components.java
         }
     }
 

@@ -33,14 +33,14 @@ public class Leaderboard<N extends Number> {
 		;
 
 		add("time_played", 0)
-				.value(stats -> stats.getValue(Stats.CUSTOM.get(Stats.PLAY_ONE_MINUTE)))
+				.value(stats -> stats.getValue(Stats.CUSTOM.get(Stats.PLAY_TIME)))
 				.formatTime()
 		;
 
 		add("deaths_per_hour", 0D)
 				.value(stats -> {
 					int d = stats.getValue(Stats.CUSTOM.get(Stats.DEATHS));
-					int t = stats.getValue(Stats.CUSTOM.get(Stats.PLAY_ONE_MINUTE));
+					int t = stats.getValue(Stats.CUSTOM.get(Stats.PLAY_TIME));
 					return d <= 0 || t < 72000 ? 0D : (double) d * 72000D / (double) t;
 				})
 				.string(value -> DECIMAL_FORMAT.format(value.doubleValue()))

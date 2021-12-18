@@ -22,7 +22,7 @@ public class OtherPlayerInventory implements Container {
 
 	@Override
 	public boolean isEmpty() {
-		return player.inventory.isEmpty();
+		return player.getInventory().isEmpty();
 	}
 
 	public boolean isInvalidSlot(int index) {
@@ -50,7 +50,7 @@ public class OtherPlayerInventory implements Container {
 		}
 
 		int slot = getSlot(index);
-		return slot == -1 ? ItemStack.EMPTY : player.inventory.getItem(slot);
+		return slot == -1 ? ItemStack.EMPTY : player.getInventory().getItem(slot);
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class OtherPlayerInventory implements Container {
 		}
 
 		int slot = getSlot(index);
-		return slot == -1 ? ItemStack.EMPTY : player.inventory.removeItem(slot, count);
+		return slot == -1 ? ItemStack.EMPTY : player.getInventory().removeItem(slot, count);
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public class OtherPlayerInventory implements Container {
 		}
 
 		int slot = getSlot(index);
-		return slot == -1 ? ItemStack.EMPTY : player.inventory.removeItemNoUpdate(slot);
+		return slot == -1 ? ItemStack.EMPTY : player.getInventory().removeItemNoUpdate(slot);
 	}
 
 	@Override
@@ -82,19 +82,19 @@ public class OtherPlayerInventory implements Container {
 		int slot = getSlot(index);
 
 		if (slot != -1) {
-			player.inventory.setItem(slot, is);
+			player.getInventory().setItem(slot, is);
 			setChanged();
 		}
 	}
 
 	@Override
 	public int getMaxStackSize() {
-		return player.inventory.getMaxStackSize();
+		return player.getInventory().getMaxStackSize();
 	}
 
 	@Override
 	public void setChanged() {
-		player.inventory.setChanged();
+		player.getInventory().setChanged();
 		player.containerMenu.broadcastChanges();
 	}
 
@@ -110,11 +110,11 @@ public class OtherPlayerInventory implements Container {
 		}
 
 		int slot = getSlot(index);
-		return slot != -1 && player.inventory.canPlaceItem(slot, stack);
+		return slot != -1 && player.getInventory().canPlaceItem(slot, stack);
 	}
 
 	@Override
 	public void clearContent() {
-		player.inventory.clearContent();
+		player.getInventory().clearContent();
 	}
 }

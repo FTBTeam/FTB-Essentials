@@ -2,9 +2,8 @@ pluginManagement {
 	repositories {
 		maven { url "https://maven.creeperhost.net/" }
 		maven { url "https://maven.shedaniel.me/" }
-		maven { url "https://server.bbkr.space/artifactory/libs-release" }
 		gradlePluginPortal()
 	}
 }
 
-rootProject.name = 'FTB-Essentials-1.16.5'
+rootProject.name = 'FTB-Essentials-1.18.1'

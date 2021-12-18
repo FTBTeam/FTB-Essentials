@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[32,)"
+loaderVersion = "[39,)"
 issueTrackerURL = "https://github.com/FTBTeam/FTB-Essentials/issues"
 license = "All Rights Reserved"
 
@@ -15,7 +15,7 @@ Adds many essential utility commands for servers
 [[dependencies.ftbessentials]]
 modId = "forge"
 mandatory = true
-versionRange = "[32,)"
+versionRange = "[39,)"
 ordering = "NONE"
 side = "BOTH"
 
@@ -29,6 +29,13 @@ side = "BOTH"
 [[dependencies.ftbessentials]]
 modId = "ftblibrary"
 mandatory = true
-versionRange = "[1605.3.4-build.79,)"
+versionRange = "[1801.3.5-build.98,)"
 ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.ftbessentials]]
+modId = "ftbranks"
+mandatory = false
+versionRange = "[1801.1.6-build.18,)"
+ordering = "AFTER"
 side = "BOTH"

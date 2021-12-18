@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbessentials;
 
+import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftbessentials.command.FTBEssentialsCommands;
 import dev.ftb.mods.ftbessentials.command.TPACommands;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
@@ -8,8 +9,6 @@ import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
-import me.shedaniel.architectury.hooks.LevelResourceHooks;
-import me.shedaniel.architectury.platform.Platform;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Style;
@@ -22,12 +21,12 @@ import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 
 import java.nio.file.Path;
 import java.util.Iterator;
@@ -37,12 +36,12 @@ import java.util.Iterator;
  */
 @Mod.EventBusSubscriber(modid = FTBEssentials.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class FTBEEventHandler {
-	public static final LevelResource CONFIG_FILE = LevelResourceHooks.create("serverconfig/ftbessentials.snbt");
+	public static final LevelResource CONFIG_FILE = new LevelResource("serverconfig/ftbessentials.snbt");
 	public static final Style RECORDING_STYLE = Style.EMPTY.applyFormat(ChatFormatting.RED);
 	public static final Style STREAMING_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x9146FF));
 
 	@SubscribeEvent
-	public static void serverAboutToStart(FMLServerAboutToStartEvent event) {
+	public static void serverAboutToStart(ServerAboutToStartEvent event) {
 		Path configFilePath = event.getServer().getWorldPath(CONFIG_FILE);
 		Path defaultConfigFilePath = Platform.getConfigFolder().resolve("../defaultconfigs/ftbessentials-server.snbt");
 
@@ -76,7 +75,7 @@ public class FTBEEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void serverStopped(FMLServerStoppedEvent event) {
+	public static void serverStopped(ServerStoppedEvent event) {
 		FTBEWorldData.instance = null;
 		TPACommands.REQUESTS.clear();
 	}
@@ -148,19 +147,20 @@ public class FTBEEventHandler {
 	@SubscribeEvent
 	public static void playerTick(TickEvent.PlayerTickEvent event) {
 		if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayer) {
-			FTBEPlayerData data = FTBEPlayerData.get(event.player);
+			var data = FTBEPlayerData.get(event.player);
+			var abilities = event.player.getAbilities();
 
 			if (data == null) {
 				return;
 			}
 
-			if (data.god && !event.player.abilities.invulnerable) {
-				event.player.abilities.invulnerable = true;
+			if (data.god && !abilities.invulnerable) {
+				abilities.invulnerable = true;
 				event.player.onUpdateAbilities();
 			}
 
-			if (data.fly && !event.player.abilities.mayfly) {
-				event.player.abilities.mayfly = true;
+			if (data.fly && !abilities.mayfly) {
+				abilities.mayfly = true;
 				event.player.onUpdateAbilities();
 			}
 		}

@@ -1,15 +1,15 @@
 package dev.ftb.mods.ftbessentials.util;
 
 import com.mojang.authlib.GameProfile;
+import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
-import me.shedaniel.architectury.hooks.PlayerHooks;
-import me.shedaniel.architectury.utils.NbtType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -151,7 +151,7 @@ public class FTBEPlayerData {
 
 		teleportHistory.clear();
 
-		ListTag th = tag.getList("teleport_history", NbtType.COMPOUND);
+		ListTag th = tag.getList("teleport_history", Tag.TAG_COMPOUND);
 
 		for (int i = 0; i < th.size(); i++) {
 			teleportHistory.add(new TeleportPos(th.getCompound(i)));

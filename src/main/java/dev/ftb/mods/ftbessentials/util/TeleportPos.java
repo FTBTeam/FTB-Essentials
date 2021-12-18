@@ -86,7 +86,7 @@ public class TeleportPos {
 		}
 
 		int lvl = player.experienceLevel;
-		player.teleportTo(world, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, player.yRot, player.xRot);
+		player.teleportTo(world, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, player.getYRot(), player.getXRot());
 		player.setExperienceLevels(lvl);
 		return TeleportResult.SUCCESS;
 	}
@@ -111,16 +111,12 @@ public class TeleportPos {
 			ResourceLocation s = dimension.location();
 
 			if (s.getNamespace().equals("minecraft")) {
-				switch (s.getPath()) {
-					case "overworld":
-						return "Overworld";
-					case "the_nether":
-						return "The Nether";
-					case "the_end":
-						return "The End";
-					default:
-						return s.getPath();
-				}
+				return switch (s.getPath()) {
+					case "overworld" -> "Overworld";
+					case "the_nether" -> "The Nether";
+					case "the_end" -> "The End";
+					default -> s.getPath();
+				};
 			}
 
 			return s.getPath() + " [" + s.getNamespace() + "]";

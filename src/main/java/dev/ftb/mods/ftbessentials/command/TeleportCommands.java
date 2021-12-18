@@ -2,12 +2,12 @@ package dev.ftb.mods.ftbessentials.command;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
+import dev.architectury.hooks.tags.TagHooks;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.RTPEvent;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
-import me.shedaniel.architectury.hooks.TagHooks;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.DimensionArgument;
@@ -36,7 +36,7 @@ import java.util.Optional;
  * @author LatvianModder
  */
 public class TeleportCommands {
-	public static final Tag<Block> IGNORE_RTP = TagHooks.getBlockOptional(new ResourceLocation(FTBEssentials.MOD_ID, "ignore_rtp"));
+	public static final Tag<Block> IGNORE_RTP = TagHooks.optionalBlock(new ResourceLocation(FTBEssentials.MOD_ID, "ignore_rtp"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("back")
@@ -177,7 +177,7 @@ public class TeleportCommands {
 	}
 
 	public static int tpx(ServerPlayer player, ServerLevel to) {
-		player.teleportTo(to, player.getX(), player.getY(), player.getZ(), player.yRot, player.xRot);
+		player.teleportTo(to, player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
 		return 1;
 	}
 }

@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbessentials.net;
 
+import dev.architectury.networking.simple.MessageType;
+import dev.architectury.networking.simple.SimpleNetworkManager;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
-import me.shedaniel.architectury.networking.simple.MessageType;
-import me.shedaniel.architectury.networking.simple.SimpleNetworkManager;
 
 /**
  * @author LatvianModder
