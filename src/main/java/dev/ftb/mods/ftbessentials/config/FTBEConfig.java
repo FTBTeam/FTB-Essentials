@@ -63,6 +63,8 @@ public interface FTBEConfig {
 			.comment("Allows admins to view other users' inventories using a command");
 	ToggleableConfig MUTE = new ToggleableConfig(ADMIN, "mute") // todo: temp mute?
 			.comment("Allows admins to restrict players from chatting by using a command to mute (or unmute) them");
+	ToggleableConfig HOME_FOR = new ToggleableConfig(ADMIN, "homefor")
+			.comment("Allows admins to view and teleport to other users' homes");
 
 	SNBTConfig MISC = CONFIG.getGroup("misc").comment("Miscellaneous features and utilities");
 	ToggleableConfig KICKME = new ToggleableConfig(MISC, "kickme")

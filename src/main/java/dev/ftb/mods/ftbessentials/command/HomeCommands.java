@@ -15,10 +15,9 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.common.UsernameCache;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author LatvianModder
@@ -57,6 +56,29 @@ public class HomeCommands {
 				.then(Commands.argument("player", GameProfileArgument.gameProfile())
 						.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
 						.executes(context -> listhomes(context.getSource(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
+				)
+		);
+
+		dispatcher.register(Commands.literal("homefor")
+				.requires(FTBEConfig.HOME_FOR.enabledAndOp())
+				.then(Commands.argument("player", StringArgumentType.string())
+						.requires(source -> source.hasPermission(2))
+						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getAllPlayerNameSuggestion(context.getSource().getPlayerOrException()), builder))
+						.executes(context -> listHomesFor(context.getSource(), StringArgumentType.getString(context, "player")))
+						.then(Commands.argument("name", StringArgumentType.greedyString())
+								.requires(source -> source.hasPermission(2))
+								.suggests((context, builder) -> SharedSuggestionProvider.suggest(getOfflineHomeSuggestions(StringArgumentType.getString(context, "player")), builder))
+								.executes(context -> homeFor(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "player"), StringArgumentType.getString(context, "name")))
+						)
+				)
+		);
+
+		dispatcher.register(Commands.literal("listhomesfor")
+				.requires(FTBEConfig.HOME_FOR.enabledAndOp())
+				.then(Commands.argument("player", StringArgumentType.string())
+						.requires(source -> source.hasPermission(2))
+						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getAllPlayerNameSuggestion(context.getSource().getPlayerOrException()), builder))
+						.executes(context -> listHomesFor(context.getSource(), StringArgumentType.getString(context, "player")))
 				)
 		);
 	}
@@ -124,8 +146,10 @@ public class HomeCommands {
 	}
 
 	public static int listhomes(CommandSourceStack source, GameProfile of) {
-		FTBEPlayerData data = FTBEPlayerData.get(of);
+		return listhomes(source, FTBEPlayerData.get(of));
+	}
 
+	public static int listhomes(CommandSourceStack source, FTBEPlayerData data) {
 		if (data == null) {
 			return 0;
 		}
@@ -143,4 +167,64 @@ public class HomeCommands {
 
 		return 1;
 	}
+
+	private static Iterable<String> getAllPlayerNameSuggestion(ServerPlayer player) {
+		List<String> names = new ArrayList<>(UsernameCache.getMap().values());
+		names.remove(player.getGameProfile().getName());
+		return names;
+	}
+
+	private static UUID getOfflineUUIDByName(String name) {
+		return UsernameCache.getMap().entrySet().stream()
+				.filter(entry -> entry.getValue().equalsIgnoreCase(name))
+				.map(Map.Entry::getKey)
+				.findFirst()
+				.orElse(null);
+	}
+
+	private static FTBEPlayerData getOfflinePlayerData(UUID uuid) {
+		if (uuid == null) return null;
+		FTBEPlayerData data = FTBEPlayerData.MAP.get(uuid);
+		if (data == null) {
+			data = new FTBEPlayerData(uuid);
+			data.load();
+		}
+		return data;
+	}
+
+	private static int listHomesFor(CommandSourceStack source, String name) throws CommandSyntaxException {
+		UUID uuid = getOfflineUUIDByName(name);
+		if (uuid == null) {
+			source.getPlayerOrException().displayClientMessage(new TextComponent("No player found with name " + name + " !"), false);
+			return 0;
+		}
+		FTBEPlayerData data = getOfflinePlayerData(uuid);
+		return listhomes(source, data);
+	}
+
+	private static int homeFor(ServerPlayer player, String offlineName, String homeName) {
+		UUID uuid = getOfflineUUIDByName(offlineName);
+		if (uuid == null) {
+			player.displayClientMessage(new TextComponent("No player with name " + offlineName + " found!"), false);
+			return 0;
+		}
+		FTBEPlayerData data = getOfflinePlayerData(uuid);
+		TeleportPos pos = data.homes.get(homeName.toLowerCase());
+
+		if (pos == null) {
+			player.displayClientMessage(new TextComponent("Home not found!"), false);
+			return 0;
+		}
+
+		return data.homeTeleporter.teleport(player, p -> pos).runCommand(player);
+	}
+
+    private static Set<String> getOfflineHomeSuggestions(String offlineName) {
+        UUID uuid = getOfflineUUIDByName(offlineName);
+        if (uuid == null) {
+            return Collections.emptySet();
+        }
+        FTBEPlayerData data = getOfflinePlayerData(uuid);
+        return data.homes.keySet();
+    }
 }
