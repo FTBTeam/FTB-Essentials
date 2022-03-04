@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbessentials.command;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
-import dev.architectury.hooks.tags.TagHooks;
+
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
@@ -14,12 +14,15 @@ import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -36,7 +39,7 @@ import java.util.Optional;
  * @author LatvianModder
  */
 public class TeleportCommands {
-	public static final Tag<Block> IGNORE_RTP = TagHooks.optionalBlock(new ResourceLocation(FTBEssentials.MOD_ID, "ignore_rtp"));
+	public static final TagKey<Block> IGNORE_RTP = TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(FTBEssentials.MOD_ID, "ignore_rtp"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("back")
@@ -125,9 +128,9 @@ public class TeleportCommands {
 			return findBlockPos(world, player, attempt + 1);
 		}
 
-		Optional<ResourceKey<Biome>> biomeKey = world.getBiomeName(currentPos);
+		Holder<Biome> biomeKey = world.getBiome(currentPos);
 
-		if (biomeKey.isPresent() && biomeKey.get().location().getPath().contains("ocean")) {
+		if (biomeKey.unwrapKey().isPresent() && biomeKey.unwrapKey().get().location().getPath().contains("ocean")) {
 			return findBlockPos(world, player, attempt + 1);
 		}
 
