@@ -143,7 +143,7 @@ public class TeleportCommands {
 		BlockPos hmPos = world.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, currentPos);
 
 		if (hmPos.getY() > 0) {
-			if (hmPos.getY() >= world.getHeight()) { // broken heightmap (nether, other mod dimensions)
+			if (hmPos.getY() >= world.getLogicalHeight()) { // broken heightmap (nether, other mod dimensions)
 				for (BlockPos newPos : BlockPos.spiralAround(new BlockPos(hmPos.getX(), world.getSeaLevel(), hmPos.getY()), 16, Direction.EAST, Direction.SOUTH)) {
 					BlockState bs = world.getBlockState(newPos);
 
