@@ -5,7 +5,7 @@ import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -32,7 +32,7 @@ public class TeleportPos {
 		};
 
 		TeleportResult DIMENSION_NOT_FOUND = player -> {
-			player.displayClientMessage(new TextComponent("Dimension not found!"), false);
+			player.displayClientMessage(Component.literal("Dimension not found!"), false);
 			return 0;
 		};
 
@@ -49,7 +49,7 @@ public class TeleportPos {
 
 		@Override
 		default int runCommand(ServerPlayer player) {
-			player.displayClientMessage(new TextComponent("Can't teleport yet! Cooldown: " + TimeUtils.prettyTimeString(getCooldown() / 1000L)), false);
+			player.displayClientMessage(Component.literal("Can't teleport yet! Cooldown: " + TimeUtils.prettyTimeString(getCooldown() / 1000L)), false);
 			return 0;
 		}
 	}

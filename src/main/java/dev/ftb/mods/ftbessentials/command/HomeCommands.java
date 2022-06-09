@@ -13,7 +13,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Collections;
@@ -81,7 +81,7 @@ public class HomeCommands {
 		TeleportPos pos = data.homes.get(name.toLowerCase());
 
 		if (pos == null) {
-			player.displayClientMessage(new TextComponent("Home not found!"), false);
+			player.displayClientMessage(Component.literal("Home not found!"), false);
 			return 0;
 		}
 
@@ -96,13 +96,13 @@ public class HomeCommands {
 		}
 
 		if (data.homes.size() >= FTBEConfig.MAX_HOMES.get(player) && !data.homes.containsKey(name.toLowerCase())) {
-			player.displayClientMessage(new TextComponent("Can't add any more homes!"), false);
+			player.displayClientMessage(Component.literal("Can't add any more homes!"), false);
 			return 0;
 		}
 
 		data.homes.put(name.toLowerCase(), new TeleportPos(player));
 		data.save();
-		player.displayClientMessage(new TextComponent("Home set!"), false);
+		player.displayClientMessage(Component.literal("Home set!"), false);
 		return 1;
 	}
 
@@ -115,10 +115,10 @@ public class HomeCommands {
 
 		if (data.homes.remove(name.toLowerCase()) != null) {
 			data.save();
-			player.displayClientMessage(new TextComponent("Home deleted!"), false);
+			player.displayClientMessage(Component.literal("Home deleted!"), false);
 			return 1;
 		} else {
-			player.displayClientMessage(new TextComponent("Home not found!"), false);
+			player.displayClientMessage(Component.literal("Home not found!"), false);
 			return 0;
 		}
 	}
@@ -131,14 +131,14 @@ public class HomeCommands {
 		}
 
 		if (data.homes.isEmpty()) {
-			source.sendSuccess(new TextComponent("None"), false);
+			source.sendSuccess(Component.literal("None"), false);
 			return 1;
 		}
 
 		TeleportPos origin = new TeleportPos(source.getLevel().dimension(), new BlockPos(source.getPosition()));
 
 		for (Map.Entry<String, TeleportPos> entry : data.homes.entrySet()) {
-			source.sendSuccess(new TextComponent(entry.getKey() + ": " + entry.getValue().distanceString(origin)), false);
+			source.sendSuccess(Component.literal(entry.getKey() + ": " + entry.getValue().distanceString(origin)), false);
 		}
 
 		return 1;

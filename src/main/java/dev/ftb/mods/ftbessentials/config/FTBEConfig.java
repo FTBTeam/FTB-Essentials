@@ -43,8 +43,8 @@ public interface FTBEConfig {
 			.comment("Allows players to teleport to a random point in the Wilderness",
 					"Note: This currently does not respect Claimed Chunks yet!");
 	IntValue RTP_MAX_TRIES = RTP.config.getInt("max_tries", 100).range(1, 1000).comment("Number of tries before /rtp gives up");
-	IntValue RTP_MIN_DISTANCE = RTP.config.getInt("min_distance", 1000).range(0, 30000000).comment("/rtp min distance from spawn point");
-	IntValue RTP_MAX_DISTANCE = RTP.config.getInt("max_distance", 100000).range(0, 30000000).comment("/rtp max distance from spawn point");
+	IntValue RTP_MIN_DISTANCE = RTP.config.getInt("min_distance", 500).range(0, 30000000).comment("/rtp min distance from spawn point");
+	IntValue RTP_MAX_DISTANCE = RTP.config.getInt("max_distance", 25000).range(0, 30000000).comment("/rtp max distance from spawn point");
 	// tpl
 	ToggleableConfig TPL = new ToggleableConfig(TELEPORTATION, "tpl")
 			.comment("Allows admins to teleport to the location a user was last seen at");

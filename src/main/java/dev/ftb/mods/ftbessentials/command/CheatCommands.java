@@ -9,7 +9,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -108,12 +107,12 @@ public class CheatCommands {
 			data.save();
 			abilities.mayfly = false;
 			abilities.flying = false;
-			player.displayClientMessage(new TextComponent("Flight disabled"), true);
+			player.displayClientMessage(Component.literal("Flight disabled"), true);
 		} else {
 			data.fly = true;
 			data.save();
 			abilities.mayfly = true;
-			player.displayClientMessage(new TextComponent("Flight enabled"), true);
+			player.displayClientMessage(Component.literal("Flight enabled"), true);
 		}
 
 		player.onUpdateAbilities();
@@ -128,12 +127,12 @@ public class CheatCommands {
 			data.god = false;
 			data.save();
 			abilities.invulnerable = false;
-			player.displayClientMessage(new TextComponent("God mode disabled"), true);
+			player.displayClientMessage(Component.literal("God mode disabled"), true);
 		} else {
 			data.god = true;
 			data.save();
 			abilities.invulnerable = true;
-			player.displayClientMessage(new TextComponent("God mode enabled"), true);
+			player.displayClientMessage(Component.literal("God mode enabled"), true);
 		}
 
 		player.onUpdateAbilities();
@@ -158,7 +157,7 @@ public class CheatCommands {
 
 	public static int nicknamefor(CommandSourceStack source, ServerPlayer player, String nick) {
 		if (nick.length() > 30) {
-			player.displayClientMessage(new TextComponent("Nickname too long!"), false);
+			player.displayClientMessage(Component.literal("Nickname too long!"), false);
 			return 0;
 		}
 
@@ -168,9 +167,9 @@ public class CheatCommands {
 		player.refreshDisplayName();
 
 		if (data.nick.isEmpty()) {
-			source.sendSuccess(new TextComponent("Nickname reset!"), true);
+			source.sendSuccess(Component.literal("Nickname reset!"), true);
 		} else {
-			source.sendSuccess(new TextComponent("Nickname changed to '" + data.nick + "'"), true);
+			source.sendSuccess(Component.literal("Nickname changed to '" + data.nick + "'"), true);
 		}
 
 		data.sendTabName(source.getServer());
@@ -181,7 +180,7 @@ public class CheatCommands {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.muted = true;
 		data.save();
-		source.sendSuccess(new TextComponent("").append(player.getDisplayName()).append(" has been muted by ").append(source.getDisplayName()), true);
+		source.sendSuccess(Component.literal("").append(player.getDisplayName()).append(" has been muted by ").append(source.getDisplayName()), true);
 		return 1;
 	}
 
@@ -189,7 +188,7 @@ public class CheatCommands {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.muted = false;
 		data.save();
-		source.sendSuccess(new TextComponent("").append(player.getDisplayName()).append(" has been unmuted by ").append(source.getDisplayName()), true);
+		source.sendSuccess(Component.literal("").append(player.getDisplayName()).append(" has been unmuted by ").append(source.getDisplayName()), true);
 		return 1;
 	}
 }
