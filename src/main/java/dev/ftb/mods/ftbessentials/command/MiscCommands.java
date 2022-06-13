@@ -9,17 +9,10 @@ import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.Leaderboard;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.world.MenuProvider;
@@ -36,11 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author LatvianModder
@@ -100,7 +89,7 @@ public class MiscCommands {
 
 	private static int enderChest(ServerPlayer player, @Nullable ServerPlayer target) {
 
-		MutableComponent title = new TranslatableComponent("container.enderchest");
+		MutableComponent title = Component.translatable("container.enderchest");
 		if (target != null) {
 			title.append(" × ").append(target.getDisplayName());
 		}
@@ -113,7 +102,7 @@ public class MiscCommands {
 	}
 
 	public static int kickme(ServerPlayer player) {
-		player.connection.disconnect(new TextComponent("You kicked yourself!"));
+		player.connection.disconnect(Component.literal("You kicked yourself!"));
 		return 1;
 	}
 
@@ -121,7 +110,7 @@ public class MiscCommands {
 		player.openMenu(new MenuProvider() {
 			@Override
 			public Component getDisplayName() {
-				return new TextComponent("Trash Can");
+				return Component.literal("Trash Can");
 			}
 
 			@Override
@@ -175,10 +164,10 @@ public class MiscCommands {
 			}
 		}
 
-		source.sendSuccess(new TextComponent("== Leaderboard [" + leaderboard.name + "] ==").withStyle(ChatFormatting.DARK_GREEN), false);
+		source.sendSuccess(Component.literal("== Leaderboard [" + leaderboard.name + "] ==").withStyle(ChatFormatting.DARK_GREEN), false);
 
 		if (list.isEmpty()) {
-			source.sendSuccess(new TextComponent("No data!").withStyle(ChatFormatting.GRAY), false);
+			source.sendSuccess(Component.literal("No data!").withStyle(ChatFormatting.GRAY), false);
 			return 1;
 		}
 
@@ -190,22 +179,22 @@ public class MiscCommands {
 				num = "0" + num;
 			}
 
-			TextComponent component = new TextComponent("");
+			MutableComponent component = Component.literal("");
 			component.withStyle(ChatFormatting.GRAY);
 
 			if (i == 0) {
-				component.append(new TextComponent("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xD4AF37))));
+				component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xD4AF37))));
 			} else if (i == 1) {
-				component.append(new TextComponent("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xC0C0C0))));
+				component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xC0C0C0))));
 			} else if (i == 2) {
-				component.append(new TextComponent("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x9F7A34))));
+				component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x9F7A34))));
 			} else {
-				component.append(new TextComponent("#" + num + " "));
+				component.append(Component.literal("#" + num + " "));
 			}
 
-			component.append(new TextComponent(pair.getLeft().name).withStyle(i == self ? ChatFormatting.GREEN : ChatFormatting.YELLOW));
-			component.append(new TextComponent(": "));
-			component.append(new TextComponent(leaderboard.stringGetter.apply(pair.getRight())));
+			component.append(Component.literal(pair.getLeft().name).withStyle(i == self ? ChatFormatting.GREEN : ChatFormatting.YELLOW));
+			component.append(Component.literal(": "));
+			component.append(Component.literal(leaderboard.stringGetter.apply(pair.getRight())));
 			source.sendSuccess(component, false);
 		}
 
@@ -219,9 +208,9 @@ public class MiscCommands {
 		player.refreshDisplayName();
 
 		if (data.recording == 1) {
-			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is now recording!"), ChatType.CHAT, Util.NIL_UUID);
+			player.server.getPlayerList().broadcastSystemMessage(Component.literal("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is now recording!"), ChatType.CHAT);
 		} else {
-			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is no longer recording!"), ChatType.CHAT, Util.NIL_UUID);
+			player.server.getPlayerList().broadcastSystemMessage(Component.literal("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is no longer recording!"), ChatType.CHAT);
 		}
 
 		data.sendTabName(player.server);
@@ -235,9 +224,9 @@ public class MiscCommands {
 		player.refreshDisplayName();
 
 		if (data.recording == 2) {
-			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is now streaming!"), ChatType.CHAT, Util.NIL_UUID);
+			player.server.getPlayerList().broadcastSystemMessage(Component.literal("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is now streaming!"), ChatType.CHAT);
 		} else {
-			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is no longer streaming!"), ChatType.CHAT, Util.NIL_UUID);
+			player.server.getPlayerList().broadcastSystemMessage(Component.literal("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is no longer streaming!"), ChatType.CHAT);
 		}
 
 		data.sendTabName(player.server);
@@ -255,7 +244,7 @@ public class MiscCommands {
 
 	public static int nickname(ServerPlayer player, String nick) {
 		if (nick.length() > 30) {
-			player.displayClientMessage(new TextComponent("Nickname too long!"), false);
+			player.displayClientMessage(Component.literal("Nickname too long!"), false);
 			return 0;
 		}
 
@@ -266,9 +255,9 @@ public class MiscCommands {
 		player.refreshDisplayName();
 
 		if (data.nick.isEmpty()) {
-			player.displayClientMessage(new TextComponent("Nickname reset!"), false);
+			player.displayClientMessage(Component.literal("Nickname reset!"), false);
 		} else {
-			player.displayClientMessage(new TextComponent("Nickname changed to '" + data.nick + "'"), false);
+			player.displayClientMessage(Component.literal("Nickname changed to '" + data.nick + "'"), false);
 		}
 
 		data.sendTabName(player.server);

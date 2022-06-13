@@ -9,10 +9,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -91,7 +88,7 @@ public class TPACommands {
 		FTBEPlayerData dataTarget = FTBEPlayerData.get(target);
 
 		if (REQUESTS.values().stream().anyMatch(r -> r.source == dataSource && r.target == dataTarget)) {
-			player.displayClientMessage(new TextComponent("Request already sent!"), false);
+			player.displayClientMessage(Component.literal("Request already sent!"), false);
 			return 0;
 		}
 
@@ -103,27 +100,27 @@ public class TPACommands {
 
 		TPARequest request = create(player.server, dataSource, dataTarget, here);
 
-		TextComponent component = new TextComponent("TPA request! [ ");
+		MutableComponent component = Component.literal("TPA request! [ ");
 		component.append((here ? target : player).getDisplayName().copy().withStyle(ChatFormatting.YELLOW));
 		component.append(" \u27A1 ");
 		component.append((here ? player : target).getDisplayName().copy().withStyle(ChatFormatting.YELLOW));
 		component.append(" ]");
 
-		TextComponent component2 = new TextComponent("Click one of these: ");
-		component2.append(new TextComponent("Accept \u2714").setStyle(Style.EMPTY
+		MutableComponent component2 = Component.literal("Click one of these: ");
+		component2.append(Component.literal("Accept \u2714").setStyle(Style.EMPTY
 				.applyFormat(ChatFormatting.GREEN)
 				.withBold(true)
 				.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpaccept " + request.id))
-				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to Accept")))
+				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to Accept")))
 		));
 
 		component2.append(" | ");
 
-		component2.append(new TextComponent("Deny \u274C").setStyle(Style.EMPTY
+		component2.append(Component.literal("Deny \u274C").setStyle(Style.EMPTY
 				.applyFormat(ChatFormatting.RED)
 				.withBold(true)
 				.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpdeny " + request.id))
-				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to Deny")))
+				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to Deny")))
 		));
 
 		component2.append(" |");
@@ -131,7 +128,7 @@ public class TPACommands {
 		target.displayClientMessage(component, false);
 		target.displayClientMessage(component2, false);
 
-		player.displayClientMessage(new TextComponent("Request sent!"), false);
+		player.displayClientMessage(Component.literal("Request sent!"), false);
 		return 1;
 	}
 
@@ -139,14 +136,14 @@ public class TPACommands {
 		TPARequest request = REQUESTS.get(id);
 
 		if (request == null) {
-			player.displayClientMessage(new TextComponent("Invalid request!"), false);
+			player.displayClientMessage(Component.literal("Invalid request!"), false);
 			return 0;
 		}
 
 		ServerPlayer sourcePlayer = player.server.getPlayerList().getPlayer(request.source.uuid);
 
 		if (sourcePlayer == null) {
-			player.displayClientMessage(new TextComponent("Player has gone offline!"), false);
+			player.displayClientMessage(Component.literal("Player has gone offline!"), false);
 			return 0;
 		}
 
@@ -163,18 +160,18 @@ public class TPACommands {
 		TPARequest request = REQUESTS.get(id);
 
 		if (request == null) {
-			player.displayClientMessage(new TextComponent("Invalid request!"), false);
+			player.displayClientMessage(Component.literal("Invalid request!"), false);
 			return 0;
 		}
 
 		REQUESTS.remove(request.id);
 
-		player.displayClientMessage(new TextComponent("Request denied!"), false);
+		player.displayClientMessage(Component.literal("Request denied!"), false);
 
 		ServerPlayer player2 = player.server.getPlayerList().getPlayer(request.target.uuid);
 
 		if (player2 != null) {
-			player2.displayClientMessage(new TextComponent("Request denied!"), false);
+			player2.displayClientMessage(Component.literal("Request denied!"), false);
 		}
 
 		return 1;

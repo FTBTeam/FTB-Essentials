@@ -10,10 +10,9 @@ import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -181,11 +180,11 @@ public class FTBEEventHandler {
 					ServerPlayer target = r.server.getPlayerList().getPlayer(r.target.uuid);
 
 					if (source != null) {
-						source.sendMessage(new TextComponent("TPA request expired!"), Util.NIL_UUID);
+						source.sendSystemMessage(Component.literal("TPA request expired!"));
 					}
 
 					if (target != null) {
-						target.sendMessage(new TextComponent("TPA request expired!"), Util.NIL_UUID);
+						target.sendSystemMessage(Component.literal("TPA request expired!"));
 					}
 
 					iterator.remove();
@@ -200,7 +199,7 @@ public class FTBEEventHandler {
 
 		if (data != null && data.muted) {
 			event.setCanceled(true);
-			event.getPlayer().displayClientMessage(new TextComponent("You can't use chat, you've been muted by an admin!").withStyle(ChatFormatting.RED), false);
+			event.getPlayer().displayClientMessage(Component.literal("You can't use chat, you've been muted by an admin!").withStyle(ChatFormatting.RED), false);
 		}
 	}
 
@@ -210,7 +209,7 @@ public class FTBEEventHandler {
 			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
 
 			if (data != null && !data.nick.isEmpty()) {
-				event.setDisplayname(new TextComponent(data.nick));
+				event.setDisplayname(Component.literal(data.nick));
 			}
 		}
 	}
@@ -221,7 +220,7 @@ public class FTBEEventHandler {
 			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
 
 			if (data != null && data.recording > 0) {
-				event.setDisplayname(new TextComponent("").append(new TextComponent("\u23FA").withStyle(data.recording == 1 ? RECORDING_STYLE : STREAMING_STYLE)).append(" ").append(event.getDisplayname()));
+				event.setDisplayname(Component.literal("").append(Component.literal("\u23FA").withStyle(data.recording == 1 ? RECORDING_STYLE : STREAMING_STYLE)).append(" ").append(event.getDisplayname()));
 			}
 		}
 	}
