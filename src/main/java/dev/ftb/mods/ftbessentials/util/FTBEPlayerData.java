@@ -119,6 +119,7 @@ public class FTBEPlayerData {
 		json.putBoolean("fly", fly);
 		json.putBoolean("god", god);
 		json.putString("nick", nick);
+		json.putString("name", name);
 		json.put("last_seen", lastSeen.write());
 		json.putInt("recording", recording);
 
@@ -146,6 +147,9 @@ public class FTBEPlayerData {
 		fly = tag.getBoolean("fly");
 		god = tag.getBoolean("god");
 		nick = tag.getString("nick");
+		if (name == null) {
+			name = tag.getString("name");
+		}
 		recording = tag.getInt("recording");
 		lastSeen = tag.contains("last_seen") ? new TeleportPos(tag.getCompound("last_seen")) : null;
 
