@@ -1,13 +1,13 @@
 modLoader = "javafml"
-loaderVersion = "[39,)"
-issueTrackerURL = "https://github.com/FTBTeam/FTB-Essentials/issues"
+loaderVersion = "[${forgeshortversion},)"
+issueTrackerURL = "https://go.ftb.team/support-mod-issues"
 license = "All Rights Reserved"
 
 [[mods]]
 modId = "ftbessentials"
 version = "${version}"
 displayName = "FTB Essentials"
-authors = "LatvianModder"
+authors = "FTB Team"
 description = '''
 Adds many essential utility commands for servers
 '''
@@ -15,27 +15,27 @@ Adds many essential utility commands for servers
 [[dependencies.ftbessentials]]
 modId = "forge"
 mandatory = true
-versionRange = "[39,)"
+versionRange = "[${forgeversion},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbessentials]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.16,)"
+versionRange = "[${mcversion},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbessentials]]
 modId = "ftblibrary"
 mandatory = true
-versionRange = "[1801.3.5-build.98,)"
+versionRange = "[${libraryversion},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbessentials]]
 modId = "ftbranks"
 mandatory = false
-versionRange = "[1801.1.6-build.18,)"
+versionRange = "[${ranksversion},)"
 ordering = "AFTER"
 side = "BOTH"

@@ -20,9 +20,9 @@ import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -85,7 +85,7 @@ public class FTBEEventHandler {
 	}
 
 	@SubscribeEvent
-	public static void worldSaved(WorldEvent.Save event) {
+	public static void worldSaved(LevelEvent.Save event) {
 		if (FTBEWorldData.instance != null && FTBEWorldData.instance.save) {
 			if (SNBT.write(FTBEWorldData.instance.mkdirs("").resolve("data.snbt"), FTBEWorldData.instance.write())) {
 				FTBEWorldData.instance.save = false;
@@ -95,36 +95,36 @@ public class FTBEEventHandler {
 
 	@SubscribeEvent
 	public static void playerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-		FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+		FTBEPlayerData data = FTBEPlayerData.get(event.getEntity());
 
 		if (data == null) {
 			return;
 		}
 
-		data.lastSeen = new TeleportPos(event.getPlayer());
+		data.lastSeen = new TeleportPos(event.getEntity());
 		data.save();
 
 		for (FTBEPlayerData d : FTBEPlayerData.MAP.values()) {
-			d.sendTabName((ServerPlayer) event.getPlayer());
+			d.sendTabName((ServerPlayer) event.getEntity());
 		}
 	}
 
 	@SubscribeEvent
 	public static void playerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-		FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+		FTBEPlayerData data = FTBEPlayerData.get(event.getEntity());
 
 		if (data == null) {
 			return;
 		}
 
-		data.lastSeen = new TeleportPos(event.getPlayer());
+		data.lastSeen = new TeleportPos(event.getEntity());
 		data.save();
 	}
 
 	@SubscribeEvent
 	public static void playerLoad(PlayerEvent.LoadFromFile event) {
 		if (FTBEWorldData.instance != null) {
-			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+			FTBEPlayerData data = FTBEPlayerData.get(event.getEntity());
 
 			if (data != null) {
 				data.load();
@@ -135,7 +135,7 @@ public class FTBEEventHandler {
 	@SubscribeEvent
 	public static void playerSaved(PlayerEvent.SaveToFile event) {
 		if (FTBEWorldData.instance != null) {
-			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+			FTBEPlayerData data = FTBEPlayerData.get(event.getEntity());
 
 			if (data != null) {
 				data.saveNow();
@@ -205,8 +205,8 @@ public class FTBEEventHandler {
 
 	@SubscribeEvent
 	public static void playerName(PlayerEvent.NameFormat event) {
-		if (event.getPlayer() instanceof ServerPlayer) {
-			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+		if (event.getEntity() instanceof ServerPlayer) {
+			FTBEPlayerData data = FTBEPlayerData.get(event.getEntity());
 
 			if (data != null && !data.nick.isEmpty()) {
 				event.setDisplayname(Component.literal(data.nick));
@@ -216,8 +216,8 @@ public class FTBEEventHandler {
 
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void playerNameLow(PlayerEvent.NameFormat event) {
-		if (event.getPlayer() instanceof ServerPlayer) {
-			FTBEPlayerData data = FTBEPlayerData.get(event.getPlayer());
+		if (event.getEntity() instanceof ServerPlayer) {
+			FTBEPlayerData data = FTBEPlayerData.get(event.getEntity());
 
 			if (data != null && data.recording > 0) {
 				event.setDisplayname(Component.literal("").append(Component.literal("\u23FA").withStyle(data.recording == 1 ? RECORDING_STYLE : STREAMING_STYLE)).append(" ").append(event.getDisplayname()));
