@@ -24,11 +24,13 @@ public class FTBEssentials {
 
 	public static FTBEssentialsCommon PROXY;
 	public static boolean ranksMod;
+	public static boolean luckpermsMod;
 
 	public FTBEssentials() {
 		ModLoadingContext.get().registerExtensionPoint(DisplayTest.class, () -> new DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
 		FTBEssentialsNet.init();
 		PROXY = DistExecutor.safeRunForDist(() -> FTBEssentialsClient::new, () -> FTBEssentialsCommon::new);
 		ranksMod = ModList.get().isLoaded(FTBRanks.MOD_ID);
+		luckpermsMod = ModList.get().isLoaded("luckperms");
 	}
 }
