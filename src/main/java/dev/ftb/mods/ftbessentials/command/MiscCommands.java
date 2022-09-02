@@ -208,9 +208,9 @@ public class MiscCommands {
 		player.refreshDisplayName();
 
 		if (data.recording == 1) {
-			player.server.getPlayerList().broadcastSystemMessage(Component.literal("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is now recording!"), ChatType.CHAT);
+			player.server.getPlayerList().broadcastSystemMessage(Component.literal("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is now recording!"), false);
 		} else {
-			player.server.getPlayerList().broadcastSystemMessage(Component.literal("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is no longer recording!"), ChatType.CHAT);
+			player.server.getPlayerList().broadcastSystemMessage(Component.literal("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is no longer recording!"), false);
 		}
 
 		data.sendTabName(player.server);
@@ -224,9 +224,9 @@ public class MiscCommands {
 		player.refreshDisplayName();
 
 		if (data.recording == 2) {
-			player.server.getPlayerList().broadcastSystemMessage(Component.literal("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is now streaming!"), ChatType.CHAT);
+			player.server.getPlayerList().broadcastSystemMessage(Component.literal("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is now streaming!"), false);
 		} else {
-			player.server.getPlayerList().broadcastSystemMessage(Component.literal("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is no longer streaming!"), ChatType.CHAT);
+			player.server.getPlayerList().broadcastSystemMessage(Component.literal("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is no longer streaming!"), false);
 		}
 
 		data.sendTabName(player.server);
