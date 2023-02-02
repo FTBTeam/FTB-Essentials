@@ -30,6 +30,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.UsernameCache;
 import net.minecraftforge.common.util.FakePlayerFactory;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -136,10 +137,9 @@ public class MiscCommands {
 	public static <T extends Number> int leaderboard(CommandSourceStack source, Leaderboard<T> leaderboard, boolean reverse) {
 		try {
 			Files.list(FTBEWorldData.instance.mkdirs("playerdata"))
-					.filter(path -> path.toString().endsWith(".json"))
+					.filter(path -> path.toString().endsWith(".snbt"))
 					.map(Path::getFileName)
-					.map(path -> new GameProfile(UUID.fromString(path.toString().replace(".json", "")), null))
-					.filter(profile -> !FTBEPlayerData.MAP.containsKey(profile.getId()))
+					.map(path -> profileWithCachedName(UUID.fromString(path.toString().replace(".snbt", ""))))
 					.map(FTBEPlayerData::get)
 					.filter(Objects::nonNull)
 					.forEach(FTBEPlayerData::load);
@@ -210,6 +210,10 @@ public class MiscCommands {
 		}
 
 		return 1;
+	}
+
+	private static GameProfile profileWithCachedName(UUID id) {
+		return new GameProfile(id, UsernameCache.getLastKnownUsername(id));
 	}
 
 	public static int recording(ServerPlayer player) {
