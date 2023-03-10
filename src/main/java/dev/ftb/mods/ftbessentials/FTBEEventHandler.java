@@ -177,9 +177,9 @@ public class FTBEEventHandler {
 			while (iterator.hasNext()) {
 				TPACommands.TPARequest r = iterator.next();
 
-				if (now > r.created + 60000L) {
-					ServerPlayer source = r.server.getPlayerList().getPlayer(r.source.uuid);
-					ServerPlayer target = r.server.getPlayerList().getPlayer(r.target.uuid);
+				if (now > r.created() + 60000L) {
+					ServerPlayer source = event.getServer().getPlayerList().getPlayer(r.source().uuid);
+					ServerPlayer target = event.getServer().getPlayerList().getPlayer(r.target().uuid);
 
 					if (source != null) {
 						source.sendMessage(new TextComponent("TPA request expired!"), Util.NIL_UUID);
