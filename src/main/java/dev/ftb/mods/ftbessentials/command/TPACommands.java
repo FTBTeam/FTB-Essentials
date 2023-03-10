@@ -10,7 +10,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.*;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.HashMap;
@@ -20,22 +19,12 @@ import java.util.Random;
  * @author LatvianModder
  */
 public class TPACommands {
-	public static class TPARequest {
-		public final String id;
-		public MinecraftServer server;
-		public FTBEPlayerData source;
-		public FTBEPlayerData target;
-		public boolean here;
-		public long created;
-
-		public TPARequest(String s) {
-			id = s;
-		}
+	public record TPARequest(String id, FTBEPlayerData source, FTBEPlayerData target, boolean here, long created) {
 	}
 
 	public static final HashMap<String, TPARequest> REQUESTS = new HashMap<>();
 
-	public static TPARequest create(MinecraftServer server, FTBEPlayerData source, FTBEPlayerData target, boolean here) {
+	public static TPARequest create(FTBEPlayerData source, FTBEPlayerData target, boolean here) {
 		String key;
 
 		do {
@@ -43,12 +32,7 @@ public class TPACommands {
 		}
 		while (REQUESTS.containsKey(key));
 
-		TPARequest r = new TPARequest(key);
-		r.server = server;
-		r.source = source;
-		r.target = target;
-		r.here = here;
-		r.created = System.currentTimeMillis();
+		TPARequest r = new TPARequest(key, source, target, here, System.currentTimeMillis());
 		REQUESTS.put(key, r);
 		return r;
 	}
@@ -87,6 +71,10 @@ public class TPACommands {
 		FTBEPlayerData dataSource = FTBEPlayerData.get(player);
 		FTBEPlayerData dataTarget = FTBEPlayerData.get(target);
 
+		if (dataSource == null || dataTarget == null) {
+			return 0;
+		}
+
 		if (REQUESTS.values().stream().anyMatch(r -> r.source == dataSource && r.target == dataTarget)) {
 			player.displayClientMessage(Component.literal("Request already sent!"), false);
 			return 0;
@@ -98,7 +86,7 @@ public class TPACommands {
 			return result.runCommand(player);
 		}
 
-		TPARequest request = create(player.server, dataSource, dataTarget, here);
+		TPARequest request = create(dataSource, dataTarget, here);
 
 		MutableComponent component = Component.literal("TPA request! [ ");
 		component.append((here ? target : player).getDisplayName().copy().withStyle(ChatFormatting.YELLOW));
