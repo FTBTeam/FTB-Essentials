@@ -165,6 +165,7 @@ public class TeleportCommands {
 		ServerPlayer p = player.server.getPlayerList().getPlayer(to.getId());
 
 		if (p != null) {
+			FTBEPlayerData.addTeleportHistory(player);
 			new TeleportPos(p).teleport(player);
 			return 1;
 		}
@@ -175,7 +176,9 @@ public class TeleportCommands {
 			return 0;
 		}
 
+		FTBEPlayerData.addTeleportHistory(player);
 		dataTo.lastSeen.teleport(player);
+
 		return 1;
 	}
 
