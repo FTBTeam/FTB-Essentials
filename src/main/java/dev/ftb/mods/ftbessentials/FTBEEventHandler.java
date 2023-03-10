@@ -18,6 +18,7 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
@@ -226,10 +227,17 @@ public class FTBEEventHandler {
 		}
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void playerDeath(LivingDeathEvent event) {
-		if (event.getEntity() instanceof ServerPlayer) {
-			FTBEPlayerData.addTeleportHistory((ServerPlayer) event.getEntity());
+		if (event.getEntity() instanceof ServerPlayer sp) {
+			FTBEPlayerData.addTeleportHistory(sp);
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOWEST)
+	public static void vanillaTeleportCommand(EntityTeleportEvent.TeleportCommand event) {
+		if (event.getEntity() instanceof ServerPlayer sp) {
+			FTBEPlayerData.addTeleportHistory(sp);
 		}
 	}
 }
