@@ -205,11 +205,12 @@ public class FTBEEventHandler {
 
 	@SubscribeEvent
 	public static void playerName(PlayerEvent.NameFormat event) {
-		if (event.getEntity() instanceof ServerPlayer) {
-			FTBEPlayerData data = FTBEPlayerData.get(event.getEntity());
+		if (event.getEntity() instanceof ServerPlayer sp) {
+			FTBEPlayerData data = FTBEPlayerData.get(sp);
 
 			if (data != null && !data.nick.isEmpty()) {
-				event.setDisplayname(Component.literal(data.nick));
+				Component name = FTBEssentials.ranksMod ? FTBRanksIntegration.getDisplayName(sp, data.nick) : Component.literal(data.nick);
+				event.setDisplayname(name);
 			}
 		}
 	}
