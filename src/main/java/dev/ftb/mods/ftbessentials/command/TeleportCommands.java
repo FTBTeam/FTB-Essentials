@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.RTPEvent;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.DimensionArgument;
@@ -71,7 +72,7 @@ public class TeleportCommands {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 
 		if (data.teleportHistory.isEmpty()) {
-			player.displayClientMessage(Component.literal("Teleportation history is empty!"), false);
+			player.displayClientMessage(Component.literal("Teleportation history is empty!").withStyle(ChatFormatting.RED), false);
 			return 0;
 		}
 
@@ -105,7 +106,7 @@ public class TeleportCommands {
 
 	private static TeleportPos findBlockPos(ServerLevel world, ServerPlayer player, int attempt) {
 		if (attempt > FTBEConfig.RTP_MAX_TRIES.get()) {
-			player.displayClientMessage(Component.literal("Could not find a valid location to teleport to!"), false);
+			player.displayClientMessage(Component.literal("Could not find a valid location to teleport to!").withStyle(ChatFormatting.RED), false);
 			return new TeleportPos(player);
 		}
 

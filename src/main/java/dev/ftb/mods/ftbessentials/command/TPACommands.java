@@ -80,7 +80,9 @@ public class TPACommands {
 			return 0;
 		}
 
-		TeleportPos.TeleportResult result = (here ? dataTarget : dataSource).tpaTeleporter.checkCooldown();
+		TeleportPos.TeleportResult result = here ?
+				dataTarget.tpaTeleporter.checkCooldown() :
+				dataSource.tpaTeleporter.checkCooldown();
 
 		if (!result.isSuccess()) {
 			return result.runCommand(player);
@@ -135,7 +137,9 @@ public class TPACommands {
 			return 0;
 		}
 
-		TeleportPos.TeleportResult result = (request.here ? request.target : request.source).tpaTeleporter.teleport(request.here ? player : sourcePlayer, p -> new TeleportPos(request.here ? sourcePlayer : player));
+		TeleportPos.TeleportResult result = request.here ?
+				request.target.tpaTeleporter.teleport(player, p -> new TeleportPos(sourcePlayer)) :
+				request.source.tpaTeleporter.teleport(sourcePlayer, p -> new TeleportPos(player));
 
 		if (result.isSuccess()) {
 			REQUESTS.remove(request.id);

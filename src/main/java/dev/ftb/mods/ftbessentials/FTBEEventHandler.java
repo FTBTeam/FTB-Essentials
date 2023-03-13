@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
+import dev.ftb.mods.ftbessentials.util.WarmupCooldownTeleporter;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import net.minecraft.ChatFormatting;
@@ -20,6 +21,7 @@ import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
@@ -191,6 +193,10 @@ public class FTBEEventHandler {
 					iterator.remove();
 				}
 			}
+
+			if (event.getServer().getTickCount() % 20 == 0) {
+				WarmupCooldownTeleporter.tickWarmups(event.getServer());
+			}
 		}
 	}
 
@@ -238,6 +244,20 @@ public class FTBEEventHandler {
 	public static void vanillaTeleportCommand(EntityTeleportEvent.TeleportCommand event) {
 		if (event.getEntity() instanceof ServerPlayer sp) {
 			FTBEPlayerData.addTeleportHistory(sp);
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOWEST)
+	public static void onPlayerHurt(LivingHurtEvent event) {
+		if (event.getEntity() instanceof ServerPlayer sp && event.getAmount() > 0f) {
+			WarmupCooldownTeleporter.cancelWarmup(sp);
+		}
+	}
+
+	@SubscribeEvent
+	public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+		if (event.getEntity() instanceof ServerPlayer sp) {
+			WarmupCooldownTeleporter.cancelWarmup(sp);
 		}
 	}
 }
