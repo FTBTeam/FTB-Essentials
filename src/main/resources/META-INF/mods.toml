@@ -39,3 +39,10 @@ mandatory = false
 versionRange = "[${ranksversion},)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies.ftbessentials]]
+modId = "luckperms"
+mandatory = false
+versionRange = "[5.4.46,)"
+ordering = "AFTER"
+side = "SERVER"
