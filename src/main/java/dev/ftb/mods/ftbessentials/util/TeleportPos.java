@@ -49,7 +49,8 @@ public class TeleportPos {
 
 		@Override
 		default int runCommand(ServerPlayer player) {
-			player.displayClientMessage(new TextComponent("Can't teleport yet! Cooldown: " + TimeUtils.prettyTimeString(getCooldown() / 1000L)), false);
+			String secStr = TimeUtils.prettyTimeString(getCooldown() / 1000L);
+			player.displayClientMessage(new TextComponent("Can't teleport yet! Cooldown: " + secStr), false);
 			return 0;
 		}
 	}

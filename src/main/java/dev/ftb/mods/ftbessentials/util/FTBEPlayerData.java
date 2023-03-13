@@ -17,11 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author LatvianModder
@@ -79,12 +75,12 @@ public class FTBEPlayerData {
 	public final LinkedHashMap<String, TeleportPos> homes;
 	public int recording;
 
-	public final CooldownTeleporter backTeleporter;
-	public final CooldownTeleporter spawnTeleporter;
-	public final CooldownTeleporter warpTeleporter;
-	public final CooldownTeleporter homeTeleporter;
-	public final CooldownTeleporter tpaTeleporter;
-	public final CooldownTeleporter rtpTeleporter;
+	public final WarmupCooldownTeleporter backTeleporter;
+	public final WarmupCooldownTeleporter spawnTeleporter;
+	public final WarmupCooldownTeleporter warpTeleporter;
+	public final WarmupCooldownTeleporter homeTeleporter;
+	public final WarmupCooldownTeleporter tpaTeleporter;
+	public final WarmupCooldownTeleporter rtpTeleporter;
 	public final LinkedList<TeleportPos> teleportHistory;
 
 	public FTBEPlayerData(UUID u) {
@@ -100,12 +96,12 @@ public class FTBEPlayerData {
 		homes = new LinkedHashMap<>();
 		recording = 0;
 
-		backTeleporter = new CooldownTeleporter(this, FTBEConfig.BACK.cooldown::get);
-		spawnTeleporter = new CooldownTeleporter(this, FTBEConfig.SPAWN.cooldown::get);
-		warpTeleporter = new CooldownTeleporter(this, FTBEConfig.WARP.cooldown::get);
-		homeTeleporter = new CooldownTeleporter(this, FTBEConfig.HOME.cooldown::get);
-		tpaTeleporter = new CooldownTeleporter(this, FTBEConfig.TPA.cooldown::get);
-		rtpTeleporter = new CooldownTeleporter(this, FTBEConfig.RTP.cooldown::get);
+		backTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.BACK::getCooldown, FTBEConfig.BACK::getWarmup);
+		spawnTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.SPAWN::getCooldown, FTBEConfig.SPAWN::getWarmup);
+		warpTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.WARP::getCooldown, FTBEConfig.WARP::getWarmup);
+		homeTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.HOME::getCooldown, FTBEConfig.HOME::getWarmup);
+		tpaTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.TPA::getCooldown, FTBEConfig.TPA::getWarmup);
+		rtpTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.RTP::getCooldown, FTBEConfig.RTP::getWarmup);
 		teleportHistory = new LinkedList<>();
 	}
 
