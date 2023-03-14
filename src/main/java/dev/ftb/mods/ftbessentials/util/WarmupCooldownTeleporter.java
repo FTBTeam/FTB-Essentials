@@ -14,17 +14,24 @@ import java.util.function.ToIntFunction;
  * @author LatvianModder
  */
 public class WarmupCooldownTeleporter {
-	public final FTBEPlayerData playerData;
-	public final ToIntFunction<ServerPlayer> cooldownConfig;
+	private final FTBEPlayerData playerData;
+	private final ToIntFunction<ServerPlayer> cooldownConfig;
 	private final ToIntFunction<ServerPlayer> warmupConfig;
-	public long cooldown;
+	private final boolean popHistoryOnTeleport;
+
+	private long cooldown;
 
 	private static final Map<UUID, Warmup> WARMUPS = new HashMap<>();
 
 	public WarmupCooldownTeleporter(FTBEPlayerData playerData, ToIntFunction<ServerPlayer> cooldownConfig, ToIntFunction<ServerPlayer> warmupConfig) {
+		this(playerData, cooldownConfig, warmupConfig, false);
+	}
+
+	public WarmupCooldownTeleporter(FTBEPlayerData playerData, ToIntFunction<ServerPlayer> cooldownConfig, ToIntFunction<ServerPlayer> warmupConfig, boolean popHistoryOnTeleport) {
 		this.playerData = playerData;
 		this.cooldownConfig = cooldownConfig;
 		this.warmupConfig = warmupConfig;
+		this.popHistoryOnTeleport = popHistoryOnTeleport;
 		this.cooldown = 0L;
 	}
 
@@ -67,7 +74,7 @@ public class WarmupCooldownTeleporter {
 			return res;
 		}
 
-		if (this == playerData.backTeleporter) {
+		if (popHistoryOnTeleport) {
 			playerData.popTeleportHistory();
 		} else {
 			playerData.addTeleportHistory(player, currentPos);
