@@ -14,6 +14,7 @@ import net.minecraft.Util;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -28,6 +29,7 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.nio.file.Path;
 import java.util.Iterator;
@@ -174,12 +176,13 @@ public class FTBEEventHandler {
 
 			Iterator<TPACommands.TPARequest> iterator = TPACommands.REQUESTS.values().iterator();
 
+			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 			while (iterator.hasNext()) {
 				TPACommands.TPARequest r = iterator.next();
 
 				if (now > r.created() + 60000L) {
-					ServerPlayer source = event.getServer().getPlayerList().getPlayer(r.source().uuid);
-					ServerPlayer target = event.getServer().getPlayerList().getPlayer(r.target().uuid);
+					ServerPlayer source = server.getPlayerList().getPlayer(r.source().uuid);
+					ServerPlayer target = server.getPlayerList().getPlayer(r.target().uuid);
 
 					if (source != null) {
 						source.sendMessage(new TextComponent("TPA request expired!"), Util.NIL_UUID);
