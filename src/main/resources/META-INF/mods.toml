@@ -39,3 +39,10 @@ mandatory = false
 versionRange = "[1801.1.6-build.18,)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies.ftbessentials]]
+modId = "luckperms"
+mandatory = false
+versionRange = "[5.4.30,)"
+ordering = "AFTER"
+side = "SERVER"
