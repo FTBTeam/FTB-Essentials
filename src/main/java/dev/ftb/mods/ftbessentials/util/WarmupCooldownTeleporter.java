@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbessentials.util;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
@@ -67,7 +67,9 @@ public class WarmupCooldownTeleporter {
 			return res;
 		}
 
-		if (this != playerData.backTeleporter) {
+		if (this == playerData.backTeleporter) {
+			playerData.popTeleportHistory();
+		} else {
 			playerData.addTeleportHistory(player, currentPos);
 		}
 		return res;
@@ -95,11 +97,11 @@ public class WarmupCooldownTeleporter {
 					if (player.position().distanceToSqr(warmup.initialPos) > 0.25) {
 						// player has moved more than half a block
 						toRemove.add(playerId);
-						player.displayClientMessage(Component.literal("Teleportation interrupted!").withStyle(ChatFormatting.RED), true);
+						player.displayClientMessage(new TextComponent("Teleportation interrupted!").withStyle(ChatFormatting.RED), true);
 					} else {
 						long seconds = (warmup.when() - now) / 1000L;
 						String secStr = seconds == 1 ? "second" : "seconds";
-						player.displayClientMessage(Component.literal(String.format("Teleporting in %d %s", seconds, secStr)).withStyle(ChatFormatting.YELLOW), true);
+						player.displayClientMessage(new TextComponent(String.format("Teleporting in %d %s", seconds, secStr)).withStyle(ChatFormatting.YELLOW), true);
 					}
 				}
 			} else {
@@ -113,7 +115,7 @@ public class WarmupCooldownTeleporter {
 
 	public static void cancelWarmup(ServerPlayer player) {
 		if (WARMUPS.remove(player.getUUID()) != null) {
-			player.displayClientMessage(Component.literal("Teleportation interrupted!").withStyle(ChatFormatting.RED), true);
+			player.displayClientMessage(new TextComponent("Teleportation interrupted!").withStyle(ChatFormatting.RED), true);
 		}
 	}
 

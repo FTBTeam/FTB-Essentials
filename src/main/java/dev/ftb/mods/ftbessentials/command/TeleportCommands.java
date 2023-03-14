@@ -77,7 +77,6 @@ public class TeleportCommands {
 		}
 
 		if (data.backTeleporter.teleport(player, serverPlayerEntity -> data.teleportHistory.getLast()).runCommand(player) != 0) {
-			data.teleportHistory.removeLast();
 			data.save();
 			return 1;
 		}
