@@ -70,6 +70,8 @@ dependencies {
 	}
 
 	modImplementation "dev.ftb.mods:ftb-ranks-forge:${rootProject.ftb_ranks_version}"
+
+	compileOnly 'net.luckperms:api:5.4'
 }
 
 processResources {
