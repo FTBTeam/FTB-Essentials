@@ -67,7 +67,9 @@ public class WarmupCooldownTeleporter {
 			return res;
 		}
 
-		if (this != playerData.backTeleporter) {
+		if (this == playerData.backTeleporter) {
+			playerData.popTeleportHistory();
+		} else {
 			playerData.addTeleportHistory(player, currentPos);
 		}
 		return res;

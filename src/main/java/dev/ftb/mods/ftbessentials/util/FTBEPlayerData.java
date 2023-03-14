@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbessentials.util;
 
 import com.mojang.authlib.GameProfile;
 import dev.architectury.hooks.level.entity.PlayerHooks;
+import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
@@ -170,6 +171,14 @@ public class FTBEPlayerData {
 		}
 
 		save();
+	}
+
+	public void popTeleportHistory() {
+		if (!teleportHistory.isEmpty()) {
+			teleportHistory.removeLast();
+		} else {
+			FTBEssentials.LOGGER.warn("attempted to pop empty back history for {}", uuid);
+		}
 	}
 
 	public void load() {
