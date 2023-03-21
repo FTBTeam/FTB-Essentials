@@ -13,7 +13,6 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.HashMap;
@@ -23,22 +22,12 @@ import java.util.Random;
  * @author LatvianModder
  */
 public class TPACommands {
-	public static class TPARequest {
-		public final String id;
-		public MinecraftServer server;
-		public FTBEPlayerData source;
-		public FTBEPlayerData target;
-		public boolean here;
-		public long created;
-
-		public TPARequest(String s) {
-			id = s;
-		}
+	public record TPARequest(String id, FTBEPlayerData source, FTBEPlayerData target, boolean here, long created) {
 	}
 
 	public static final HashMap<String, TPARequest> REQUESTS = new HashMap<>();
 
-	public static TPARequest create(MinecraftServer server, FTBEPlayerData source, FTBEPlayerData target, boolean here) {
+	public static TPARequest create(FTBEPlayerData source, FTBEPlayerData target, boolean here) {
 		String key;
 
 		do {
@@ -46,12 +35,7 @@ public class TPACommands {
 		}
 		while (REQUESTS.containsKey(key));
 
-		TPARequest r = new TPARequest(key);
-		r.server = server;
-		r.source = source;
-		r.target = target;
-		r.here = here;
-		r.created = System.currentTimeMillis();
+		TPARequest r = new TPARequest(key, source, target, here, System.currentTimeMillis());
 		REQUESTS.put(key, r);
 		return r;
 	}
@@ -90,18 +74,24 @@ public class TPACommands {
 		FTBEPlayerData dataSource = FTBEPlayerData.get(player);
 		FTBEPlayerData dataTarget = FTBEPlayerData.get(target);
 
+		if (dataSource == null || dataTarget == null) {
+			return 0;
+		}
+
 		if (REQUESTS.values().stream().anyMatch(r -> r.source == dataSource && r.target == dataTarget)) {
 			player.displayClientMessage(new TextComponent("Request already sent!"), false);
 			return 0;
 		}
 
-		TeleportPos.TeleportResult result = (here ? dataTarget : dataSource).tpaTeleporter.checkCooldown();
+		TeleportPos.TeleportResult result = here ?
+				dataTarget.tpaTeleporter.checkCooldown() :
+				dataSource.tpaTeleporter.checkCooldown();
 
 		if (!result.isSuccess()) {
 			return result.runCommand(player);
 		}
 
-		TPARequest request = create(player.server, dataSource, dataTarget, here);
+		TPARequest request = create(dataSource, dataTarget, here);
 
 		TextComponent component = new TextComponent("TPA request! [ ");
 		component.append((here ? target : player).getDisplayName().copy().withStyle(ChatFormatting.YELLOW));
@@ -150,7 +140,9 @@ public class TPACommands {
 			return 0;
 		}
 
-		TeleportPos.TeleportResult result = (request.here ? request.target : request.source).tpaTeleporter.teleport(request.here ? player : sourcePlayer, p -> new TeleportPos(request.here ? sourcePlayer : player));
+		TeleportPos.TeleportResult result = request.here ?
+				request.target.tpaTeleporter.teleport(player, p -> new TeleportPos(sourcePlayer)) :
+				request.source.tpaTeleporter.teleport(sourcePlayer, p -> new TeleportPos(player));
 
 		if (result.isSuccess()) {
 			REQUESTS.remove(request.id);

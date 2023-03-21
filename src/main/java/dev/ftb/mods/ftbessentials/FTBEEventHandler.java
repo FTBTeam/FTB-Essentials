@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
+import dev.ftb.mods.ftbessentials.util.WarmupCooldownTeleporter;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import net.minecraft.ChatFormatting;
@@ -14,12 +15,15 @@ import net.minecraft.Util;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
@@ -27,6 +31,7 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.nio.file.Path;
 import java.util.Iterator;
@@ -173,12 +178,13 @@ public class FTBEEventHandler {
 
 			Iterator<TPACommands.TPARequest> iterator = TPACommands.REQUESTS.values().iterator();
 
+			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 			while (iterator.hasNext()) {
 				TPACommands.TPARequest r = iterator.next();
 
-				if (now > r.created + 60000L) {
-					ServerPlayer source = r.server.getPlayerList().getPlayer(r.source.uuid);
-					ServerPlayer target = r.server.getPlayerList().getPlayer(r.target.uuid);
+				if (now > r.created() + 60000L) {
+					ServerPlayer source = server.getPlayerList().getPlayer(r.source().uuid);
+					ServerPlayer target = server.getPlayerList().getPlayer(r.target().uuid);
 
 					if (source != null) {
 						source.sendMessage(new TextComponent("TPA request expired!"), Util.NIL_UUID);
@@ -190,6 +196,10 @@ public class FTBEEventHandler {
 
 					iterator.remove();
 				}
+			}
+
+			if (server.getTickCount() % 20 == 0) {
+				WarmupCooldownTeleporter.tickWarmups(server);
 			}
 		}
 	}
@@ -226,10 +236,31 @@ public class FTBEEventHandler {
 		}
 	}
 
-	@SubscribeEvent
+	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void playerDeath(LivingDeathEvent event) {
-		if (event.getEntity() instanceof ServerPlayer) {
-			FTBEPlayerData.addTeleportHistory((ServerPlayer) event.getEntity());
+		if (event.getEntity() instanceof ServerPlayer sp) {
+			FTBEPlayerData.addTeleportHistory(sp);
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOWEST)
+	public static void vanillaTeleportCommand(EntityTeleportEvent.TeleportCommand event) {
+		if (event.getEntity() instanceof ServerPlayer sp) {
+			FTBEPlayerData.addTeleportHistory(sp);
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.LOWEST)
+	public static void onPlayerHurt(LivingHurtEvent event) {
+		if (event.getEntity() instanceof ServerPlayer sp && event.getAmount() > 0f) {
+			WarmupCooldownTeleporter.cancelWarmup(sp);
+		}
+	}
+
+	@SubscribeEvent
+	public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+		if (event.getEntity() instanceof ServerPlayer sp) {
+			WarmupCooldownTeleporter.cancelWarmup(sp);
 		}
 	}
 }

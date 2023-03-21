@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbessentials;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.ftb.mods.ftbessentials.net.FTBEssentialsNet;
-import dev.ftb.mods.ftbranks.FTBRanks;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.IExtensionPoint.DisplayTest;
 import net.minecraftforge.fml.ModList;
@@ -24,11 +23,13 @@ public class FTBEssentials {
 
 	public static FTBEssentialsCommon PROXY;
 	public static boolean ranksMod;
+	public static boolean luckpermsMod;
 
 	public FTBEssentials() {
 		ModLoadingContext.get().registerExtensionPoint(DisplayTest.class, () -> new DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
 		FTBEssentialsNet.init();
 		PROXY = DistExecutor.safeRunForDist(() -> FTBEssentialsClient::new, () -> FTBEssentialsCommon::new);
-		ranksMod = ModList.get().isLoaded(FTBRanks.MOD_ID);
+		ranksMod = ModList.get().isLoaded("ftbranks");
+		luckpermsMod = ModList.get().isLoaded("luckperms");
 	}
 }

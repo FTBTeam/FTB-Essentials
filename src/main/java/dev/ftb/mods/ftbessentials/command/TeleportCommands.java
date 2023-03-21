@@ -2,12 +2,12 @@ package dev.ftb.mods.ftbessentials.command;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
-
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.RTPEvent;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.DimensionArgument;
@@ -17,11 +17,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
@@ -32,8 +30,6 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.MinecraftForge;
-
-import java.util.Optional;
 
 /**
  * @author LatvianModder
@@ -76,12 +72,11 @@ public class TeleportCommands {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 
 		if (data.teleportHistory.isEmpty()) {
-			player.displayClientMessage(new TextComponent("Teleportation history is empty!"), false);
+			player.displayClientMessage(new TextComponent("Teleportation history is empty!").withStyle(ChatFormatting.RED), false);
 			return 0;
 		}
 
 		if (data.backTeleporter.teleport(player, serverPlayerEntity -> data.teleportHistory.getLast()).runCommand(player) != 0) {
-			data.teleportHistory.removeLast();
 			data.save();
 			return 1;
 		}
@@ -110,7 +105,7 @@ public class TeleportCommands {
 
 	private static TeleportPos findBlockPos(ServerLevel world, ServerPlayer player, int attempt) {
 		if (attempt > FTBEConfig.RTP_MAX_TRIES.get()) {
-			player.displayClientMessage(new TextComponent("Could not find a valid location to teleport to!"), false);
+			player.displayClientMessage(new TextComponent("Could not find a valid location to teleport to!").withStyle(ChatFormatting.RED), false);
 			return new TeleportPos(player);
 		}
 
@@ -165,6 +160,7 @@ public class TeleportCommands {
 		ServerPlayer p = player.server.getPlayerList().getPlayer(to.getId());
 
 		if (p != null) {
+			FTBEPlayerData.addTeleportHistory(player);
 			new TeleportPos(p).teleport(player);
 			return 1;
 		}
@@ -175,7 +171,9 @@ public class TeleportCommands {
 			return 0;
 		}
 
+		FTBEPlayerData.addTeleportHistory(player);
 		dataTo.lastSeen.teleport(player);
+
 		return 1;
 	}
 

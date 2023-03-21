@@ -1,10 +1,10 @@
 plugins {
-	id "dev.architectury.loom" version "0.11.0-SNAPSHOT"
+	id "dev.architectury.loom" version "0.12.0-SNAPSHOT"
 	id 'maven-publish'
 	id "com.matthewprenger.cursegradle" version "1.4.0"
 }
 
-apply from: 'https://files.latmod.com/public/markdown-git-changelog.gradle'
+apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/git-md-changelog.gradle'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = 17
 
@@ -70,6 +70,8 @@ dependencies {
 	}
 
 	modImplementation "dev.ftb.mods:ftb-ranks-forge:${rootProject.ftb_ranks_version}"
+
+	compileOnly 'net.luckperms:api:5.4'
 }
 
 processResources {
