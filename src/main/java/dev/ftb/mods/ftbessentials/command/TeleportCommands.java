@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.RTPEvent;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.DimensionArgument;
@@ -71,12 +72,11 @@ public class TeleportCommands {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 
 		if (data.teleportHistory.isEmpty()) {
-			player.displayClientMessage(Component.literal("Teleportation history is empty!"), false);
+			player.displayClientMessage(Component.literal("Teleportation history is empty!").withStyle(ChatFormatting.RED), false);
 			return 0;
 		}
 
 		if (data.backTeleporter.teleport(player, serverPlayerEntity -> data.teleportHistory.getLast()).runCommand(player) != 0) {
-			data.teleportHistory.removeLast();
 			data.save();
 			return 1;
 		}
@@ -105,7 +105,7 @@ public class TeleportCommands {
 
 	private static TeleportPos findBlockPos(ServerLevel world, ServerPlayer player, int attempt) {
 		if (attempt > FTBEConfig.RTP_MAX_TRIES.get()) {
-			player.displayClientMessage(Component.literal("Could not find a valid location to teleport to!"), false);
+			player.displayClientMessage(Component.literal("Could not find a valid location to teleport to!").withStyle(ChatFormatting.RED), false);
 			return new TeleportPos(player);
 		}
 
@@ -160,6 +160,7 @@ public class TeleportCommands {
 		ServerPlayer p = player.server.getPlayerList().getPlayer(to.getId());
 
 		if (p != null) {
+			FTBEPlayerData.addTeleportHistory(player);
 			new TeleportPos(p).teleport(player);
 			return 1;
 		}
@@ -170,7 +171,9 @@ public class TeleportCommands {
 			return 0;
 		}
 
+		FTBEPlayerData.addTeleportHistory(player);
 		dataTo.lastSeen.teleport(player);
+
 		return 1;
 	}
 

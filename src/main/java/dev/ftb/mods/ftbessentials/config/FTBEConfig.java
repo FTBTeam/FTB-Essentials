@@ -12,7 +12,7 @@ public interface FTBEConfig {
 
 	SNBTConfig TELEPORTATION = CONFIG.getGroup("teleportation").comment("Teleportation-related settings");
 	// back
-	TimedCommandConfig BACK = new TimedCommandConfig(TELEPORTATION, "back", 30)
+	TimedCommandConfig BACK = new TimedCommandConfig(TELEPORTATION, "back", 30, 0)
 			.comment("Allows users to return to their previous location after teleporting (or dying)");
 	PermissionBasedIntValue MAX_BACK = new PermissionBasedIntValue(
 			BACK.config.getInt("max", 10)
@@ -21,12 +21,12 @@ public interface FTBEConfig {
 			"Max size of the teleport history. This limits how many times you can use /back"
 	);
 	// spawn
-	TimedCommandConfig SPAWN = new TimedCommandConfig(TELEPORTATION, "spawn", 10);
+	TimedCommandConfig SPAWN = new TimedCommandConfig(TELEPORTATION, "spawn", 10, 0);
 	// warp
-	TimedCommandConfig WARP = new TimedCommandConfig(TELEPORTATION, "warp", 10)
+	TimedCommandConfig WARP = new TimedCommandConfig(TELEPORTATION, "warp", 10, 0)
 			.comment("Allows admins to create 'warps', which are fixed points in the world that users may teleport to using /warp");
 	// home
-	TimedCommandConfig HOME = new TimedCommandConfig(TELEPORTATION, "home", 10)
+	TimedCommandConfig HOME = new TimedCommandConfig(TELEPORTATION, "home", 10, 0)
 			.comment("Allows users to set 'homes', which they can then freely teleport to by using /home afterwards");
 	PermissionBasedIntValue MAX_HOMES = new PermissionBasedIntValue(
 			HOME.config.getInt("max", 1)
@@ -35,11 +35,11 @@ public interface FTBEConfig {
 			"Max amount of homes a user can have."
 	);
 	// tpa
-	TimedCommandConfig TPA = new TimedCommandConfig(TELEPORTATION, "tpa", 10)
+	TimedCommandConfig TPA = new TimedCommandConfig(TELEPORTATION, "tpa", 10, 0)
 			.comment("Allows players to create requests to teleport to other users on the server,",
 					"as well as requesting other players to teleport to them");
 	// rtp
-	TimedCommandConfig RTP = new TimedCommandConfig(TELEPORTATION, "rtp", 600)
+	TimedCommandConfig RTP = new TimedCommandConfig(TELEPORTATION, "rtp", 600, 0)
 			.comment("Allows players to teleport to a random point in the Wilderness",
 					"Note: This currently does not respect Claimed Chunks yet!");
 	IntValue RTP_MAX_TRIES = RTP.config.getInt("max_tries", 100).range(1, 1000).comment("Number of tries before /rtp gives up");
