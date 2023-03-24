@@ -196,7 +196,7 @@ public class FTBEEventHandler {
 		// this is better than checking for living death event, because player cloning isn't cancellable
 		// the player death event is cancellable, and we can't detect cancelled events with Architectury
 		if (!wonGame) {
-			FTBEPlayerData.addTeleportHistory(oldPlayer);
+			newPlayer.getLastDeathLocation().ifPresent(loc -> FTBEPlayerData.addTeleportHistory(newPlayer));
 		}
 	}
 
