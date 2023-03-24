@@ -111,13 +111,13 @@ public class FTBEPlayerData {
 	}
 
 	public SNBTCompoundTag write() {
-		SNBTCompoundTag json = new SNBTCompoundTag();
-		json.putBoolean("muted", muted);
-		json.putBoolean("fly", fly);
-		json.putBoolean("god", god);
-		json.putString("nick", nick);
-		json.put("last_seen", lastSeen.write());
-		json.putInt("recording", recording);
+		SNBTCompoundTag nbt = new SNBTCompoundTag();
+		nbt.putBoolean("muted", muted);
+		nbt.putBoolean("fly", fly);
+		nbt.putBoolean("god", god);
+		nbt.putString("nick", nick);
+		nbt.put("last_seen", lastSeen.write());
+		nbt.putInt("recording", recording);
 
 		ListTag tph = new ListTag();
 
@@ -125,7 +125,7 @@ public class FTBEPlayerData {
 			tph.add(pos.write());
 		}
 
-		json.put("teleport_history", tph);
+		nbt.put("teleport_history", tph);
 
 		SNBTCompoundTag hm = new SNBTCompoundTag();
 
@@ -133,9 +133,9 @@ public class FTBEPlayerData {
 			hm.put(h.getKey(), h.getValue().write());
 		}
 
-		json.put("homes", hm);
+		nbt.put("homes", hm);
 
-		return json;
+		return nbt;
 	}
 
 	public void read(CompoundTag tag) {

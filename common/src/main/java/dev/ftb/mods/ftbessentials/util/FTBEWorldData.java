@@ -4,12 +4,12 @@ import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author LatvianModder
@@ -24,10 +24,12 @@ public class FTBEWorldData {
 	private boolean needSave;
 
 	public final Map<String, TeleportPos> warps;
+	private final Map<UUID,Long> muteTimeouts;
 
 	public FTBEWorldData(MinecraftServer s) {
 		server = s;
 		warps = new LinkedHashMap<>();
+		muteTimeouts = new HashMap<>();
 	}
 
 	public Path mkdirs(String path) {
@@ -73,24 +75,63 @@ public class FTBEWorldData {
 	private SNBTCompoundTag toNBT() {
 		SNBTCompoundTag tag = new SNBTCompoundTag();
 
-		SNBTCompoundTag wm = new SNBTCompoundTag();
+		SNBTCompoundTag warpsTag = new SNBTCompoundTag();
+		warps.forEach((key, value) -> warpsTag.put(key, value.write()));
+		tag.put("warps", warpsTag);
 
-		for (Map.Entry<String, TeleportPos> h : warps.entrySet()) {
-			wm.put(h.getKey(), h.getValue().write());
-		}
-
-		tag.put("warps", wm);
+		SNBTCompoundTag mutesTag = new SNBTCompoundTag();
+		muteTimeouts.forEach((id, until) -> mutesTag.putLong(id.toString(), until));
+		tag.put("mute_timeouts", mutesTag);
 
 		return tag;
 	}
 
 	public void loadNBT(SNBTCompoundTag tag) {
 		warps.clear();
-
-		SNBTCompoundTag w = tag.getCompound("warps");
-
-		for (String key : w.getAllKeys()) {
-			warps.put(key, new TeleportPos(w.getCompound(key)));
+		SNBTCompoundTag warpsTag = tag.getCompound("warps");
+		for (String key : warpsTag.getAllKeys()) {
+			warps.put(key, new TeleportPos(warpsTag.getCompound(key)));
 		}
+
+		muteTimeouts.clear();
+		SNBTCompoundTag mutesTag = tag.getCompound("mute_timeouts");
+		for (String key : mutesTag.getAllKeys()) {
+			muteTimeouts.put(UUID.fromString(key), mutesTag.getLong(key));
+		}
+	}
+
+	public void tickMuteTimeouts(MinecraftServer server) {
+		long now = System.currentTimeMillis();
+		Set<UUID> toExpire = new HashSet<>();
+		muteTimeouts.forEach((id, expiry) -> {
+			if (now >= expiry) {
+				toExpire.add(id);
+			}
+		});
+		toExpire.forEach(id -> {
+			ServerPlayer player = server.getPlayerList().getPlayer(id);
+			if (player != null) {
+				server.getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().append(" is no longer muted"), false);
+			}
+			FTBEPlayerData data = FTBEPlayerData.get(player);
+			if (data != null) {
+				data.muted = false;
+			}
+			muteTimeouts.remove(id);
+			markDirty();
+		});
+	}
+
+	public void setMuteTimeout(ServerPlayer player, long until) {
+		if (until > 0) {
+			muteTimeouts.put(player.getUUID(), until);
+		} else {
+			muteTimeouts.remove(player.getUUID());
+		}
+		markDirty();
+	}
+
+	public Optional<Long> getMuteTimeout(ServerPlayer player) {
+		return Optional.ofNullable(muteTimeouts.get(player.getUUID()));
 	}
 }

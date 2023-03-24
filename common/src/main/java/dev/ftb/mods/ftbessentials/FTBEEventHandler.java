@@ -11,6 +11,7 @@ import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import dev.ftb.mods.ftbessentials.util.WarmupCooldownTeleporter;
+import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -169,6 +170,7 @@ public class FTBEEventHandler {
 
 		if (server.getTickCount() % 20 == 0) {
 			WarmupCooldownTeleporter.tickWarmups(server);
+			FTBEWorldData.instance.tickMuteTimeouts(server);
 		}
 	}
 
@@ -179,6 +181,10 @@ public class FTBEEventHandler {
 			if (data != null && data.muted) {
 				serverPlayer.displayClientMessage(Component.literal("You can't use chat, you've been muted by an admin!")
 						.withStyle(ChatFormatting.RED), false);
+				FTBEWorldData.instance.getMuteTimeout(serverPlayer).ifPresent(expiry -> {
+					long left = (expiry - System.currentTimeMillis()) / 1000L;
+					serverPlayer.displayClientMessage(Component.literal("Mute expiry in: " + TimeUtils.prettyTimeString(left)).withStyle(ChatFormatting.RED), false);
+				});
 				return EventResult.interruptFalse();
 			}
 		}

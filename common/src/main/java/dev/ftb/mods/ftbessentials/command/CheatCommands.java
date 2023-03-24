@@ -2,15 +2,21 @@ package dev.ftb.mods.ftbessentials.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.ftb.mods.ftbessentials.FTBEssentialsPlatform;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.util.DurationUtil;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
+import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.OtherPlayerInventory;
 import dev.ftb.mods.ftblibrary.util.PlayerDisplayNameUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -18,6 +24,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 /**
  * @author LatvianModder
@@ -85,16 +94,17 @@ public class CheatCommands {
 		if (FTBEConfig.MUTE.isEnabled()) {
 			dispatcher.register(Commands.literal("mute")
 					.requires(FTBEConfig.MUTE.enabledAndOp())
-					.requires(source -> source.hasPermission(2))
 					.then(Commands.argument("player", EntityArgument.player())
-							.requires(source -> source.hasPermission(2))
-							.executes(context -> mute(context.getSource(), EntityArgument.getPlayer(context, "player")))
+							.executes(context -> mute(context.getSource(), EntityArgument.getPlayer(context, "player"), ""))
+							.then(Commands.argument("until", StringArgumentType.greedyString())
+									.suggests((context, builder) -> suggestTimeouts(builder))
+									.executes(context -> mute(context.getSource(), EntityArgument.getPlayer(context, "player"), StringArgumentType.getString(context, "until")))
+							)
 					)
 			);
 			dispatcher.register(Commands.literal("unmute")
 					.requires(FTBEConfig.MUTE.enabledAndOp())
 					.then(Commands.argument("player", EntityArgument.player())
-							.requires(source -> source.hasPermission(2))
 							.executes(context -> unmute(context.getSource(), EntityArgument.getPlayer(context, "player")))
 					)
 			);
@@ -111,6 +121,7 @@ public class CheatCommands {
 
 	public static int fly(ServerPlayer player) {
 		var data = FTBEPlayerData.get(player);
+		if (data == null) return 0;
 		var abilities = player.getAbilities();
 
 		if (data.fly) {
@@ -132,6 +143,7 @@ public class CheatCommands {
 
 	public static int god(ServerPlayer player) {
 		var data = FTBEPlayerData.get(player);
+		if (data == null) return 0;
 		var abilities = player.getAbilities();
 
 		if (data.god) {
@@ -173,6 +185,7 @@ public class CheatCommands {
 		}
 
 		FTBEPlayerData data = FTBEPlayerData.get(player);
+		if (data == null) return 0;
 		data.nick = nick.trim();
 		data.markDirty();
 		PlayerDisplayNameUtil.refreshDisplayName(player);
@@ -187,19 +200,44 @@ public class CheatCommands {
 		return 1;
 	}
 
-	public static int mute(CommandSourceStack source, ServerPlayer player) {
+	public static int mute(CommandSourceStack source, ServerPlayer player, String duration) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
+		if (data == null) return 0;
+
+		DurationUtil.DurationInfo info = DurationUtil.calculateUntil(duration);
+		if (info == null) {
+			source.sendFailure(Component.literal("Invalid duration syntax: '" + duration + "'"));
+			source.sendFailure(Component.literal("Use a number followed by 'm' (minutes), 'h' (hours), 'd' (days) or 'w' (weeks)"));
+			return 0;
+		}
+
 		data.muted = true;
+		FTBEWorldData.instance.setMuteTimeout(player, info.until());
+
 		data.markDirty();
-		source.sendSuccess(Component.literal("").append(player.getDisplayName()).append(" has been muted by ").append(source.getDisplayName()), true);
+
+		MutableComponent msg = player.getDisplayName().copy()
+				.append(" has been muted by ")
+				.append(source.getDisplayName())
+				.append(", ")
+				.append(info.desc());
+		source.sendSuccess(msg, true);
+
 		return 1;
+	}
+
+	private static CompletableFuture<Suggestions> suggestTimeouts(SuggestionsBuilder builder) {
+		return SharedSuggestionProvider.suggest(Stream.of("5m", "10m", "1h", "1d", "1w", "<number>[smhdw]"), builder);
 	}
 
 	public static int unmute(CommandSourceStack source, ServerPlayer player) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
+		if (data == null) return 0;
 		data.muted = false;
+		FTBEWorldData.instance.setMuteTimeout(player, -1);
 		data.markDirty();
-		source.sendSuccess(Component.literal("").append(player.getDisplayName()).append(" has been unmuted by ").append(source.getDisplayName()), true);
+		source.sendSuccess(player.getDisplayName().copy().append(" has been unmuted by ").append(source.getDisplayName()), true);
 		return 1;
 	}
+
 }
