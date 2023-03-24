@@ -221,7 +221,7 @@ public class CheatCommands {
 				.append(source.getDisplayName())
 				.append(", ")
 				.append(info.desc());
-		source.sendSuccess(msg, true);
+		notifyMuting(source, player, msg);
 
 		return 1;
 	}
@@ -233,11 +233,29 @@ public class CheatCommands {
 	public static int unmute(CommandSourceStack source, ServerPlayer player) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		if (data == null) return 0;
+
 		data.muted = false;
 		FTBEWorldData.instance.setMuteTimeout(player, -1);
 		data.markDirty();
-		source.sendSuccess(player.getDisplayName().copy().append(" has been unmuted by ").append(source.getDisplayName()), true);
+
+		MutableComponent msg = player.getDisplayName().copy()
+				.append(" has been unmuted by ")
+				.append(source.getDisplayName());
+		notifyMuting(source, player, msg);
+
 		return 1;
 	}
 
+	private static void notifyMuting(CommandSourceStack source, Player target, Component msg) {
+		// notify any online ops, plus the player being (un)muted
+		source.getServer().getPlayerList().getPlayers().forEach(p -> {
+			if (p.hasPermissions(2) || p == target) {
+				p.displayClientMessage(msg, false);
+			}
+		});
+		// notify command sender if not actually a player
+		if (!source.isPlayer()) {
+			source.sendSuccess(msg, true);
+		}
+	}
 }
