@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "ftbessentials",
+  "version": "${version}",
+  "name": "FTB Essentials",
+  "description": "Adds many essential utility commands for servers",
+  "authors": [
+    "FTB Team"
+  ],
+  "contact": {
+    "homepage": "https://go.ftb.team/support-mod-issues",
+    "sources": "https://github.com/FTBTeam/FTB-Essentials"
+  },
+  "license": "All Rights Reserved",
+  "entrypoints": {
+    "main": [
+      "dev.ftb.mods.ftbessentials.fabric.FTBEssentialsFabric"
+    ]
+  },
+  "mixins": [
+    "ftbessentials-fabric.mixins.json",
+    "ftbessentials-common.mixins.json"
+  ],
+  "depends": {
+    "fabric": "*",
+    "minecraft": ">=1.19.2",
+    "architectury": ">=6.2.43",
+    "ftblibrary": ">=1902.3.10-build.160"
+  },
+  "breaks": {
+    "ftbranks": "<1902.1.12-"
+  }
+}

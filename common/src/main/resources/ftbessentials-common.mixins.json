@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "dev.ftb.mods.ftbessentials.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+  ],
+  "mixins": [
+    "PlayerListAccess"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
