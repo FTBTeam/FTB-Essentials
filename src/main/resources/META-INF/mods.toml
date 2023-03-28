@@ -43,6 +43,6 @@ side = "BOTH"
 [[dependencies.ftbessentials]]
 modId = "luckperms"
 mandatory = false
-versionRange = "[5.4.30,)"
+versionRange = "[5.4.26,)"
 ordering = "AFTER"
 side = "SERVER"
