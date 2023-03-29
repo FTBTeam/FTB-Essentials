@@ -6,7 +6,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.ftb.mods.ftbessentials.FTBEssentialsPlatform;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
-import dev.ftb.mods.ftbessentials.util.DurationUtil;
+import dev.ftb.mods.ftbessentials.util.DurationInfo;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.OtherPlayerInventory;
@@ -204,26 +204,25 @@ public class CheatCommands {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		if (data == null) return 0;
 
-		DurationUtil.DurationInfo info = DurationUtil.calculateUntil(duration);
-		if (info == null) {
-			source.sendFailure(Component.literal("Invalid duration syntax: '" + duration + "'"));
-			source.sendFailure(Component.literal("Use a number followed by 'm' (minutes), 'h' (hours), 'd' (days) or 'w' (weeks)"));
+		try {
+			DurationInfo info = DurationInfo.fromString(duration);
+			data.muted = true;
+			FTBEWorldData.instance.setMuteTimeout(player, info.until());
+
+			data.markDirty();
+
+			MutableComponent msg = player.getDisplayName().copy()
+					.append(" has been muted by ")
+					.append(source.getDisplayName())
+					.append(", ")
+					.append(info.desc());
+			notifyMuting(source, player, msg);
+
+			return 1;
+		} catch (IllegalArgumentException e) {
+			source.sendFailure(Component.literal("Invalid duration syntax: '" + duration + "': " + e.getMessage()));
 			return 0;
 		}
-
-		data.muted = true;
-		FTBEWorldData.instance.setMuteTimeout(player, info.until());
-
-		data.markDirty();
-
-		MutableComponent msg = player.getDisplayName().copy()
-				.append(" has been muted by ")
-				.append(source.getDisplayName())
-				.append(", ")
-				.append(info.desc());
-		notifyMuting(source, player, msg);
-
-		return 1;
 	}
 
 	private static CompletableFuture<Suggestions> suggestTimeouts(SuggestionsBuilder builder) {
