@@ -38,34 +38,44 @@ public class TeleportCommands {
 	public static final TagKey<Block> IGNORE_RTP = TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(FTBEssentials.MOD_ID, "ignore_rtp"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(Commands.literal("back")
-				.requires(FTBEConfig.BACK)
-				.executes(context -> back(context.getSource().getPlayerOrException()))
-		);
+		if (FTBEConfig.BACK.isEnabled()) {
+			dispatcher.register(Commands.literal("back")
+					.requires(FTBEConfig.BACK)
+					.executes(context -> back(context.getSource().getPlayerOrException()))
+			);
+		}
 
-		dispatcher.register(Commands.literal("spawn")
-				.requires(FTBEConfig.SPAWN)
-				.executes(context -> spawn(context.getSource().getPlayerOrException()))
-		);
+		if (FTBEConfig.SPAWN.isEnabled()) {
+			dispatcher.register(Commands.literal("spawn")
+					.requires(FTBEConfig.SPAWN)
+					.executes(context -> spawn(context.getSource().getPlayerOrException()))
+			);
+		}
 
-		dispatcher.register(Commands.literal("rtp")
-				.requires(FTBEConfig.RTP)
-				.executes(context -> rtp(context.getSource().getPlayerOrException()))
-		);
+		if (FTBEConfig.RTP.isEnabled()) {
+			dispatcher.register(Commands.literal("rtp")
+					.requires(FTBEConfig.RTP)
+					.executes(context -> rtp(context.getSource().getPlayerOrException()))
+			);
+		}
 
-		dispatcher.register(Commands.literal("teleport_last")
-				.requires(FTBEConfig.TPL.enabledAndOp())
-				.then(Commands.argument("player", GameProfileArgument.gameProfile())
-						.executes(context -> tpLast(context.getSource().getPlayerOrException(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
-				)
-		);
+		if (FTBEConfig.TPL.isEnabled()) {
+			dispatcher.register(Commands.literal("teleport_last")
+					.requires(FTBEConfig.TPL.enabledAndOp())
+					.then(Commands.argument("player", GameProfileArgument.gameProfile())
+							.executes(context -> tpLast(context.getSource().getPlayerOrException(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
+					)
+			);
+		}
 
-		dispatcher.register(Commands.literal("tpx")
-				.requires(FTBEConfig.TPX.enabledAndOp())
-				.then(Commands.argument("dimension", DimensionArgument.dimension())
-						.executes(context -> tpx(context.getSource().getPlayerOrException(), DimensionArgument.getDimension(context, "dimension")))
-				)
-		);
+		if (FTBEConfig.TPX.isEnabled()) {
+			dispatcher.register(Commands.literal("tpx")
+					.requires(FTBEConfig.TPX.enabledAndOp())
+					.then(Commands.argument("dimension", DimensionArgument.dimension())
+							.executes(context -> tpx(context.getSource().getPlayerOrException(), DimensionArgument.getDimension(context, "dimension")))
+					)
+			);
+		}
 	}
 
 	public static int back(ServerPlayer player) {
