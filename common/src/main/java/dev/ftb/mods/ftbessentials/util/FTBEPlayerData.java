@@ -56,7 +56,7 @@ public class FTBEPlayerData {
 		FTBEPlayerData data = get(player);
 
 		if (data != null) {
-			data.addTeleportHistory(player, new TeleportPos(dimension, pos));
+			data.addTeleportHistory(player, new TeleportPos(dimension, pos, player.getYRot(), player.getXRot()));
 		}
 	}
 
