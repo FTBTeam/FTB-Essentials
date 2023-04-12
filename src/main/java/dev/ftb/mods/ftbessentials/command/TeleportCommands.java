@@ -92,7 +92,7 @@ public class TeleportCommands {
 			return 0;
 		}
 
-		return data.spawnTeleporter.teleport(player, p -> new TeleportPos(w, w.getSharedSpawnPos())).runCommand(player);
+		return data.spawnTeleporter.teleport(player, p -> new TeleportPos(w, w.getSharedSpawnPos(), w.getSharedSpawnAngle(), 0F)).runCommand(player);
 	}
 
 	public static int rtp(ServerPlayer player) {

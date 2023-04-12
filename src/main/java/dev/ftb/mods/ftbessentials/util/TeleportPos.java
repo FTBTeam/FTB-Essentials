@@ -57,25 +57,34 @@ public class TeleportPos {
 
 	public final ResourceKey<Level> dimension;
 	public final BlockPos pos;
+	public final Float yRot, xRot;
 	public long time;
 
 	public TeleportPos(ResourceKey<Level> d, BlockPos p) {
+		this(d, p, null, null);
+	}
+	
+	public TeleportPos(ResourceKey<Level> d, BlockPos p, Float yRot, Float xRot) {
 		dimension = d;
 		pos = p;
+		this.yRot = yRot;
+		this.xRot = xRot;
 		time = System.currentTimeMillis();
 	}
 
-	public TeleportPos(Level world, BlockPos p) {
-		this(world.dimension(), p);
+	public TeleportPos(Level world, BlockPos p, Float yRot, Float xRot) {
+		this(world.dimension(), p, yRot, xRot);
 	}
 
 	public TeleportPos(Entity entity) {
-		this(entity.level, entity.blockPosition());
+		this(entity.level, entity.blockPosition(), entity.getYRot(), entity.getXRot());
 	}
 
 	public TeleportPos(CompoundTag tag) {
 		dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(tag.getString("dim")));
 		pos = new BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"));
+		this.yRot = (tag.getTagType("yRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("yRot") : null;
+		this.xRot = (tag.getTagType("xRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("xRot") : null;
 		time = tag.getLong("time");
 	}
 
@@ -87,7 +96,9 @@ public class TeleportPos {
 		}
 
 		int lvl = player.experienceLevel;
-		player.teleportTo(world, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, player.getYRot(), player.getXRot());
+		float xrot = (this.xRot == null) ? player.getXRot() : this.xRot;
+		float yrot = (this.yRot == null) ? player.getYRot() : this.yRot;
+		player.teleportTo(world, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, yrot, xrot);
 		player.setExperienceLevels(lvl);
 		return TeleportResult.SUCCESS;
 	}
@@ -100,6 +111,8 @@ public class TeleportPos {
 		tag.putInt("y", pos.getY());
 		tag.putInt("z", pos.getZ());
 		tag.putLong("time", time);
+		if (this.xRot != null) tag.putFloat("xRot", this.xRot);
+		if (this.yRot != null) tag.putFloat("yRot", this.yRot);
 		return tag;
 	}
 
