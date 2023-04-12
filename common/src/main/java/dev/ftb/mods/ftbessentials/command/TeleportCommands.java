@@ -97,7 +97,7 @@ public class TeleportCommands {
 	public static int spawn(ServerPlayer player) {
 		return FTBEPlayerData.getOrCreate(player).map(data -> {
 			ServerLevel level = player.server.getLevel(Level.OVERWORLD);
-			return level == null ? 0 : data.spawnTeleporter.teleport(player, p -> new TeleportPos(level, level.getSharedSpawnPos())).runCommand(player);
+			return level == null ? 0 : data.spawnTeleporter.teleport(player, p -> new TeleportPos(level, level.getSharedSpawnPos(), level.getSharedSpawnAngle(), 0F)).runCommand(player);
 		}).orElse(0);
 	}
 
