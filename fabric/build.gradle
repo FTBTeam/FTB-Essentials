@@ -1,5 +1,6 @@
 plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "com.matthewprenger.cursegradle" version "1.4.0"
 }
 
 def ENV = System.getenv()
@@ -24,7 +25,7 @@ configurations {
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
-    // Remove the next line if you don't want to depend on the API
+
     modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
@@ -76,29 +77,30 @@ components.java {
 
 publishing {
     publications {
-        mavenFabric(MavenPublication) {
-            artifactId = "${rootProject.archives_base_name}-${project.name}"
+        mavenForge(MavenPublication) {
+            artifactId = "${rootProject.archives_base_name}"
+            version ftbPublishing.mavenVersion
             from components.java
         }
     }
 
     repositories {
-        if (ENV.FTB_MAVEN_TOKEN) {
+        if (ftbPublishing.ftbToken) {
             maven {
-                url "https://maven.ftb.dev/release"
+                url ftbPublishing.ftbURL
                 credentials {
-                    username = "ftb"
-                    password = "${ENV.FTB_MAVEN_TOKEN}"
+                    username = ftbPublishing.ftbUser
+                    password = ftbPublishing.ftbToken
                 }
             }
         }
 
-        if (ENV.SAPS_TOKEN) {
+        if (ftbPublishing.sapsToken) {
             maven {
-                url "https://maven.saps.dev/minecraft"
+                url ftbPublishing.sapsURL
                 credentials {
-                    username = "ftb"
-                    password = "${ENV.SAPS_TOKEN}"
+                    username = ftbPublishing.sapsUser
+                    password = ftbPublishing.sapsToken
                 }
             }
         }
@@ -113,7 +115,7 @@ if (ENV.CURSEFORGE_KEY) {
             releaseType = project.curseforge_type
             addGameVersion "Fabric"
             addGameVersion rootProject.minecraft_version
-            mainArtifact(remapJar.archivePath)
+            mainArtifact(remapJar.archiveFile)
             relations {
                 requiredDependency 'architectury-api'
                 requiredDependency 'fabric-api'
@@ -126,4 +128,4 @@ if (ENV.CURSEFORGE_KEY) {
     }
 }
 
-//rootProject.tasks.getByName("curseforgePublish").dependsOn tasks.getByName("curseforge")
+rootProject.tasks.getByName("curseforgePublish").dependsOn tasks.getByName("curseforge")
