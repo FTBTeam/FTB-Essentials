@@ -25,7 +25,7 @@
     "fabric": "*",
     "minecraft": ">=1.19.2",
     "architectury": ">=6.2.43",
-    "ftblibrary": ">=1902.3.10-build.160"
+    "ftblibrary": ">=1902.3.16-build.191"
   },
   "breaks": {
     "ftbranks": "<1902.1.12-"
