@@ -73,6 +73,7 @@ shadowJar {
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
+    archiveBaseName.set "${rootProject.archives_base_name}-${project.name}"
     classifier null
 }
 
@@ -131,6 +132,7 @@ if (ENV.CURSEFORGE_KEY) {
             id = project.curseforge_id
             releaseType = project.curseforge_type
             addGameVersion project.minecraft_version
+            addGameVersion "Forge"
             mainArtifact(remapJar.archiveFile)
             relations {
                 requiredDependency 'ftb-library-forge'
