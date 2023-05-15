@@ -17,8 +17,8 @@ public class ToggleableConfig implements Predicate<CommandSourceStack> {
 
 	public ToggleableConfig(SNBTConfig parent, String name, boolean def) {
 		this.name = name;
-		config = parent.getGroup(name);
-		enabled = config.getBoolean("enabled", def);
+		config = parent.addGroup(name);
+		enabled = config.addBoolean("enabled", def);
 	}
 
 	public boolean isEnabled() {

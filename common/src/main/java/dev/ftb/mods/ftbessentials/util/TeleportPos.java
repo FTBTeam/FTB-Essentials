@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbessentials.util;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -74,21 +74,20 @@ public class TeleportPos {
 	}
 
 	public TeleportPos(CompoundTag tag) {
-		dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(tag.getString("dim")));
+		dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(tag.getString("dim")));
 		pos = new BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"));
 		time = tag.getLong("time");
 	}
 
 	public TeleportResult teleport(ServerPlayer player) {
-		ServerLevel world = player.server.getLevel(dimension);
-
-		if (world == null) {
+		ServerLevel level = player.server.getLevel(dimension);
+		if (level == null) {
 			return TeleportResult.DIMENSION_NOT_FOUND;
 		}
 
-		int lvl = player.experienceLevel;
-		player.teleportTo(world, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, player.getYRot(), player.getXRot());
-		player.setExperienceLevels(lvl);
+		int xpLevel = player.experienceLevel;
+		player.teleportTo(level, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, player.getYRot(), player.getXRot());
+		player.setExperienceLevels(xpLevel);
 		return TeleportResult.SUCCESS;
 	}
 

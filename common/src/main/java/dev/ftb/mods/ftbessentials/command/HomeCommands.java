@@ -134,7 +134,7 @@ public class HomeCommands {
 			return 1;
 		}
 
-		TeleportPos origin = new TeleportPos(source.getLevel().dimension(), new BlockPos(source.getPosition()));
+		TeleportPos origin = new TeleportPos(source.getLevel().dimension(), BlockPos.containing(source.getPosition()));
 
 		for (Map.Entry<String, TeleportPos> entry : data.homes.entrySet()) {
 			source.sendSuccess(Component.literal(entry.getKey() + ": " + entry.getValue().distanceString(origin)), false);

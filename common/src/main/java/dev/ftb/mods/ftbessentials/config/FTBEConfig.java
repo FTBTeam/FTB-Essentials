@@ -10,12 +10,12 @@ import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
 public interface FTBEConfig {
 	SNBTConfig CONFIG = SNBTConfig.create(FTBEssentials.MOD_ID).comment("FTB Essentials config file", "If you're a modpack maker, edit defaultconfigs/ftbessentials-server.snbt instead");
 
-	SNBTConfig TELEPORTATION = CONFIG.getGroup("teleportation").comment("Teleportation-related settings");
+	SNBTConfig TELEPORTATION = CONFIG.addGroup("teleportation").comment("Teleportation-related settings");
 	// back
 	TimedCommandConfig BACK = new TimedCommandConfig(TELEPORTATION, "back", 30, 0)
 			.comment("Allows users to return to their previous location after teleporting (or dying)");
 	PermissionBasedIntValue MAX_BACK = new PermissionBasedIntValue(
-			BACK.config.getInt("max", 10)
+			BACK.config.addInt("max", 10)
 					.range(0, Integer.MAX_VALUE),
 			"ftbessentials.back.max",
 			"Max size of the teleport history. This limits how many times you can use /back"
@@ -29,7 +29,7 @@ public interface FTBEConfig {
 	TimedCommandConfig HOME = new TimedCommandConfig(TELEPORTATION, "home", 10, 0)
 			.comment("Allows users to set 'homes', which they can then freely teleport to by using /home afterwards");
 	PermissionBasedIntValue MAX_HOMES = new PermissionBasedIntValue(
-			HOME.config.getInt("max", 1)
+			HOME.config.addInt("max", 1)
 					.range(0, Integer.MAX_VALUE),
 			"ftbessentials.home.max",
 			"Max amount of homes a user can have."
@@ -42,9 +42,9 @@ public interface FTBEConfig {
 	TimedCommandConfig RTP = new TimedCommandConfig(TELEPORTATION, "rtp", 600, 0)
 			.comment("Allows players to teleport to a random point in the Wilderness",
 					"Note: This currently does not respect Claimed Chunks yet!");
-	IntValue RTP_MAX_TRIES = RTP.config.getInt("max_tries", 100).range(1, 1000).comment("Number of tries before /rtp gives up");
-	IntValue RTP_MIN_DISTANCE = RTP.config.getInt("min_distance", 500).range(0, 30000000).comment("/rtp min distance from spawn point");
-	IntValue RTP_MAX_DISTANCE = RTP.config.getInt("max_distance", 25000).range(0, 30000000).comment("/rtp max distance from spawn point");
+	IntValue RTP_MAX_TRIES = RTP.config.addInt("max_tries", 100).range(1, 1000).comment("Number of tries before /rtp gives up");
+	IntValue RTP_MIN_DISTANCE = RTP.config.addInt("min_distance", 500).range(0, 30000000).comment("/rtp min distance from spawn point");
+	IntValue RTP_MAX_DISTANCE = RTP.config.addInt("max_distance", 25000).range(0, 30000000).comment("/rtp max distance from spawn point");
 	// tpl
 	ToggleableConfig TPL = new ToggleableConfig(TELEPORTATION, "tpl")
 			.comment("Allows admins to teleport to the location a user was last seen at");
@@ -52,7 +52,7 @@ public interface FTBEConfig {
 	ToggleableConfig TPX = new ToggleableConfig(TELEPORTATION, "tpx")
 			.comment("Allows admins to teleport to dimension");
 
-	SNBTConfig ADMIN = CONFIG.getGroup("admin").comment("Admin commands for cheating and moderation");
+	SNBTConfig ADMIN = CONFIG.addGroup("admin").comment("Admin commands for cheating and moderation");
 	ToggleableConfig HEAL = new ToggleableConfig(ADMIN, "heal")
 			.comment("Allows admins to heal themselves using a command");
 	ToggleableConfig FLY = new ToggleableConfig(ADMIN, "fly")
@@ -64,7 +64,7 @@ public interface FTBEConfig {
 	ToggleableConfig MUTE = new ToggleableConfig(ADMIN, "mute") // todo: temp mute?
 			.comment("Allows admins to restrict players from chatting by using a command to mute (or unmute) them");
 
-	SNBTConfig MISC = CONFIG.getGroup("misc").comment("Miscellaneous features and utilities");
+	SNBTConfig MISC = CONFIG.addGroup("misc").comment("Miscellaneous features and utilities");
 	ToggleableConfig KICKME = new ToggleableConfig(MISC, "kickme")
 			.comment("Allows users to kick themselves from the server, for example if they are stuck or desynced");
 	ToggleableConfig TRASHCAN = new ToggleableConfig(MISC, "trashcan")

@@ -16,7 +16,7 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -35,7 +35,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
  * @author LatvianModder
  */
 public class TeleportCommands {
-	public static final TagKey<Block> IGNORE_RTP = TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(FTBEssentials.MOD_ID, "ignore_rtp"));
+	public static final TagKey<Block> IGNORE_RTP = TagKey.create(Registries.BLOCK, new ResourceLocation(FTBEssentials.MOD_ID, "ignore_rtp"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		if (FTBEConfig.BACK.isEnabled()) {

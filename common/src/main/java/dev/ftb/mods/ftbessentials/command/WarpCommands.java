@@ -34,7 +34,7 @@ public class WarpCommands {
 			dispatcher.register(Commands.literal("setwarp")
 					.requires(FTBEConfig.WARP.enabledAndOp())
 					.then(Commands.argument("name", StringArgumentType.greedyString())
-							.executes(context -> setwarp(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
+							.executes(context -> setWarp(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
 					)
 			);
 
@@ -42,13 +42,13 @@ public class WarpCommands {
 					.requires(FTBEConfig.WARP.enabledAndOp())
 					.then(Commands.argument("name", StringArgumentType.greedyString())
 							.suggests((context, builder) -> SharedSuggestionProvider.suggest(getWarpSuggestions(context), builder))
-							.executes(context -> delwarp(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
+							.executes(context -> deleteWarp(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
 					)
 			);
 
 			dispatcher.register(Commands.literal("listwarps")
 					.requires(FTBEConfig.WARP)
-					.executes(context -> listwarps(context.getSource()))
+					.executes(context -> listWarps(context.getSource()))
 			);
 		}
 	}
@@ -69,14 +69,14 @@ public class WarpCommands {
 		return data.warpTeleporter.teleport(player, p -> pos).runCommand(player);
 	}
 
-	public static int setwarp(ServerPlayer player, String name) {
+	public static int setWarp(ServerPlayer player, String name) {
 		FTBEWorldData.instance.warps.put(name.toLowerCase(), new TeleportPos(player));
 		FTBEWorldData.instance.markDirty();
 		player.displayClientMessage(Component.literal("Warp set!"), false);
 		return 1;
 	}
 
-	public static int delwarp(ServerPlayer player, String name) {
+	public static int deleteWarp(ServerPlayer player, String name) {
 		if (FTBEWorldData.instance.warps.remove(name.toLowerCase()) != null) {
 			FTBEWorldData.instance.markDirty();
 			player.displayClientMessage(Component.literal("Warp deleted!"), false);
@@ -87,13 +87,13 @@ public class WarpCommands {
 		}
 	}
 
-	public static int listwarps(CommandSourceStack source) {
+	public static int listWarps(CommandSourceStack source) {
 		if (FTBEWorldData.instance.warps.isEmpty()) {
 			source.sendSuccess(Component.literal("None"), false);
 			return 1;
 		}
 
-		TeleportPos origin = new TeleportPos(source.getLevel().dimension(), new BlockPos(source.getPosition()));
+		TeleportPos origin = new TeleportPos(source.getLevel().dimension(), BlockPos.containing(source.getPosition()));
 
 		for (Map.Entry<String, TeleportPos> entry : FTBEWorldData.instance.warps.entrySet()) {
 			source.sendSuccess(Component.literal(entry.getKey() + ": " + entry.getValue().distanceString(origin)), false);
