@@ -72,7 +72,7 @@ public class CheatCommands {
 			dispatcher.register(Commands.literal("invsee")
 					.requires(FTBEConfig.INVSEE.enabledAndOp())
 					.then(Commands.argument("player", EntityArgument.player())
-							.executes(context -> invsee(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "player")))
+							.executes(context -> viewInventory(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "player")))
 					)
 			);
 		}
@@ -82,10 +82,10 @@ public class CheatCommands {
 					.requires(FTBEConfig.NICK.enabledAndOp())
 					.then(Commands.argument("player", EntityArgument.player())
 							.requires(source -> source.hasPermission(2))
-							.executes(context -> nicknamefor(context.getSource(), EntityArgument.getPlayer(context, "player"), ""))
+							.executes(context -> nicknameFor(context.getSource(), EntityArgument.getPlayer(context, "player"), ""))
 							.then(Commands.argument("nickname", StringArgumentType.greedyString())
 									.requires(source -> source.hasPermission(2))
-									.executes(context -> nicknamefor(context.getSource(), EntityArgument.getPlayer(context, "player"), StringArgumentType.getString(context, "nickname")))
+									.executes(context -> nicknameFor(context.getSource(), EntityArgument.getPlayer(context, "player"), StringArgumentType.getString(context, "nickname")))
 							)
 					)
 			);
@@ -97,7 +97,7 @@ public class CheatCommands {
 					.then(Commands.argument("player", EntityArgument.player())
 							.executes(context -> mute(context.getSource(), EntityArgument.getPlayer(context, "player"), ""))
 							.then(Commands.argument("until", StringArgumentType.greedyString())
-									.suggests((context, builder) -> suggestTimeouts(builder))
+									.suggests((context, builder) -> suggestMuteTimeouts(builder))
 									.executes(context -> mute(context.getSource(), EntityArgument.getPlayer(context, "player"), StringArgumentType.getString(context, "until")))
 							)
 					)
@@ -120,49 +120,45 @@ public class CheatCommands {
 	}
 
 	public static int fly(ServerPlayer player) {
-		var data = FTBEPlayerData.get(player);
-		if (data == null) return 0;
-		var abilities = player.getAbilities();
+		return FTBEPlayerData.getOrCreate(player).map(data -> {
+			var abilities = player.getAbilities();
 
-		if (data.fly) {
-			data.fly = false;
-			data.markDirty();
-			abilities.mayfly = false;
-			abilities.flying = false;
-			player.displayClientMessage(Component.literal("Flight disabled"), true);
-		} else {
-			data.fly = true;
-			data.markDirty();
-			abilities.mayfly = true;
-			player.displayClientMessage(Component.literal("Flight enabled"), true);
-		}
+			if (data.canFly()) {
+				data.setCanFly(false);
+				abilities.mayfly = false;
+				abilities.flying = false;
+				player.displayClientMessage(Component.literal("Flight disabled"), true);
+			} else {
+				data.setCanFly(true);
+				abilities.mayfly = true;
+				player.displayClientMessage(Component.literal("Flight enabled"), true);
+			}
 
-		player.onUpdateAbilities();
-		return 1;
+			player.onUpdateAbilities();
+			return 1;
+		}).orElse(0);
 	}
 
 	public static int god(ServerPlayer player) {
-		var data = FTBEPlayerData.get(player);
-		if (data == null) return 0;
-		var abilities = player.getAbilities();
+		return FTBEPlayerData.getOrCreate(player).map(data -> {
+			var abilities = player.getAbilities();
 
-		if (data.god) {
-			data.god = false;
-			data.markDirty();
-			abilities.invulnerable = false;
-			player.displayClientMessage(Component.literal("God mode disabled"), true);
-		} else {
-			data.god = true;
-			data.markDirty();
-			abilities.invulnerable = true;
-			player.displayClientMessage(Component.literal("God mode enabled"), true);
-		}
+			if (data.isGod()) {
+				data.setGod(false);
+				abilities.invulnerable = false;
+				player.displayClientMessage(Component.literal("God mode disabled"), true);
+			} else {
+				data.setGod(true);
+				abilities.invulnerable = true;
+				player.displayClientMessage(Component.literal("God mode enabled"), true);
+			}
 
-		player.onUpdateAbilities();
-		return 1;
+			player.onUpdateAbilities();
+			return 1;
+		}).orElse(0);
 	}
 
-	public static int invsee(ServerPlayer source, ServerPlayer player) {
+	public static int viewInventory(ServerPlayer source, ServerPlayer player) {
 		source.openMenu(new MenuProvider() {
 			@Override
 			public Component getDisplayName() {
@@ -178,71 +174,66 @@ public class CheatCommands {
 		return 1;
 	}
 
-	public static int nicknamefor(CommandSourceStack source, ServerPlayer player, String nick) {
+	public static int nicknameFor(CommandSourceStack source, ServerPlayer player, String nick) {
 		if (nick.length() > 30) {
 			player.displayClientMessage(Component.literal("Nickname too long!"), false);
 			return 0;
 		}
 
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-		if (data == null) return 0;
-		data.nick = nick.trim();
-		data.markDirty();
-		PlayerDisplayNameUtil.refreshDisplayName(player);
+		return FTBEPlayerData.getOrCreate(player).map(data -> {
+			data.setNick(nick.trim());
+			data.markDirty();
+			PlayerDisplayNameUtil.refreshDisplayName(player);
 
-		if (data.nick.isEmpty()) {
-			source.sendSuccess(Component.literal("Nickname reset!"), true);
-		} else {
-			source.sendSuccess(Component.literal("Nickname changed to '" + data.nick + "'"), true);
-		}
+			if (data.getNick().isEmpty()) {
+				source.sendSuccess(Component.literal("Nickname reset!"), true);
+			} else {
+				source.sendSuccess(Component.literal("Nickname changed to '" + data.getNick() + "'"), true);
+			}
 
-		data.sendTabName(source.getServer());
-		return 1;
+			data.sendTabName(source.getServer());
+			return 1;
+		}).orElse(0);
 	}
 
 	public static int mute(CommandSourceStack source, ServerPlayer player, String duration) {
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-		if (data == null) return 0;
+		return FTBEPlayerData.getOrCreate(player).map(data -> {
+			try {
+				DurationInfo info = DurationInfo.fromString(duration);
+				data.setMuted(true);
+				FTBEWorldData.instance.setMuteTimeout(player, info.until());
 
-		try {
-			DurationInfo info = DurationInfo.fromString(duration);
-			data.muted = true;
-			FTBEWorldData.instance.setMuteTimeout(player, info.until());
+				MutableComponent msg = player.getDisplayName().copy()
+						.append(" has been muted by ")
+						.append(source.getDisplayName())
+						.append(", ")
+						.append(info.desc());
+				notifyMuting(source, player, msg);
 
-			data.markDirty();
-
-			MutableComponent msg = player.getDisplayName().copy()
-					.append(" has been muted by ")
-					.append(source.getDisplayName())
-					.append(", ")
-					.append(info.desc());
-			notifyMuting(source, player, msg);
-
-			return 1;
-		} catch (IllegalArgumentException e) {
-			source.sendFailure(Component.literal("Invalid duration syntax: '" + duration + "': " + e.getMessage()));
-			return 0;
-		}
-	}
-
-	private static CompletableFuture<Suggestions> suggestTimeouts(SuggestionsBuilder builder) {
-		return SharedSuggestionProvider.suggest(Stream.of("5m", "10m", "1h", "1d", "1w", "<number>[smhdw]"), builder);
+				return 1;
+			} catch (IllegalArgumentException e) {
+				source.sendFailure(Component.literal("Invalid duration syntax: '" + duration + "': " + e.getMessage()));
+				return 0;
+			}
+		}).orElse(0);
 	}
 
 	public static int unmute(CommandSourceStack source, ServerPlayer player) {
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-		if (data == null) return 0;
+		return FTBEPlayerData.getOrCreate(player).map(data -> {
+			data.setMuted(false);
+			FTBEWorldData.instance.setMuteTimeout(player, -1);
 
-		data.muted = false;
-		FTBEWorldData.instance.setMuteTimeout(player, -1);
-		data.markDirty();
+			MutableComponent msg = player.getDisplayName().copy()
+					.append(" has been unmuted by ")
+					.append(source.getDisplayName());
+			notifyMuting(source, player, msg);
 
-		MutableComponent msg = player.getDisplayName().copy()
-				.append(" has been unmuted by ")
-				.append(source.getDisplayName());
-		notifyMuting(source, player, msg);
+			return 1;
+		}).orElse(0);
+	}
 
-		return 1;
+	private static CompletableFuture<Suggestions> suggestMuteTimeouts(SuggestionsBuilder builder) {
+		return SharedSuggestionProvider.suggest(Stream.of("5m", "10m", "1h", "1d", "1w", "<number>[smhdw]"), builder);
 	}
 
 	private static void notifyMuting(CommandSourceStack source, Player target, Component msg) {

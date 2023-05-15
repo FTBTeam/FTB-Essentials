@@ -14,9 +14,6 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.NetworkConstants;
 
-import static dev.ftb.mods.ftbessentials.FTBEssentials.RECORDING_STYLE;
-import static dev.ftb.mods.ftbessentials.FTBEssentials.STREAMING_STYLE;
-
 @Mod(FTBEssentials.MOD_ID)
 public class FTBEssentialsForge {
 	public FTBEssentialsForge() {
@@ -33,43 +30,32 @@ public class FTBEssentialsForge {
 
 	public void playerName(PlayerEvent.NameFormat event) {
 		if (event.getEntity() instanceof ServerPlayer sp) {
-			FTBEPlayerData data = FTBEPlayerData.get(sp);
-
-			if (data != null && !data.nick.isEmpty()) {
-				Component name = Component.literal(data.nick);
-				event.setDisplayname(name);
-			}
+			FTBEPlayerData.getOrCreate(sp).ifPresent(data -> {
+				if (!data.getNick().isEmpty()) event.setDisplayname(Component.literal(data.getNick()));
+			});
 		}
 	}
 
 	public void playerNameLow(PlayerEvent.NameFormat event) {
-		if (event.getEntity() instanceof ServerPlayer) {
-			FTBEPlayerData data = FTBEPlayerData.get(event.getEntity());
-
-			if (data != null && data.recording > 0) {
-				event.setDisplayname(Component.literal("\u23FA ").withStyle(data.recording == 1 ? RECORDING_STYLE : STREAMING_STYLE)
-						.append(event.getDisplayname()));
-			}
+		if (event.getEntity() instanceof ServerPlayer sp) {
+			FTBEPlayerData.getOrCreate(sp).ifPresent(data -> {
+				if (data.getRecording() != FTBEPlayerData.RecordingStatus.NONE) {
+					event.setDisplayname(Component.literal("⏺ ").withStyle(data.getRecording().getStyle())
+							.append(event.getDisplayname()));
+				}
+			});
 		}
 	}
 
 	public void playerLoad(PlayerEvent.LoadFromFile event) {
 		if (FTBEWorldData.instance != null) {
-			FTBEPlayerData data = FTBEPlayerData.get(event.getEntity());
-
-			if (data != null) {
-				data.load();
-			}
+			FTBEPlayerData.getOrCreate(event.getEntity()).ifPresent(FTBEPlayerData::load);
 		}
 	}
 
 	public void playerSaved(PlayerEvent.SaveToFile event) {
 		if (FTBEWorldData.instance != null) {
-			FTBEPlayerData data = FTBEPlayerData.get(event.getEntity());
-
-			if (data != null) {
-				data.saveNow();
-			}
+			FTBEPlayerData.getOrCreate(event.getEntity()).ifPresent(FTBEPlayerData::saveNow);
 		}
 	}
 

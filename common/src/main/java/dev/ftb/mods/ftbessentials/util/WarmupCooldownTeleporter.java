@@ -70,14 +70,12 @@ public class WarmupCooldownTeleporter {
 		TeleportPos currentPos = new TeleportPos(player);
 
 		TeleportPos.TeleportResult res = teleportPos.teleport(player);
-		if (!res.isSuccess()) {
-			return res;
-		}
-
-		if (popHistoryOnTeleport) {
-			playerData.popTeleportHistory();
-		} else {
-			playerData.addTeleportHistory(player, currentPos);
+		if (res.isSuccess()) {
+			if (popHistoryOnTeleport) {
+				playerData.popTeleportHistory();
+			} else {
+				playerData.addTeleportHistory(player, currentPos);
+			}
 		}
 		return res;
 	}

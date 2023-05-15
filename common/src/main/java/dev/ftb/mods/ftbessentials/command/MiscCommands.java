@@ -7,6 +7,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.mixin.PlayerListAccess;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
+import dev.ftb.mods.ftbessentials.util.FTBEPlayerData.RecordingStatus;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.Leaderboard;
 import dev.ftb.mods.ftblibrary.util.PlayerDisplayNameUtil;
@@ -68,14 +69,9 @@ public class MiscCommands {
 			);
 		}
 
-
-		LiteralArgumentBuilder<CommandSourceStack> leaderboardCommand = Commands.literal("leaderboard");
-
-		for (Leaderboard<?> leaderboard : Leaderboard.MAP.values()) {
-			leaderboardCommand = leaderboardCommand.then(Commands.literal(leaderboard.name).executes(context -> leaderboard(context.getSource(), leaderboard, false)));
+		if (FTBEConfig.LEADERBOARD.isEnabled()) {
+			dispatcher.register(Leaderboard.buildCommand());
 		}
-
-		dispatcher.register(leaderboardCommand);
 
 		if (FTBEConfig.REC.isEnabled()) {
 			dispatcher.register(Commands.literal("recording")
@@ -146,10 +142,10 @@ public class MiscCommands {
 			stream.filter(path -> path.toString().endsWith(".json"))
 					.map(Path::getFileName)
 					.map(path -> new GameProfile(UUID.fromString(path.toString().replace(".json", "")), null))
-					.filter(profile -> !FTBEPlayerData.MAP.containsKey(profile.getId()))
-					.map(FTBEPlayerData::get)
-					.filter(Objects::nonNull)
-					.forEach(FTBEPlayerData::load);
+					.filter(profile -> !FTBEPlayerData.playerExists(profile.getId()))
+					.map(FTBEPlayerData::getOrCreate)
+					.filter(Optional::isPresent)
+					.forEach(data -> data.get().load());
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -157,15 +153,14 @@ public class MiscCommands {
 		List<Pair<FTBEPlayerData, T>> list = new ArrayList<>();
 		int self = -1;
 
-		for (FTBEPlayerData playerData : FTBEPlayerData.MAP.values()) {
-			ServerStatsCounter stats = getPlayerStats(source.getServer(), playerData.uuid);
+		FTBEPlayerData.forEachPlayer(playerData -> {
+			ServerStatsCounter stats = getPlayerStats(source.getServer(), playerData.getUuid());
 
-			T num = leaderboard.valueGetter.apply(stats);
-
-			if (leaderboard.filter.test(num)) {
+			T num = leaderboard.getValue(stats);
+			if (leaderboard.test(num)) {
 				list.add(Pair.of(playerData, num));
 			}
-		}
+		});
 
 		if (reverse) {
 			list.sort(Comparator.comparingDouble(pair -> pair.getRight().doubleValue()));
@@ -175,14 +170,14 @@ public class MiscCommands {
 
 		if (source.getEntity() instanceof ServerPlayer) {
 			for (int i = 0; i < list.size(); i++) {
-				if (list.get(i).getLeft().uuid.equals(source.getEntity().getUUID())) {
+				if (list.get(i).getLeft().getUuid().equals(source.getEntity().getUUID())) {
 					self = list.size();
 					break;
 				}
 			}
 		}
 
-		source.sendSuccess(Component.literal("== Leaderboard [" + leaderboard.name + "] ==").withStyle(ChatFormatting.DARK_GREEN), false);
+		source.sendSuccess(Component.literal("== Leaderboard [" + leaderboard.getName() + "] ==").withStyle(ChatFormatting.DARK_GREEN), false);
 
 		if (list.isEmpty()) {
 			source.sendSuccess(Component.literal("No data!").withStyle(ChatFormatting.GRAY), false);
@@ -210,9 +205,9 @@ public class MiscCommands {
 				component.append(Component.literal("#" + num + " "));
 			}
 
-			component.append(Component.literal(pair.getLeft().name).withStyle(i == self ? ChatFormatting.GREEN : ChatFormatting.YELLOW));
+			component.append(Component.literal(pair.getLeft().getName()).withStyle(i == self ? ChatFormatting.GREEN : ChatFormatting.YELLOW));
 			component.append(Component.literal(": "));
-			component.append(Component.literal(leaderboard.stringGetter.apply(pair.getRight())));
+			component.append(Component.literal(leaderboard.asString(pair.getRight())));
 			source.sendSuccess(component, false);
 		}
 
@@ -220,41 +215,35 @@ public class MiscCommands {
 	}
 
 	public static int recording(ServerPlayer player) {
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-		if (data == null) {
-			return 0;
-		}
-		data.recording = data.recording == 1 ? 0 : 1;
-		data.markDirty();
-		PlayerDisplayNameUtil.refreshDisplayName(player);
+		return FTBEPlayerData.getOrCreate(player).map(data -> {
+			data.setRecording(data.getRecording() == RecordingStatus.RECORDING ? RecordingStatus.NONE : RecordingStatus.RECORDING);
+			PlayerDisplayNameUtil.refreshDisplayName(player);
 
-		if (data.recording == 1) {
-			player.server.getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" is now recording!"), false);
-		} else {
-			player.server.getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" is no longer recording!"), false);
-		}
+			if (data.getRecording() == RecordingStatus.RECORDING) {
+				player.server.getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" is now recording!"), false);
+			} else {
+				player.server.getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" is no longer recording!"), false);
+			}
 
-		data.sendTabName(player.server);
-		return 1;
+			data.sendTabName(player.server);
+			return 1;
+		}).orElse(0);
 	}
 
 	public static int streaming(ServerPlayer player) {
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-		if (data == null) {
-			return 0;
-		}
-		data.recording = data.recording == 2 ? 0 : 2;
-		data.markDirty();
-		PlayerDisplayNameUtil.refreshDisplayName(player);
+		return FTBEPlayerData.getOrCreate(player).map(data -> {
+			data.setRecording(data.getRecording() == RecordingStatus.STREAMING ? RecordingStatus.NONE : RecordingStatus.STREAMING);
+			PlayerDisplayNameUtil.refreshDisplayName(player);
 
-		if (data.recording == 2) {
-			player.server.getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" is now streaming!"), false);
-		} else {
-			player.server.getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" is no longer streaming!"), false);
-		}
+			if (data.getRecording() == RecordingStatus.STREAMING) {
+				player.server.getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" is now streaming!"), false);
+			} else {
+				player.server.getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" is no longer streaming!"), false);
+			}
 
-		data.sendTabName(player.server);
-		return 1;
+			data.sendTabName(player.server);
+			return 1;
+		}).orElse(0);
 	}
 
 	public static int hat(ServerPlayer player) {
@@ -272,23 +261,19 @@ public class MiscCommands {
 			return 0;
 		}
 
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-		if (data == null) {
-			return 0;
-		}
-		data.nick = nick.trim();
+		return FTBEPlayerData.getOrCreate(player).map(data -> {
+			data.setNick(nick.trim());
+			PlayerDisplayNameUtil.refreshDisplayName(player);
 
-		data.markDirty();
-		PlayerDisplayNameUtil.refreshDisplayName(player);
+			if (data.getNick().isEmpty()) {
+				player.displayClientMessage(Component.literal("Nickname reset!"), false);
+			} else {
+				player.displayClientMessage(Component.literal("Nickname changed to '" + data.getNick() + "'"), false);
+			}
 
-		if (data.nick.isEmpty()) {
-			player.displayClientMessage(Component.literal("Nickname reset!"), false);
-		} else {
-			player.displayClientMessage(Component.literal("Nickname changed to '" + data.nick + "'"), false);
-		}
-
-		data.sendTabName(player.server);
-		return 1;
+			data.sendTabName(player.server);
+			return 1;
+		}).orElse(0);
 	}
 
     /**

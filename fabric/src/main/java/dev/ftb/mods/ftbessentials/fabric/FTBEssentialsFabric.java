@@ -17,9 +17,9 @@ public class FTBEssentialsFabric implements ModInitializer {
 
         PlayerDisplayNameCallback.EVENT.register(PlayerDisplayNameCallback.EARLY, (player, oldDisplayName) -> {
             if (player instanceof ServerPlayer sp) {
-                FTBEPlayerData data = FTBEPlayerData.get(sp);
-                if (data != null && !data.nick.isEmpty()) {
-                    return Component.literal(data.nick);
+                FTBEPlayerData data = FTBEPlayerData.getOrCreate(sp).orElse(null);
+                if (data != null && !data.getNick().isEmpty()) {
+                    return Component.literal(data.getNick());
                 }
             }
             return oldDisplayName;
@@ -27,9 +27,9 @@ public class FTBEssentialsFabric implements ModInitializer {
 
         PlayerDisplayNameCallback.EVENT.register(PlayerDisplayNameCallback.LATE, (player, oldDisplayName) -> {
             if (player instanceof ServerPlayer sp) {
-                FTBEPlayerData data = FTBEPlayerData.get(sp);
-                if (data != null && data.recording > 0) {
-                    return Component.literal("\u23FA ").withStyle(data.recording == 1 ? RECORDING_STYLE : STREAMING_STYLE).append(oldDisplayName);
+                FTBEPlayerData data = FTBEPlayerData.getOrCreate(sp).orElse(null);
+                if (data != null && data.getRecording() != FTBEPlayerData.RecordingStatus.NONE) {
+                    return Component.literal("⏺ ").withStyle(data.getRecording().getStyle()).append(oldDisplayName);
                 }
             }
             return oldDisplayName;

@@ -70,8 +70,8 @@ public class TPACommands {
 	}
 
 	public static int tpa(ServerPlayer player, ServerPlayer target, boolean here) {
-		FTBEPlayerData dataSource = FTBEPlayerData.get(player);
-		FTBEPlayerData dataTarget = FTBEPlayerData.get(target);
+		FTBEPlayerData dataSource = FTBEPlayerData.getOrCreate(player).orElse(null);
+		FTBEPlayerData dataTarget = FTBEPlayerData.getOrCreate(target).orElse(null);
 
 		if (dataSource == null || dataTarget == null) {
 			return 0;
@@ -94,12 +94,12 @@ public class TPACommands {
 
 		MutableComponent component = Component.literal("TPA request! [ ");
 		component.append((here ? target : player).getDisplayName().copy().withStyle(ChatFormatting.YELLOW));
-		component.append(" \u27A1 ");
+		component.append(" ➡ ");
 		component.append((here ? player : target).getDisplayName().copy().withStyle(ChatFormatting.YELLOW));
 		component.append(" ]");
 
 		MutableComponent component2 = Component.literal("Click one of these: ");
-		component2.append(Component.literal("Accept \u2714").setStyle(Style.EMPTY
+		component2.append(Component.literal("Accept ✔").setStyle(Style.EMPTY
 				.applyFormat(ChatFormatting.GREEN)
 				.withBold(true)
 				.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpaccept " + request.id))
@@ -108,7 +108,7 @@ public class TPACommands {
 
 		component2.append(" | ");
 
-		component2.append(Component.literal("Deny \u274C").setStyle(Style.EMPTY
+		component2.append(Component.literal("Deny ❌").setStyle(Style.EMPTY
 				.applyFormat(ChatFormatting.RED)
 				.withBold(true)
 				.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpdeny " + request.id))
@@ -132,7 +132,7 @@ public class TPACommands {
 			return 0;
 		}
 
-		ServerPlayer sourcePlayer = player.server.getPlayerList().getPlayer(request.source.uuid);
+		ServerPlayer sourcePlayer = player.server.getPlayerList().getPlayer(request.source.getUuid());
 
 		if (sourcePlayer == null) {
 			player.displayClientMessage(Component.literal("Player has gone offline!"), false);
@@ -162,7 +162,7 @@ public class TPACommands {
 
 		player.displayClientMessage(Component.literal("Request denied!"), false);
 
-		ServerPlayer player2 = player.server.getPlayerList().getPlayer(request.target.uuid);
+		ServerPlayer player2 = player.server.getPlayerList().getPlayer(request.target.getUuid());
 
 		if (player2 != null) {
 			player2.displayClientMessage(Component.literal("Request denied!"), false);

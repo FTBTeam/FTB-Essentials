@@ -1,6 +1,8 @@
 package dev.ftb.mods.ftbessentials;
 
 import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
+import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
+import dev.ftb.mods.ftbessentials.util.FTBEPlayerData.RecordingStatus;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -20,15 +22,11 @@ public class FTBEssentialsClient extends FTBEssentialsCommon {
 		}
 
 		MutableComponent component = Component.literal("");
-
-		if (packet.recording > 0) {
-			MutableComponent component1 = Component.literal("\u23FA");
-			component1.withStyle(packet.recording == 1 ? FTBEssentials.RECORDING_STYLE : FTBEssentials.STREAMING_STYLE);
-			component.append(component1);
+		if (packet.recording != RecordingStatus.NONE) {
+			component.append(Component.literal("⏺").withStyle(packet.recording.getStyle()));
 		}
 
 		MutableComponent nameComponent = Component.literal(packet.nickname.isEmpty() ? packet.name : packet.nickname);
-
 		if (packet.afk) {
 			nameComponent.withStyle(ChatFormatting.GRAY);
 		}

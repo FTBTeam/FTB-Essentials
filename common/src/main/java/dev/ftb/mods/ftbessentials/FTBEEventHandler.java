@@ -76,7 +76,7 @@ public class FTBEEventHandler {
 
 		FTBEConfig.CONFIG.load(configFilePath, defaultConfigFilePath, () -> DEFAULT_CONFIG);
 
-		FTBEPlayerData.MAP.clear();
+		FTBEPlayerData.clear();
 		FTBEWorldData.instance = new FTBEWorldData(minecraftServer);
 		FTBEWorldData.instance.load();
 	}
@@ -96,52 +96,45 @@ public class FTBEEventHandler {
 
 			if (Platform.isFabric()) {
 				// on Forge, data is saved by the PlayerEvent.SaveToFile event handler
-				FTBEPlayerData.MAP.values().forEach(FTBEPlayerData::saveNow);
+				FTBEPlayerData.saveAll();
 			}
 		}
 	}
 
 	private static void playerLoggedIn(ServerPlayer serverPlayer) {
-		FTBEPlayerData data = FTBEPlayerData.get(serverPlayer);
-		if (data != null) {
+		FTBEPlayerData.getOrCreate(serverPlayer).ifPresent(data -> {
 			if (Platform.isFabric()) {
 				// on Forge, data is loaded by the PlayerEvent.LoadFromFile event handler
 				data.load();
 			}
-			data.lastSeen = new TeleportPos(serverPlayer);
+			data.setLastSeenPos(new TeleportPos(serverPlayer));
 			data.markDirty();
 
-			for (FTBEPlayerData d : FTBEPlayerData.MAP.values()) {
-				d.sendTabName(serverPlayer);
-			}
-		}
+			FTBEPlayerData.sendPlayerTabs(serverPlayer);
+		});
 	}
 
 	private static void playerLoggedOut(ServerPlayer serverPlayer) {
-		FTBEPlayerData data = FTBEPlayerData.get(serverPlayer);
-		if (data != null) {
-			data.lastSeen = new TeleportPos(serverPlayer);
+		FTBEPlayerData.getOrCreate(serverPlayer).ifPresent(data -> {
+			data.setLastSeenPos(new TeleportPos(serverPlayer));
 			data.markDirty();
-		}
+		});
 	}
 
 	private static void playerTickPost(Player player) {
-		var data = FTBEPlayerData.get(player);
-		var abilities = player.getAbilities();
+		FTBEPlayerData.getOrCreate(player).ifPresent(data -> {
+			var abilities = player.getAbilities();
 
-		if (data == null) {
-			return;
-		}
+			if (data.isGod() && !abilities.invulnerable) {
+				abilities.invulnerable = true;
+				player.onUpdateAbilities();
+			}
 
-		if (data.god && !abilities.invulnerable) {
-			abilities.invulnerable = true;
-			player.onUpdateAbilities();
-		}
-
-		if (data.fly && !abilities.mayfly) {
-			abilities.mayfly = true;
-			player.onUpdateAbilities();
-		}
+			if (data.canFly() && !abilities.mayfly) {
+				abilities.mayfly = true;
+				player.onUpdateAbilities();
+			}
+		});
 	}
 
 	private static void serverTickPost(MinecraftServer server) {
@@ -153,8 +146,8 @@ public class FTBEEventHandler {
 			TPACommands.TPARequest r = iterator.next();
 
 			if (now > r.created() + 60000L) {
-				ServerPlayer source = server.getPlayerList().getPlayer(r.source().uuid);
-				ServerPlayer target = server.getPlayerList().getPlayer(r.target().uuid);
+				ServerPlayer source = server.getPlayerList().getPlayer(r.source().getUuid());
+				ServerPlayer target = server.getPlayerList().getPlayer(r.target().getUuid());
 
 				if (source != null) {
 					source.sendSystemMessage(Component.literal("TPA request expired!"));
@@ -176,9 +169,10 @@ public class FTBEEventHandler {
 
 	// FIXME this should run with HIGHEST priority but we can't do that with Arch
 	private static EventResult playerChat(@Nullable ServerPlayer serverPlayer, Component component) {
-		if (serverPlayer != null) {
-			FTBEPlayerData data = FTBEPlayerData.get(serverPlayer);
-			if (data != null && data.muted) {
+		return FTBEPlayerData.getOrCreate(serverPlayer).map(data -> {
+			if (data.isMuted()) {
+				// serverPlayer must be non-null if we got the player data
+				//noinspection DataFlowIssue
 				serverPlayer.displayClientMessage(Component.literal("You can't use chat, you've been muted by an admin!")
 						.withStyle(ChatFormatting.RED), false);
 				FTBEWorldData.instance.getMuteTimeout(serverPlayer).ifPresent(expiry -> {
@@ -187,9 +181,8 @@ public class FTBEEventHandler {
 				});
 				return EventResult.interruptFalse();
 			}
-		}
-
-		return EventResult.pass();
+			return EventResult.pass();
+		}).orElse(EventResult.pass());
 	}
 
 	private static void onPlayerDeath(ServerPlayer oldPlayer, ServerPlayer newPlayer, boolean wonGame) {

@@ -17,47 +17,9 @@ import net.minecraft.world.level.Level;
  * @author LatvianModder
  */
 public class TeleportPos {
-	@FunctionalInterface
-	public interface TeleportResult {
-		TeleportResult SUCCESS = new TeleportResult() {
-			@Override
-			public int runCommand(ServerPlayer player) {
-				return 1;
-			}
-
-			@Override
-			public boolean isSuccess() {
-				return true;
-			}
-		};
-
-		TeleportResult DIMENSION_NOT_FOUND = player -> {
-			player.displayClientMessage(Component.literal("Dimension not found!"), false);
-			return 0;
-		};
-
-		int runCommand(ServerPlayer player);
-
-		default boolean isSuccess() {
-			return false;
-		}
-	}
-
-	@FunctionalInterface
-	public interface CooldownTeleportResult extends TeleportResult {
-		long getCooldown();
-
-		@Override
-		default int runCommand(ServerPlayer player) {
-			String secStr = TimeUtils.prettyTimeString(getCooldown() / 1000L);
-			player.displayClientMessage(Component.literal("Can't teleport yet! Cooldown: " + secStr), false);
-			return 0;
-		}
-	}
-
-	public final ResourceKey<Level> dimension;
-	public final BlockPos pos;
-	public long time;
+	private final ResourceKey<Level> dimension;
+	private final BlockPos pos;
+	private final long time;
 
 	public TeleportPos(ResourceKey<Level> d, BlockPos p) {
 		dimension = d;
@@ -91,7 +53,7 @@ public class TeleportPos {
 		return TeleportResult.SUCCESS;
 	}
 
-	public SNBTCompoundTag write() {
+	public CompoundTag write() {
 		SNBTCompoundTag tag = new SNBTCompoundTag();
 		tag.singleLine();
 		tag.putString("dim", dimension.location().toString());
@@ -120,6 +82,49 @@ public class TeleportPos {
 			}
 
 			return s.getPath() + " [" + s.getNamespace() + "]";
+		}
+	}
+
+	@FunctionalInterface
+	public interface TeleportResult {
+		TeleportResult SUCCESS = new TeleportResult() {
+			@Override
+			public int runCommand(ServerPlayer player) {
+				return 1;
+			}
+
+			@Override
+			public boolean isSuccess() {
+				return true;
+			}
+		};
+
+		TeleportResult DIMENSION_NOT_FOUND = player -> {
+			player.displayClientMessage(Component.literal("Dimension not found!"), false);
+			return 0;
+		};
+
+		TeleportResult UNKNOWN_DESTINATION = player -> {
+			player.displayClientMessage(Component.literal("Unknown destination!"), false);
+			return 0;
+		};
+
+		int runCommand(ServerPlayer player);
+
+		default boolean isSuccess() {
+			return false;
+		}
+	}
+
+	@FunctionalInterface
+	public interface CooldownTeleportResult extends TeleportResult {
+		long getCooldown();
+
+		@Override
+		default int runCommand(ServerPlayer player) {
+			String secStr = TimeUtils.prettyTimeString(getCooldown() / 1000L);
+			player.displayClientMessage(Component.literal("Can't teleport yet! Cooldown: " + secStr), false);
+			return 0;
 		}
 	}
 }

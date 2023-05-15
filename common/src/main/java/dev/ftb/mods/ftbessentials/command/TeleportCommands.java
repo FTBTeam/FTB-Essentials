@@ -79,38 +79,34 @@ public class TeleportCommands {
 	}
 
 	public static int back(ServerPlayer player) {
-		FTBEPlayerData data = FTBEPlayerData.get(player);
+		return FTBEPlayerData.getOrCreate(player).map(data -> {
+			if (data.teleportHistory.isEmpty()) {
+				player.displayClientMessage(Component.literal("Teleportation history is empty!").withStyle(ChatFormatting.RED), false);
+				return 0;
+			}
 
-		if (data.teleportHistory.isEmpty()) {
-			player.displayClientMessage(Component.literal("Teleportation history is empty!").withStyle(ChatFormatting.RED), false);
+			if (data.backTeleporter.teleport(player, serverPlayerEntity -> data.teleportHistory.getLast()).runCommand(player) != 0) {
+				data.markDirty();
+				return 1;
+			}
+
 			return 0;
-		}
-
-		if (data.backTeleporter.teleport(player, serverPlayerEntity -> data.teleportHistory.getLast()).runCommand(player) != 0) {
-			data.markDirty();
-			return 1;
-		}
-
-		return 0;
+		}).orElse(0);
 	}
 
 	public static int spawn(ServerPlayer player) {
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-		ServerLevel w = player.server.getLevel(Level.OVERWORLD);
-
-		if (w == null) {
-			return 0;
-		}
-
-		return data.spawnTeleporter.teleport(player, p -> new TeleportPos(w, w.getSharedSpawnPos())).runCommand(player);
+		return FTBEPlayerData.getOrCreate(player).map(data -> {
+			ServerLevel level = player.server.getLevel(Level.OVERWORLD);
+			return level == null ? 0 : data.spawnTeleporter.teleport(player, p -> new TeleportPos(level, level.getSharedSpawnPos())).runCommand(player);
+		}).orElse(0);
 	}
 
 	public static int rtp(ServerPlayer player) {
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-		return data.rtpTeleporter.teleport(player, p -> {
-			p.displayClientMessage(Component.literal("Looking for random location..."), false);
-			return findBlockPos(player.getLevel(), p, 1);
-		}).runCommand(player);
+		return FTBEPlayerData.getOrCreate(player).map(data -> data.rtpTeleporter.teleport(player, p -> {
+					p.displayClientMessage(Component.literal("Looking for random location..."), false);
+					return findBlockPos(player.getLevel(), p, 1);
+				}).runCommand(player))
+				.orElse(0);
 	}
 
 	private static TeleportPos findBlockPos(ServerLevel world, ServerPlayer player, int attempt) {
@@ -168,24 +164,18 @@ public class TeleportCommands {
 	}
 
 	public static int tpLast(ServerPlayer player, GameProfile to) {
-		ServerPlayer p = player.server.getPlayerList().getPlayer(to.getId());
-
-		if (p != null) {
+		ServerPlayer toPlayer = player.server.getPlayerList().getPlayer(to.getId());
+		if (toPlayer != null) {
 			FTBEPlayerData.addTeleportHistory(player);
-			new TeleportPos(p).teleport(player);
+			new TeleportPos(toPlayer).teleport(player);
 			return 1;
 		}
-
-		FTBEPlayerData dataTo = FTBEPlayerData.get(to);
-
-		if (dataTo == null) {
-			return 0;
-		}
-
-		FTBEPlayerData.addTeleportHistory(player);
-		dataTo.lastSeen.teleport(player);
-
-		return 1;
+		// dest player not online; teleport to where they were last seen
+		return FTBEPlayerData.getOrCreate(to).map(dataTo -> {
+			FTBEPlayerData.addTeleportHistory(player);
+			dataTo.getLastSeenPos().teleport(player);
+			return 1;
+		}).orElse(0);
 	}
 
 	public static int tpx(ServerPlayer player, ServerLevel to) {

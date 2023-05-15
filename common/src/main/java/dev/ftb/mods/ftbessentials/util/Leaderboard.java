@@ -1,6 +1,10 @@
 package dev.ftb.mods.ftbessentials.util;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.ftb.mods.ftbessentials.command.MiscCommands;
 import net.minecraft.Util;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stats;
 
@@ -17,9 +21,9 @@ import java.util.function.Predicate;
  * @author LatvianModder
  */
 public class Leaderboard<N extends Number> {
-	public static final DecimalFormat DECIMAL_FORMAT = Util.make(new DecimalFormat("########0.00"), decimalFormat -> decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT)));
+	private static final DecimalFormat DECIMAL_FORMAT = Util.make(new DecimalFormat("########0.00"), decimalFormat -> decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT)));
 
-	public static final Map<String, Leaderboard<?>> MAP = new LinkedHashMap<>();
+	private static final Map<String, Leaderboard<?>> MAP = new LinkedHashMap<>();
 
 	public static <T extends Number> Leaderboard<T> add(String name, T defaultValue) {
 		Leaderboard<T> leaderboard = new Leaderboard<>(name, defaultValue);
@@ -27,88 +31,115 @@ public class Leaderboard<N extends Number> {
 		return leaderboard;
 	}
 
+	public static LiteralArgumentBuilder<CommandSourceStack> buildCommand() {
+		LiteralArgumentBuilder<CommandSourceStack> res = Commands.literal("leaderboard");
+		for (Leaderboard<?> leaderboard : MAP.values()) {
+			res = res.then(Commands.literal(leaderboard.name)
+					.executes(context -> MiscCommands.leaderboard(context.getSource(), leaderboard, false))
+			);
+		}
+		return res;
+	}
+
 	static {
 		add("deaths", 0)
-				.value(stats -> stats.getValue(Stats.CUSTOM.get(Stats.DEATHS)))
+				.withValueGetter(stats -> stats.getValue(Stats.CUSTOM.get(Stats.DEATHS)))
 		;
 
 		add("time_played", 0)
-				.value(stats -> stats.getValue(Stats.CUSTOM.get(Stats.PLAY_TIME)))
+				.withValueGetter(stats -> stats.getValue(Stats.CUSTOM.get(Stats.PLAY_TIME)))
 				.formatTime()
 		;
 
 		add("deaths_per_hour", 0D)
-				.value(stats -> {
+				.withValueGetter(stats -> {
 					int d = stats.getValue(Stats.CUSTOM.get(Stats.DEATHS));
 					int t = stats.getValue(Stats.CUSTOM.get(Stats.PLAY_TIME));
 					return d <= 0 || t < 72000 ? 0D : (double) d * 72000D / (double) t;
 				})
-				.string(value -> DECIMAL_FORMAT.format(value.doubleValue()))
+				.withStringGetter(value -> DECIMAL_FORMAT.format(value.doubleValue()))
 		;
 
 		add("player_kills", 0)
-				.value(stats -> stats.getValue(Stats.CUSTOM.get(Stats.PLAYER_KILLS)))
+				.withValueGetter(stats -> stats.getValue(Stats.CUSTOM.get(Stats.PLAYER_KILLS)))
 		;
 
 		add("mob_kills", 0)
-				.value(stats -> stats.getValue(Stats.CUSTOM.get(Stats.MOB_KILLS)))
+				.withValueGetter(stats -> stats.getValue(Stats.CUSTOM.get(Stats.MOB_KILLS)))
 		;
 
 		add("damage_dealt", 0)
-				.value(stats -> stats.getValue(Stats.CUSTOM.get(Stats.DAMAGE_DEALT)))
+				.withValueGetter(stats -> stats.getValue(Stats.CUSTOM.get(Stats.DAMAGE_DEALT)))
 				.formatDivideByTen()
 		;
 
 		add("jumps", 0)
-				.value(stats -> stats.getValue(Stats.CUSTOM.get(Stats.JUMP)))
+				.withValueGetter(stats -> stats.getValue(Stats.CUSTOM.get(Stats.JUMP)))
 		;
 
 		add("distance_walked", 0)
-				.value(stats -> stats.getValue(Stats.CUSTOM.get(Stats.WALK_ONE_CM)))
+				.withValueGetter(stats -> stats.getValue(Stats.CUSTOM.get(Stats.WALK_ONE_CM)))
 				.formatDistance()
 		;
 
 		add("time_since_death", 0)
-				.value(stats -> stats.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH)))
+				.withValueGetter(stats -> stats.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH)))
 				.formatTime()
 		;
 	}
 
-	public final String name;
-	public final N defaultValue;
-	public Function<ServerStatsCounter, N> valueGetter;
-	public Predicate<N> filter;
-	public Function<N, String> stringGetter;
+	private final String name;
+	private final N defaultValue;
+	private Function<ServerStatsCounter, N> valueGetter;
+	private Predicate<N> filter;
+	private Function<N, String> stringGetter;
 
-	public Leaderboard(String n, N def) {
-		name = n;
-		defaultValue = def;
-		valueGetter = stats -> defaultValue;
-		filter = num -> !num.equals(defaultValue);
+	public Leaderboard(String name, N defaultValue) {
+		this.name = name;
+		this.defaultValue = defaultValue;
+
+		valueGetter = stats -> this.defaultValue;
+		filter = num -> !num.equals(this.defaultValue);
 		stringGetter = num -> NumberFormat.getIntegerInstance(Locale.US).format(num.intValue());
 	}
 
-	public Leaderboard<N> value(Function<ServerStatsCounter, N> v) {
+	public String getName() {
+		return name;
+	}
+
+	public Leaderboard<N> withValueGetter(Function<ServerStatsCounter, N> v) {
 		valueGetter = v;
 		return this;
 	}
 
-	public Leaderboard<N> filter(Predicate<N> f) {
+	public Leaderboard<N> withFilter(Predicate<N> f) {
 		filter = f;
 		return this;
 	}
 
-	public Leaderboard<N> string(Function<N, String> s) {
+	public Leaderboard<N> withStringGetter(Function<N, String> s) {
 		stringGetter = s;
 		return this;
 	}
 
+	public N getValue(ServerStatsCounter stats) {
+		return valueGetter.apply(stats);
+	}
+
+	public boolean test(N num) {
+		return filter.test(num);
+	}
+
+	public String asString(N num) {
+		return stringGetter.apply(num);
+	}
+
 	public Leaderboard<N> formatDivideByTen() {
-		return string(value -> DECIMAL_FORMAT.format(value.doubleValue() * 0.1D));
+		return withStringGetter(value -> DECIMAL_FORMAT.format(value.doubleValue() * 0.1D));
 	}
 
 	public Leaderboard<N> formatDistance() {
-		return string(value -> {
+		return withStringGetter(value -> {
 			double d0 = value.doubleValue() / 100.0D;
 			double d1 = d0 / 1000.0D;
 			if (d1 > 0.5D) {
@@ -120,7 +151,7 @@ public class Leaderboard<N extends Number> {
 	}
 
 	public Leaderboard<N> formatTime() {
-		return string(value -> {
+		return withStringGetter(value -> {
 			double d0 = value.doubleValue() / 20.0D;
 			double d1 = d0 / 60.0D;
 			double d2 = d1 / 60.0D;

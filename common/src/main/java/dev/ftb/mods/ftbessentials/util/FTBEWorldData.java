@@ -23,13 +23,17 @@ public class FTBEWorldData {
 	private final MinecraftServer server;
 	private boolean needSave;
 
-	public final Map<String, TeleportPos> warps;
+	private final SavedTeleportManager.WarpManager warpManager;
 	private final Map<UUID,Long> muteTimeouts;
 
 	public FTBEWorldData(MinecraftServer s) {
 		server = s;
-		warps = new LinkedHashMap<>();
+		warpManager = new SavedTeleportManager.WarpManager(this);
 		muteTimeouts = new HashMap<>();
+	}
+
+	public SavedTeleportManager.WarpManager warpManager() {
+		return warpManager;
 	}
 
 	public Path mkdirs(String path) {
@@ -75,9 +79,7 @@ public class FTBEWorldData {
 	private SNBTCompoundTag toNBT() {
 		SNBTCompoundTag tag = new SNBTCompoundTag();
 
-		SNBTCompoundTag warpsTag = new SNBTCompoundTag();
-		warps.forEach((key, value) -> warpsTag.put(key, value.write()));
-		tag.put("warps", warpsTag);
+		tag.put("warps", warpManager.writeNBT());
 
 		SNBTCompoundTag mutesTag = new SNBTCompoundTag();
 		muteTimeouts.forEach((id, until) -> mutesTag.putLong(id.toString(), until));
@@ -87,11 +89,7 @@ public class FTBEWorldData {
 	}
 
 	public void loadNBT(SNBTCompoundTag tag) {
-		warps.clear();
-		SNBTCompoundTag warpsTag = tag.getCompound("warps");
-		for (String key : warpsTag.getAllKeys()) {
-			warps.put(key, new TeleportPos(warpsTag.getCompound(key)));
-		}
+		warpManager.readNBT(tag.getCompound("warps"));
 
 		muteTimeouts.clear();
 		SNBTCompoundTag mutesTag = tag.getCompound("mute_timeouts");
@@ -113,10 +111,7 @@ public class FTBEWorldData {
 			if (player != null) {
 				player.displayClientMessage(player.getDisplayName().copy().append(" is no longer muted"), false);
 			}
-			FTBEPlayerData data = FTBEPlayerData.get(player);
-			if (data != null) {
-				data.muted = false;
-			}
+			FTBEPlayerData.getOrCreate(player).ifPresent(data -> data.setMuted(false));
 			muteTimeouts.remove(id);
 			markDirty();
 		});

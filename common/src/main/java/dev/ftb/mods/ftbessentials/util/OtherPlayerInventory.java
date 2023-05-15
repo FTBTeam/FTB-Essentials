@@ -9,10 +9,10 @@ import net.minecraft.world.item.ItemStack;
  * @author LatvianModder
  */
 public class OtherPlayerInventory implements Container {
-	public final ServerPlayer player;
+	private final ServerPlayer player;
 
-	public OtherPlayerInventory(ServerPlayer p) {
-		player = p;
+	public OtherPlayerInventory(ServerPlayer player) {
+		this.player = player;
 	}
 
 	@Override

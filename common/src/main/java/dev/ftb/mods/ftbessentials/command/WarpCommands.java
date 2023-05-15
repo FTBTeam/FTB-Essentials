@@ -14,7 +14,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -54,31 +53,23 @@ public class WarpCommands {
 	}
 
 	public static Set<String> getWarpSuggestions(CommandContext<CommandSourceStack> context) {
-		return FTBEWorldData.instance.warps.keySet();
+		return FTBEWorldData.instance.warpManager().getNames();
 	}
 
 	public static int warp(ServerPlayer player, String name) {
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-		TeleportPos pos = FTBEWorldData.instance.warps.get(name.toLowerCase());
-
-		if (pos == null) {
-			player.displayClientMessage(Component.literal("Warp not found!"), false);
-			return 0;
-		}
-
-		return data.warpTeleporter.teleport(player, p -> pos).runCommand(player);
+		return FTBEPlayerData.getOrCreate(player)
+				.map(data -> FTBEWorldData.instance.warpManager().teleportTo(name, player, data.warpTeleporter).runCommand(player))
+				.orElse(0);
 	}
 
 	public static int setWarp(ServerPlayer player, String name) {
-		FTBEWorldData.instance.warps.put(name.toLowerCase(), new TeleportPos(player));
-		FTBEWorldData.instance.markDirty();
+		FTBEWorldData.instance.warpManager().addDestination(name, new TeleportPos(player), player);
 		player.displayClientMessage(Component.literal("Warp set!"), false);
 		return 1;
 	}
 
 	public static int deleteWarp(ServerPlayer player, String name) {
-		if (FTBEWorldData.instance.warps.remove(name.toLowerCase()) != null) {
-			FTBEWorldData.instance.markDirty();
+		if (FTBEWorldData.instance.warpManager().deleteDestination(name.toLowerCase())) {
 			player.displayClientMessage(Component.literal("Warp deleted!"), false);
 			return 1;
 		} else {
@@ -88,17 +79,13 @@ public class WarpCommands {
 	}
 
 	public static int listWarps(CommandSourceStack source) {
-		if (FTBEWorldData.instance.warps.isEmpty()) {
+		if (FTBEWorldData.instance.warpManager().getNames().isEmpty()) {
 			source.sendSuccess(Component.literal("None"), false);
-			return 1;
+		} else {
+			TeleportPos origin = new TeleportPos(source.getLevel().dimension(), BlockPos.containing(source.getPosition()));
+			FTBEWorldData.instance.warpManager().destinations().forEach(entry ->
+					source.sendSuccess(Component.literal(entry.name() + ": " + entry.destination().distanceString(origin)), false));
 		}
-
-		TeleportPos origin = new TeleportPos(source.getLevel().dimension(), BlockPos.containing(source.getPosition()));
-
-		for (Map.Entry<String, TeleportPos> entry : FTBEWorldData.instance.warps.entrySet()) {
-			source.sendSuccess(Component.literal(entry.getKey() + ": " + entry.getValue().distanceString(origin)), false);
-		}
-
 		return 1;
 	}
 }

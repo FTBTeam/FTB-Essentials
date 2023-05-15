@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
+import dev.ftb.mods.ftbessentials.util.SavedTeleportManager;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -16,8 +17,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -36,110 +35,77 @@ public class HomeCommands {
 			);
 			dispatcher.register(Commands.literal("sethome")
 					.requires(FTBEConfig.HOME)
-					.executes(context -> sethome(context.getSource().getPlayerOrException(), "home"))
+					.executes(context -> setHome(context.getSource().getPlayerOrException(), "home"))
 					.then(Commands.argument("name", StringArgumentType.greedyString())
-							.executes(context -> sethome(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
+							.executes(context -> setHome(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
 					)
 			);
 			dispatcher.register(Commands.literal("delhome")
 					.requires(FTBEConfig.HOME)
-					.executes(context -> delhome(context.getSource().getPlayerOrException(), "home"))
+					.executes(context -> delHome(context.getSource().getPlayerOrException(), "home"))
 					.then(Commands.argument("name", StringArgumentType.greedyString())
 							.suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context), builder))
-							.executes(context -> delhome(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
+							.executes(context -> delHome(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
 					)
 			);
 			dispatcher.register(Commands.literal("listhomes")
 					.requires(FTBEConfig.HOME)
-					.executes(context -> listhomes(context.getSource(), context.getSource().getPlayerOrException().getGameProfile()))
+					.executes(context -> listHomes(context.getSource(), context.getSource().getPlayerOrException().getGameProfile()))
 					.then(Commands.argument("player", GameProfileArgument.gameProfile())
 							.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
-							.executes(context -> listhomes(context.getSource(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
+							.executes(context -> listHomes(context.getSource(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
 					)
 			);
 		}
 	}
 
 	public static Set<String> getHomeSuggestions(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-		FTBEPlayerData data = FTBEPlayerData.get(context.getSource().getPlayerOrException());
-
-		if (data == null) {
-			return Collections.emptySet();
-		}
-
-		return data.homes.keySet();
+		return FTBEPlayerData.getOrCreate(context.getSource().getPlayerOrException())
+				.map(data -> data.homeManager().getNames())
+				.orElse(Set.of());
 	}
 
 	public static int home(ServerPlayer player, String name) {
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-
-		if (data == null) {
-			return 0;
-		}
-
-		TeleportPos pos = data.homes.get(name.toLowerCase());
-
-		if (pos == null) {
-			player.displayClientMessage(Component.literal("Home not found!"), false);
-			return 0;
-		}
-
-		return data.homeTeleporter.teleport(player, p -> pos).runCommand(player);
+		return FTBEPlayerData.getOrCreate(player)
+				.map(data -> data.homeManager().teleportTo(name, player, data.homeTeleporter).runCommand(player))
+				.orElse(0);
 	}
 
-	public static int sethome(ServerPlayer player, String name) {
-		FTBEPlayerData data = FTBEPlayerData.get(player);
-
-		if (data == null) {
-			return 0;
-		}
-
-		if (data.homes.size() >= FTBEConfig.MAX_HOMES.get(player) && !data.homes.containsKey(name.toLowerCase())) {
-			player.displayClientMessage(Component.literal("Can't add any more homes!"), false);
-			return 0;
-		}
-
-		data.homes.put(name.toLowerCase(), new TeleportPos(player));
-		data.markDirty();
-		player.displayClientMessage(Component.literal("Home set!"), false);
-		return 1;
+	public static int setHome(ServerPlayer player, String name) {
+		return FTBEPlayerData.getOrCreate(player).map(data -> {
+			try {
+				data.homeManager().addDestination(name, new TeleportPos(player), player);
+				player.displayClientMessage(Component.literal("Home set!"), false);
+				return 1;
+			} catch (SavedTeleportManager.TooManyDestinationsException e) {
+				player.displayClientMessage(Component.literal("Can't add any more homes!"), false);
+				return 0;
+			}
+		}).orElse(0);
 	}
 
-	public static int delhome(ServerPlayer player, String name) {
-		FTBEPlayerData data = FTBEPlayerData.get(player);
+	public static int delHome(ServerPlayer player, String name) {
+		return FTBEPlayerData.getOrCreate(player).map(data -> {
+			if (data.homeManager().deleteDestination(name.toLowerCase())) {
+				player.displayClientMessage(Component.literal("Home deleted!"), false);
+				return 1;
+			} else {
+				player.displayClientMessage(Component.literal("Home not found!"), false);
+				return 0;
+			}
+		}).orElse(0);
+	}
 
-		if (data == null) {
-			return 0;
-		}
-
-		if (data.homes.remove(name.toLowerCase()) != null) {
-			data.markDirty();
-			player.displayClientMessage(Component.literal("Home deleted!"), false);
+	public static int listHomes(CommandSourceStack source, GameProfile of) {
+		return FTBEPlayerData.getOrCreate(of).map(data -> {
+			if (data.homeManager().getNames().isEmpty()) {
+				source.sendSuccess(Component.literal("None"), false);
+			} else {
+				TeleportPos origin = new TeleportPos(source.getLevel().dimension(), BlockPos.containing(source.getPosition()));
+				data.homeManager().destinations().forEach(entry ->
+						source.sendSuccess(Component.literal(entry.name() + ": " + entry.destination().distanceString(origin)), false));
+			}
 			return 1;
-		} else {
-			player.displayClientMessage(Component.literal("Home not found!"), false);
-			return 0;
-		}
-	}
-
-	public static int listhomes(CommandSourceStack source, GameProfile of) {
-		FTBEPlayerData data = FTBEPlayerData.get(of);
-
-		if (data == null) {
-			return 0;
-		}
-
-		if (data.homes.isEmpty()) {
-			source.sendSuccess(Component.literal("None"), false);
-			return 1;
-		}
-
-		TeleportPos origin = new TeleportPos(source.getLevel().dimension(), BlockPos.containing(source.getPosition()));
-
-		for (Map.Entry<String, TeleportPos> entry : data.homes.entrySet()) {
-			source.sendSuccess(Component.literal(entry.getKey() + ": " + entry.getValue().distanceString(origin)), false);
-		}
-
-		return 1;
+		}).orElse(0);
 	}
 }
