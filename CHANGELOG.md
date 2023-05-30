@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 * Disabling a command in the config file (`serverconfig/ftbessentials.snbt`) now entirely prevents registration of the command
   * Allows for better compatibility with other mods which may register the same commands
+* Player pitch and yaw is now also saved along with warps, homes, etc. (thanks @MikePrimm)
 
 ## [1802.2.1]
 
