@@ -6,6 +6,7 @@ import dev.architectury.event.EventResult;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.FTBEssentialsEvents;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.util.DimensionFilter;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import net.minecraft.ChatFormatting;
@@ -106,6 +107,10 @@ public class TeleportCommands {
 	}
 
 	public static int rtp(ServerPlayer player) {
+		if (!player.hasPermissions(2) && !DimensionFilter.isDimensionOK(player.getLevel().dimension())) {
+			player.displayClientMessage(Component.literal("You may not use /rtp in this dimension!").withStyle(ChatFormatting.RED), false);
+			return 0;
+		}
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		return data.rtpTeleporter.teleport(player, p -> {
 			p.displayClientMessage(Component.literal("Looking for random location..."), false);
