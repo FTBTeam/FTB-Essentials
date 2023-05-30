@@ -3,6 +3,9 @@ package dev.ftb.mods.ftbessentials.config;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftblibrary.snbt.config.IntValue;
 import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
+import dev.ftb.mods.ftblibrary.snbt.config.StringListValue;
+
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -45,6 +48,12 @@ public interface FTBEConfig {
 	IntValue RTP_MAX_TRIES = RTP.config.addInt("max_tries", 100).range(1, 1000).comment("Number of tries before /rtp gives up");
 	IntValue RTP_MIN_DISTANCE = RTP.config.addInt("min_distance", 500).range(0, 30000000).comment("/rtp min distance from spawn point");
 	IntValue RTP_MAX_DISTANCE = RTP.config.addInt("max_distance", 25000).range(0, 30000000).comment("/rtp max distance from spawn point");
+	StringListValue RTP_DIMENSION_WHITELIST = RTP.config.addStringList("dimension_whitelist", List.of())
+			.comment("Whitelisted dimension ID's for /rtp (if non-empty, player *must* be in one of these dimensions)",
+					"Wildcarded dimensions (e.g. 'somemod:*') are supported");
+	StringListValue RTP_DIMENSION_BLACKLIST = RTP.config.addStringList("dimension_blacklist", List.of("minecraft:the_end"))
+			.comment("Blacklisted dimension ID's for /rtp (player *must not* be in any of these dimensions)",
+					"Wildcarded dimensions (e.g. 'somemod:*') are supported");
 	// tpl
 	ToggleableConfig TPL = new ToggleableConfig(TELEPORTATION, "tpl")
 			.comment("Allows admins to teleport to the location a user was last seen at");
@@ -81,3 +90,4 @@ public interface FTBEConfig {
 			.comment("Allows users to view leaderboard stats about everyone on the server.");
 
 }
+
