@@ -25,40 +25,42 @@ import java.util.Set;
  */
 public class HomeCommands {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(Commands.literal("home")
-				.requires(FTBEConfig.HOME)
-				.executes(context -> home(context.getSource().getPlayerOrException(), "home"))
-				.then(Commands.argument("name", StringArgumentType.greedyString())
-						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context), builder))
-						.executes(context -> home(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
-				)
-		);
+		if (FTBEConfig.HOME.isEnabled()) {
+			dispatcher.register(Commands.literal("home")
+					.requires(FTBEConfig.HOME)
+					.executes(context -> home(context.getSource().getPlayerOrException(), "home"))
+					.then(Commands.argument("name", StringArgumentType.greedyString())
+							.suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context), builder))
+							.executes(context -> home(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
+					)
+			);
 
-		dispatcher.register(Commands.literal("sethome")
-				.requires(FTBEConfig.HOME)
-				.executes(context -> sethome(context.getSource().getPlayerOrException(), "home"))
-				.then(Commands.argument("name", StringArgumentType.greedyString())
-						.executes(context -> sethome(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
-				)
-		);
+			dispatcher.register(Commands.literal("sethome")
+					.requires(FTBEConfig.HOME)
+					.executes(context -> sethome(context.getSource().getPlayerOrException(), "home"))
+					.then(Commands.argument("name", StringArgumentType.greedyString())
+							.executes(context -> sethome(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
+					)
+			);
 
-		dispatcher.register(Commands.literal("delhome")
-				.requires(FTBEConfig.HOME)
-				.executes(context -> delhome(context.getSource().getPlayerOrException(), "home"))
-				.then(Commands.argument("name", StringArgumentType.greedyString())
-						.suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context), builder))
-						.executes(context -> delhome(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
-				)
-		);
+			dispatcher.register(Commands.literal("delhome")
+					.requires(FTBEConfig.HOME)
+					.executes(context -> delhome(context.getSource().getPlayerOrException(), "home"))
+					.then(Commands.argument("name", StringArgumentType.greedyString())
+							.suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context), builder))
+							.executes(context -> delhome(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
+					)
+			);
 
-		dispatcher.register(Commands.literal("listhomes")
-				.requires(FTBEConfig.HOME)
-				.executes(context -> listhomes(context.getSource(), context.getSource().getPlayerOrException().getGameProfile()))
-				.then(Commands.argument("player", GameProfileArgument.gameProfile())
-						.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
-						.executes(context -> listhomes(context.getSource(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
-				)
-		);
+			dispatcher.register(Commands.literal("listhomes")
+					.requires(FTBEConfig.HOME)
+					.executes(context -> listhomes(context.getSource(), context.getSource().getPlayerOrException().getGameProfile()))
+					.then(Commands.argument("player", GameProfileArgument.gameProfile())
+							.requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+							.executes(context -> listhomes(context.getSource(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
+					)
+			);
+		}
 	}
 
 	public static Set<String> getHomeSuggestions(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

@@ -77,6 +77,6 @@ public interface FTBEConfig {
 			.comment("Allows users to change their display name, as well as admins to change nicknames for other users");
 	ToggleableConfig ENDER_CHEST = new ToggleableConfig(MISC, "enderchest")
 			.comment("Allows users to access their ender chest, as well as admins to manage other players' ender chests.");
-	// TODO leaderboard config
-
+	ToggleableConfig LEADERBOARD = new ToggleableConfig(MISC, "leaderboard")
+			.comment("Allows users to view player leaderboard stats.");
 }
