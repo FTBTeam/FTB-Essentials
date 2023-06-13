@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.3.2]
+
+### Added
+* Added config setting `only_on_death` in the `back` section
+  * When true, the `/back` command works only for returning to your last death point
+  * Default is false, as before
+* Added `dimension_whitelist` and `dimension_blacklist` settings to the config for the `/rtp` command
+  * If whitelist is not empty, players *must* be in one of these dimensions to use `/rtp`
+  * If blacklist is not empty, players *must not* be in one of these dimensions to use `/rtp`
+  * Wildcards are allowed, e.g. `somemod:*` refers to all dimensions registered by the mod `somemod`
+  * Default is an empty whitelist, and `minecraft:the_end` in the blacklist (/rtp in the End can break vanilla progression)
+
+### Fixed
+* Fix Trashcan icon missing from sidebar
+
 ## [1902.3.1]
 
 ### Added

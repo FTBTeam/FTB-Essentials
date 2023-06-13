@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbessentials.forge;
 
 import dev.ftb.mods.ftbessentials.FTBEssentials;
+import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import net.minecraft.network.chat.Component;
@@ -74,7 +75,7 @@ public class FTBEssentialsForge {
 	}
 
 	public void vanillaTeleportCommand(EntityTeleportEvent.TeleportCommand event) {
-		if (event.getEntity() instanceof ServerPlayer sp) {
+		if (event.getEntity() instanceof ServerPlayer sp && !FTBEConfig.BACK_ON_DEATH_ONLY.get()) {
 			FTBEPlayerData.addTeleportHistory(sp);
 		}
 	}
