@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbessentials.util;
 
+import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -73,7 +74,7 @@ public class WarmupCooldownTeleporter {
 		if (res.isSuccess()) {
 			if (popHistoryOnTeleport) {
 				playerData.popTeleportHistory();
-			} else {
+			} else if (!FTBEConfig.BACK_ON_DEATH_ONLY.get()) {
 				playerData.addTeleportHistory(player, currentPos);
 			}
 		}

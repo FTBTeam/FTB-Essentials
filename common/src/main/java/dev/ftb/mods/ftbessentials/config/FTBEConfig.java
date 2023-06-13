@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbessentials.config;
 
 import dev.ftb.mods.ftbessentials.FTBEssentials;
+import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
 import dev.ftb.mods.ftblibrary.snbt.config.IntValue;
 import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
 import dev.ftb.mods.ftblibrary.snbt.config.StringListValue;
@@ -23,6 +24,8 @@ public interface FTBEConfig {
 			"ftbessentials.back.max",
 			"Max size of the teleport history. This limits how many times you can use /back"
 	);
+	BooleanValue BACK_ON_DEATH_ONLY = BACK.config.getBoolean("only_on_death", false)
+			.comment("Should be the /back command only be used for returning to the last death point?");
 	// spawn
 	TimedCommandConfig SPAWN = new TimedCommandConfig(TELEPORTATION, "spawn", 10, 0);
 	// warp
