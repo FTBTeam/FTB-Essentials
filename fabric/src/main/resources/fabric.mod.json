@@ -23,11 +23,11 @@
   ],
   "depends": {
     "fabric": "*",
-    "minecraft": ">=1.19.2",
-    "architectury": ">=6.2.43",
-    "ftblibrary": ">=1902.3.16-build.191"
+    "minecraft": ">=${mcversion}",
+    "architectury": ">=${archversion}",
+    "ftblibrary": ">=${ftblibraryversion}"
   },
-  "breaks": {
-    "ftbranks": "<1902.1.12-"
+  "suggests": {
+    "ftbranks": ">=2000.1.1"
   }
 }
