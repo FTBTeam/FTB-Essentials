@@ -99,11 +99,11 @@ public class HomeCommands {
 	public static int listHomes(CommandSourceStack source, GameProfile of) {
 		return FTBEPlayerData.getOrCreate(of).map(data -> {
 			if (data.homeManager().getNames().isEmpty()) {
-				source.sendSuccess(Component.literal("None"), false);
+				source.sendSuccess(() -> Component.literal("None"), false);
 			} else {
 				TeleportPos origin = new TeleportPos(source.getLevel().dimension(), BlockPos.containing(source.getPosition()));
 				data.homeManager().destinations().forEach(entry ->
-						source.sendSuccess(Component.literal(entry.name() + ": " + entry.destination().distanceString(origin)), false));
+						source.sendSuccess(() -> Component.literal(entry.name() + ": " + entry.destination().distanceString(origin)), false));
 			}
 			return 1;
 		}).orElse(0);

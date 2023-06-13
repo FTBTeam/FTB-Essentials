@@ -80,11 +80,11 @@ public class WarpCommands {
 
 	public static int listWarps(CommandSourceStack source) {
 		if (FTBEWorldData.instance.warpManager().getNames().isEmpty()) {
-			source.sendSuccess(Component.literal("None"), false);
+			source.sendSuccess(() -> Component.literal("None"), false);
 		} else {
 			TeleportPos origin = new TeleportPos(source.getLevel().dimension(), BlockPos.containing(source.getPosition()));
 			FTBEWorldData.instance.warpManager().destinations().forEach(entry ->
-					source.sendSuccess(Component.literal(entry.name() + ": " + entry.destination().distanceString(origin)), false));
+					source.sendSuccess(() -> Component.literal(entry.name() + ": " + entry.destination().distanceString(origin)), false));
 		}
 		return 1;
 	}

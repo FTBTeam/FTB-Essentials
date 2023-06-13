@@ -186,9 +186,9 @@ public class CheatCommands {
 			PlayerDisplayNameUtil.refreshDisplayName(player);
 
 			if (data.getNick().isEmpty()) {
-				source.sendSuccess(Component.literal("Nickname reset!"), true);
+				source.sendSuccess(() -> Component.literal("Nickname reset!"), true);
 			} else {
-				source.sendSuccess(Component.literal("Nickname changed to '" + data.getNick() + "'"), true);
+				source.sendSuccess(() -> Component.literal("Nickname changed to '" + data.getNick() + "'"), true);
 			}
 
 			data.sendTabName(source.getServer());
@@ -245,7 +245,7 @@ public class CheatCommands {
 		});
 		// notify command sender if not actually a player
 		if (!source.isPlayer()) {
-			source.sendSuccess(msg, true);
+			source.sendSuccess(() -> msg, true);
 		}
 	}
 }

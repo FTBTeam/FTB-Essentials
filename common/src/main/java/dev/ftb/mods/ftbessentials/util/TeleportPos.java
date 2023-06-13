@@ -39,7 +39,7 @@ public class TeleportPos {
 	}
 
 	public TeleportPos(Entity entity) {
-		this(entity.level, entity.blockPosition(), entity.getYRot(), entity.getXRot());
+		this(entity.level(), entity.blockPosition(), entity.getYRot(), entity.getXRot());
 	}
 
 	public TeleportPos(CompoundTag tag) {

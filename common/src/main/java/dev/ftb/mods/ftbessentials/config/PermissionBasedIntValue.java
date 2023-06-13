@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbessentials.config;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.integration.FTBRanksIntegration;
 import dev.ftb.mods.ftbessentials.integration.LuckPermsIntegration;
+import dev.ftb.mods.ftbessentials.integration.PermissionsHelper;
 import dev.ftb.mods.ftblibrary.snbt.config.IntValue;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -18,13 +19,7 @@ public class PermissionBasedIntValue {
 	}
 
 	public int get(ServerPlayer player) {
-		if (FTBEssentials.ranksMod) {
-			return FTBRanksIntegration.getInt(player, value.get(), permission);
-		} else if (FTBEssentials.luckpermsMod) {
-			return LuckPermsIntegration.getInt(player, value.get(), permission);
-		}
-
-		return value.get();
+		return PermissionsHelper.getInstance().getInt(player, value.get(), permission);
 	}
 
 }

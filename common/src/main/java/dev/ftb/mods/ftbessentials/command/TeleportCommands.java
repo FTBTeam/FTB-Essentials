@@ -103,13 +103,13 @@ public class TeleportCommands {
 	}
 
 	public static int rtp(ServerPlayer player) {
-		if (!player.hasPermissions(2) && !DimensionFilter.isDimensionOK(player.getLevel().dimension())) {
+		if (!player.hasPermissions(2) && !DimensionFilter.isDimensionOK(player.level().dimension())) {
 			player.displayClientMessage(Component.literal("You may not use /rtp in this dimension!").withStyle(ChatFormatting.RED), false);
 			return 0;
 		}
 		return FTBEPlayerData.getOrCreate(player).map(data -> data.rtpTeleporter.teleport(player, p -> {
 					p.displayClientMessage(Component.literal("Looking for random location..."), false);
-					return findBlockPos(player.getLevel(), p, 1);
+					return findBlockPos((ServerLevel) player.level(), p, 1);
 				}).runCommand(player))
 				.orElse(0);
 	}
@@ -146,15 +146,15 @@ public class TeleportCommands {
 			return findBlockPos(world, player, attempt + 1);
 		}
 
-		world.getChunk(currentPos.getX() >> 4, currentPos.getZ() >> 4, ChunkStatus.HEIGHTMAPS);
+		// TODO: is there an equivalent to HEIGHTMAPS on 1.20?
+		world.getChunk(currentPos.getX() >> 4, currentPos.getZ() >> 4/*, ChunkStatus.HEIGHTMAPS*/);
 		BlockPos hmPos = world.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, currentPos);
 
 		if (hmPos.getY() > 0) {
 			if (hmPos.getY() >= world.getLogicalHeight()) { // broken heightmap (nether, other mod dimensions)
 				for (BlockPos newPos : BlockPos.spiralAround(new BlockPos(hmPos.getX(), world.getSeaLevel(), hmPos.getY()), 16, Direction.EAST, Direction.SOUTH)) {
 					BlockState bs = world.getBlockState(newPos);
-
-					if (bs.getMaterial().isSolidBlocking() && !bs.is(IGNORE_RTP) && world.isEmptyBlock(newPos.above(1)) && world.isEmptyBlock(newPos.above(2)) && world.isEmptyBlock(newPos.above(3))) {
+					if (bs.blocksMotion() && !bs.is(IGNORE_RTP) && world.isEmptyBlock(newPos.above(1)) && world.isEmptyBlock(newPos.above(2)) && world.isEmptyBlock(newPos.above(3))) {
 						player.displayClientMessage(Component.literal(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, z %d]", attempt, newPos.getX(), newPos.getZ())), false);
 						return new TeleportPos(world.dimension(), newPos.above());
 					}

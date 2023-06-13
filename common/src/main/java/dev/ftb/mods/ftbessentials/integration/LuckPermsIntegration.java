@@ -9,8 +9,8 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.Optional;
 import java.util.UUID;
 
-public class LuckPermsIntegration {
-    public static int getInt(ServerPlayer player, int def, String node) {
+public class LuckPermsIntegration implements PermissionsProvider {
+    public int getInt(ServerPlayer player, int def, String node) {
         return Math.max(getMetaData(player.getUUID(), node).map(Integer::parseInt).orElse(def), 0);
     }
 

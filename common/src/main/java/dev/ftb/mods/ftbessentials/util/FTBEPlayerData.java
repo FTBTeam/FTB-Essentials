@@ -174,7 +174,7 @@ public class FTBEPlayerData {
 	}
 
 	public static void addTeleportHistory(ServerPlayer player) {
-		addTeleportHistory(player, player.level.dimension(), player.blockPosition());
+		addTeleportHistory(player, player.level().dimension(), player.blockPosition());
 	}
 
 	public static void clear() {

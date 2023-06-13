@@ -177,10 +177,10 @@ public class MiscCommands {
 			}
 		}
 
-		source.sendSuccess(Component.literal("== Leaderboard [" + leaderboard.getName() + "] ==").withStyle(ChatFormatting.DARK_GREEN), false);
+		source.sendSuccess(() -> Component.literal("== Leaderboard [" + leaderboard.getName() + "] ==").withStyle(ChatFormatting.DARK_GREEN), false);
 
 		if (list.isEmpty()) {
-			source.sendSuccess(Component.literal("No data!").withStyle(ChatFormatting.GRAY), false);
+			source.sendSuccess(() -> Component.literal("No data!").withStyle(ChatFormatting.GRAY), false);
 			return 1;
 		}
 
@@ -208,7 +208,7 @@ public class MiscCommands {
 			component.append(Component.literal(pair.getLeft().getName()).withStyle(i == self ? ChatFormatting.GREEN : ChatFormatting.YELLOW));
 			component.append(Component.literal(": "));
 			component.append(Component.literal(leaderboard.asString(pair.getRight())));
-			source.sendSuccess(component, false);
+			source.sendSuccess(() -> component, false);
 		}
 
 		return 1;
