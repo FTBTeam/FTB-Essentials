@@ -40,6 +40,7 @@ dependencies {
 
     modImplementation("dev.ftb.mods:ftb-library-forge:${rootProject.ftb_library_version}") {
         exclude module: 'me.shedaniel:RoughlyEnoughItems-forge'
+        transitive false
     }
 
     modImplementation "dev.ftb.mods:ftb-ranks-forge:${rootProject.ftb_ranks_version}"
@@ -67,18 +68,18 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon]
-    classifier "dev-shadow"
+    setArchiveClassifier("dev-shadow")
 }
 
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
     archiveBaseName.set "${rootProject.archives_base_name}-${project.name}"
-    classifier null
+    archiveClassifier.set null
 }
 
 jar {
-    classifier "dev"
+    setArchiveClassifier("dev")
 }
 
 sourcesJar {
