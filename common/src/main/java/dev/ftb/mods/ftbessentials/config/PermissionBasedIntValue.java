@@ -1,8 +1,5 @@
 package dev.ftb.mods.ftbessentials.config;
 
-import dev.ftb.mods.ftbessentials.FTBEssentials;
-import dev.ftb.mods.ftbessentials.integration.FTBRanksIntegration;
-import dev.ftb.mods.ftbessentials.integration.LuckPermsIntegration;
 import dev.ftb.mods.ftbessentials.integration.PermissionsHelper;
 import dev.ftb.mods.ftblibrary.snbt.config.IntValue;
 import net.minecraft.server.level.ServerPlayer;

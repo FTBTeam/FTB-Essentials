@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbessentials;
 
 import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
-import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData.RecordingStatus;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;

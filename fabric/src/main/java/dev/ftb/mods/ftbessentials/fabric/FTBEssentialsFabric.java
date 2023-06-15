@@ -7,9 +7,6 @@ import net.fabricmc.api.ModInitializer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-import static dev.ftb.mods.ftbessentials.FTBEssentials.RECORDING_STYLE;
-import static dev.ftb.mods.ftbessentials.FTBEssentials.STREAMING_STYLE;
-
 public class FTBEssentialsFabric implements ModInitializer {
     @Override
     public void onInitialize() {
