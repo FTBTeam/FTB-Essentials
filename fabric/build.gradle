@@ -45,7 +45,7 @@ processResources {
                 "archversion": project.architectury_version,
                 "fabricapiversion": project.fabric_api_version,
                 "mcversion": project.minecraft_version,
-                "ftblibraryversion": project.ftb_library_version
+                "ftblibraryversion": project.ftb_library_version.replaceAll("-SNAPSHOT", "")
     }
 }
 
