@@ -1,9 +1,14 @@
 pluginManagement {
-	repositories {
-		maven { url "https://maven.creeperhost.net/" }
-		maven { url "https://maven.shedaniel.me/" }
-		gradlePluginPortal()
-	}
+    repositories {
+        maven { url "https://maven.fabricmc.net/" }
+        maven { url "https://maven.architectury.dev/" }
+        maven { url "https://maven.minecraftforge.net/" }
+        gradlePluginPortal()
+    }
 }
 
-rootProject.name = 'FTB-Essentials-1.19'
+include("common")
+include("fabric")
+include("forge")
+
+rootProject.name = "FTB-Essentials-1.20.1"

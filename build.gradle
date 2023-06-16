@@ -1,172 +1,84 @@
 plugins {
-	id "dev.architectury.loom" version "0.12.0-SNAPSHOT"
-	id 'maven-publish'
-	id "com.matthewprenger.cursegradle" version "1.4.0"
+    id "architectury-plugin" version "3.4-SNAPSHOT"
+    id "dev.architectury.loom" version "1.2-SNAPSHOT" apply false
 }
 
-apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/git-md-changelog.gradle'
-
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = 17
-
-def ENV = System.getenv()
-version = "${mod_version}-build.${ENV.GITHUB_RUN_NUMBER ?: 9999}"
-archivesBaseName = project.archives_base_name
-group = project.maven_group
-
-loom {
-	silentMojangMappingsLicense()
-
-	forge {
-		mixinConfigs = [
-		]
-
-		dataGen {
-			mod project.mod_id
-		}
-
-		launches {
-			data {
-				arg "--existing", file("src/main/resources").absolutePath
-			}
-		}
-	}
+architectury {
+    minecraft = rootProject.minecraft_version
 }
 
-repositories {
-	maven {
-		url "https://maven.architectury.dev/"
-		content {
-			includeGroup "dev.architectury"
-			includeGroup "me.shedaniel"
-			includeGroup "me.shedaniel.cloth"
-		}
-	}
+subprojects {
+    apply plugin: "dev.architectury.loom"
 
-	maven {
-		url "https://www.cursemaven.com"
-		content {
-			includeGroup "curse.maven"
-		}
-	}
+    loom {
+        silentMojangMappingsLicense()
+    }
 
-	maven {
-		url "https://maven.ftb.dev"
-		content {
-			includeGroup "dev.ftb.mods"
-		}
-	}
-
-	maven {
-		url "https://maven.saps.dev/minecraft"
-		content {
-			includeGroup "dev.latvian.mods"
-			includeGroup "dev.ftb.mods"
-		}
-	}
+    dependencies {
+        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+        // The following line declares the mojmap mappings, you may use other mappings as well
+        mappings loom.officialMojangMappings()
+        // The following line declares the yarn mappings you may select this one as well.
+        // mappings "net.fabricmc:yarn:1.19.2+build.3:v2"
+    }
 }
 
-dependencies {
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.officialMojangMappings()
+allprojects {
+    apply plugin: "java"
+    apply plugin: "architectury-plugin"
+    apply plugin: "maven-publish"
+    apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/git-md-changelog.gradle"
 
-	forge "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
+    def ENV = System.getenv()
+    version = "${mod_version}-build.${ENV.GITHUB_RUN_NUMBER ?: 9999}"
+    group = project.maven_group
+    archivesBaseName = project.archives_base_name
 
-	// also pulls in architectury
-	modImplementation("dev.ftb.mods:ftb-library-forge:${rootProject.ftb_library_version}") {
-		exclude module: 'me.shedaniel:RoughlyEnoughItems-forge'
-	}
+    // needs to be done AFTER version is set
+    apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/publishing.gradle"
 
-	modImplementation "dev.ftb.mods:ftb-ranks-forge:${rootProject.ftb_ranks_version}"
+    sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = 17
 
-	compileOnly "net.luckperms:api:5.4"
+    compileJava {
+        options.encoding = "UTF-8"
+    }
+
+    repositories {
+        mavenLocal()
+
+        maven {
+            url "https://maven.architectury.dev/"
+            content {
+                includeGroup "dev.architectury"
+                includeGroup "me.shedaniel"
+                includeGroup "me.shedaniel.cloth"
+            }
+        }
+        maven {
+            url "https://www.cursemaven.com"
+            content {
+                includeGroup "curse.maven"
+            }
+        }
+        maven {
+            url "https://maven.saps.dev/releases"
+            content {
+                includeGroup "dev.latvian.mods"
+                includeGroup "dev.ftb.mods"
+            }
+        }
+        maven {
+            url "https://maven.saps.dev/snapshots"
+            content {
+                includeGroup "dev.latvian.mods"
+                includeGroup "dev.ftb.mods"
+            }
+        }
+    }
+
+    java {
+        withSourcesJar()
+    }
 }
 
-processResources {
-	exclude '.cache'
-
-	inputs.property "version", project.version
-
-	filesMatching("META-INF/mods.toml") {
-		expand "version": project.version,
-				"forgeversion": project.forge_version,
-				"forgeshortversion": project.forge_version.split("\\.")[0],
-				"mcversion": project.minecraft_version,
-				"libraryversion": project.ftb_library_version,
-				"ranksversion": project.ftb_ranks_version
-	}
-}
-
-compileJava {
-	options.encoding = "UTF-8"
-}
-
-java {
-	withSourcesJar()
-}
-
-jar {
-	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}" }
-	}
-
-	manifest {
-		attributes([
-				"Specification-Title"     : project.mod_id,
-				"Specification-Vendor"    : project.mod_author,
-				"Specification-Version"   : "1",
-				"Implementation-Title"    : project.name,
-				"Implementation-Version"  : version,
-				"Implementation-Vendor"   : project.mod_author,
-				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-		])
-	}
-}
-
-publishing {
-	publications {
-		mavenForge(MavenPublication) {
-			artifactId = rootProject.archivesBaseName
-			from components.java
-		}
-	}
-
-	repositories {
-		if (ENV.FTB_MAVEN_TOKEN) {
-			maven {
-				url "https://maven.ftb.dev/release"
-				credentials {
-					username = "ftb"
-					password = "${ENV.FTB_MAVEN_TOKEN}"
-				}
-			}
-		}
-
-		if (ENV.SAPS_TOKEN) {
-			maven {
-				url "https://maven.saps.dev/minecraft"
-				credentials {
-					username = "ftb"
-					password = "${ENV.SAPS_TOKEN}"
-				}
-			}
-		}
-	}
-}
-
-if (ENV.CURSEFORGE_KEY) {
-	curseforge {
-		apiKey = ENV.CURSEFORGE_KEY
-		project {
-			id = project.curseforge_id
-			releaseType = project.curseforge_type
-			addGameVersion "1.19"
-			mainArtifact(remapJar.archivePath)
-			relations {
-				requiredDependency 'ftb-library-forge'
-				optionalDependency 'ftb-ranks-forge'
-			}
-			changelog = getGitChangelog
-			changelogType = 'markdown'
-		}
-	}
-}
+task curseforgePublish

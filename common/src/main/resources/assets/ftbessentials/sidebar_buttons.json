@@ -1,0 +1,11 @@
+{
+  "trash_can": {
+    "group": "ftblibrary:util",
+    "icon": "ftblibrary:icons/bin",
+    "x": 150,
+    "click": "command:/trashcan",
+    "required_server_mods": [
+      "ftbessentials"
+    ]
+  }
+}
