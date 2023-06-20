@@ -112,15 +112,16 @@ public class TeleportPos {
 			}
 		};
 
-		TeleportResult DIMENSION_NOT_FOUND = player -> {
-			player.displayClientMessage(Component.literal("Dimension not found!"), false);
-			return 0;
-		};
+		static TeleportResult failed(Component msg) {
+			return player -> {
+				player.displayClientMessage(msg, false);
+				return 0;
+			};
+		}
 
-		TeleportResult UNKNOWN_DESTINATION = player -> {
-			player.displayClientMessage(Component.literal("Unknown destination!"), false);
-			return 0;
-		};
+		TeleportResult DIMENSION_NOT_FOUND = failed(Component.literal("Dimension not found!"));
+
+		TeleportResult UNKNOWN_DESTINATION = failed(Component.literal("Unknown destination!"));
 
 		int runCommand(ServerPlayer player);
 

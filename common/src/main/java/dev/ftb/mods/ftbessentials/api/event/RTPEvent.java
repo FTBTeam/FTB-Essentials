@@ -1,4 +1,4 @@
-package dev.ftb.mods.ftbessentials.util;
+package dev.ftb.mods.ftbessentials.api.event;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;

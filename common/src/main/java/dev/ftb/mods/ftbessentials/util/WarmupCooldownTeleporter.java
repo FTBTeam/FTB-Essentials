@@ -1,6 +1,9 @@
 package dev.ftb.mods.ftbessentials.util;
 
+import dev.architectury.event.CompoundEventResult;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
+import dev.ftb.mods.ftbessentials.util.TeleportPos.TeleportResult;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -36,18 +39,23 @@ public class WarmupCooldownTeleporter {
 		this.cooldown = 0L;
 	}
 
-	public TeleportPos.TeleportResult checkCooldown() {
+	public TeleportResult checkCooldown() {
 		long now = System.currentTimeMillis();
 
 		if (now < cooldown) {
 			return (TeleportPos.CooldownTeleportResult) () -> cooldown - now;
 		}
 
-		return TeleportPos.TeleportResult.SUCCESS;
+		return TeleportResult.SUCCESS;
 	}
 
-	public TeleportPos.TeleportResult teleport(ServerPlayer player, Function<ServerPlayer, TeleportPos> positionGetter) {
-		TeleportPos.TeleportResult cooldownResult = checkCooldown();
+	public TeleportResult teleport(ServerPlayer player, Function<ServerPlayer, TeleportPos> positionGetter) {
+		CompoundEventResult<Component> result = TeleportEvent.TELEPORT.invoker().teleport(player);
+		if (result.isFalse()) {
+			return TeleportResult.failed(result.object());
+		}
+
+		TeleportResult cooldownResult = checkCooldown();
 		if (!cooldownResult.isSuccess()) {
 			return cooldownResult;
 		}
@@ -60,17 +68,17 @@ public class WarmupCooldownTeleporter {
 		} else {
 			// schedule the teleport
 			WARMUPS.put(player.getUUID(), new Warmup(System.currentTimeMillis() + warmupTime * 1000L, this, player.position(), positionGetter));
-			return TeleportPos.TeleportResult.SUCCESS;
+			return TeleportResult.SUCCESS;
 		}
 	}
 
-	private TeleportPos.TeleportResult teleportNow(ServerPlayer player, Function<ServerPlayer, TeleportPos> positionGetter) {
+	private TeleportResult teleportNow(ServerPlayer player, Function<ServerPlayer, TeleportPos> positionGetter) {
 		cooldown = System.currentTimeMillis() + Math.max(0L, cooldownConfig.applyAsInt(player) * 1000L);
 
 		TeleportPos teleportPos = positionGetter.apply(player);
 		TeleportPos currentPos = new TeleportPos(player);
 
-		TeleportPos.TeleportResult res = teleportPos.teleport(player);
+		TeleportResult res = teleportPos.teleport(player);
 		if (res.isSuccess()) {
 			if (popHistoryOnTeleport) {
 				playerData.popTeleportHistory();
@@ -96,7 +104,7 @@ public class WarmupCooldownTeleporter {
 			if (player != null) {
 				Warmup warmup = entry.getValue();
 				if (warmup.when() <= now) {
-					TeleportPos.TeleportResult res = warmup.teleporter().teleportNow(player, warmup.positionGetter());
+					TeleportResult res = warmup.teleporter().teleportNow(player, warmup.positionGetter());
 					toRemove.add(playerId);
 					res.runCommand(player);
 				} else {
