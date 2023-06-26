@@ -182,7 +182,7 @@ public class FTBEPlayerData {
 	}
 
 	public static void saveAll() {
-		MAP.values().forEach(FTBEPlayerData::saveNow);
+		MAP.values().forEach(FTBEPlayerData::saveIfChanged);
 	}
 
 	public static void sendPlayerTabs(ServerPlayer serverPlayer) {
@@ -265,7 +265,7 @@ public class FTBEPlayerData {
 		}
 	}
 
-	public void saveNow() {
+	public void saveIfChanged() {
 		if (needSave && SNBT.write(FTBEWorldData.instance.mkdirs("playerdata").resolve(uuid + ".snbt"), write())) {
 			needSave = false;
 		}

@@ -22,8 +22,6 @@ public class FTBEssentialsForge {
 
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::playerName);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::playerNameLow);
-		MinecraftForge.EVENT_BUS.addListener(this::playerLoad);
-		MinecraftForge.EVENT_BUS.addListener(this::playerSaved);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::vanillaTeleportCommand);
 
 		FTBEssentials.init();
@@ -45,18 +43,6 @@ public class FTBEssentialsForge {
 							.append(event.getDisplayname()));
 				}
 			});
-		}
-	}
-
-	public void playerLoad(PlayerEvent.LoadFromFile event) {
-		if (FTBEWorldData.instance != null) {
-			FTBEPlayerData.getOrCreate(event.getEntity()).ifPresent(FTBEPlayerData::load);
-		}
-	}
-
-	public void playerSaved(PlayerEvent.SaveToFile event) {
-		if (FTBEWorldData.instance != null) {
-			FTBEPlayerData.getOrCreate(event.getEntity()).ifPresent(FTBEPlayerData::saveNow);
 		}
 	}
 
