@@ -93,11 +93,7 @@ public class FTBEEventHandler {
 	private static void levelSave(ServerLevel serverLevel) {
 		if (FTBEWorldData.instance != null) {
 			FTBEWorldData.instance.saveNow();
-
-			if (Platform.isFabric()) {
-				// on Forge, data is saved by the PlayerEvent.SaveToFile event handler
-				FTBEPlayerData.MAP.values().forEach(FTBEPlayerData::saveNow);
-			}
+			FTBEPlayerData.MAP.values().forEach(FTBEPlayerData::saveNow);
 		}
 	}
 
