@@ -118,6 +118,9 @@ public class FTBEWorldData {
 			if (data != null) {
 				data.muted = false;
 				data.markDirty();
+				if (player == null) {
+					data.saveNow();  // ensure data for offline player is correct before they log in again
+				}
 				FTBEssentials.LOGGER.info("auto-unmuted {} - timeout expired", id);
 			} else {
 				FTBEssentials.LOGGER.warn("can't auto-unmute {} - player id not known?", id);
