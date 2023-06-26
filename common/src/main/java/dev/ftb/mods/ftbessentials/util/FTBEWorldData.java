@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbessentials.util;
 
+import com.mojang.authlib.GameProfile;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
@@ -113,9 +114,16 @@ public class FTBEWorldData {
 			if (player != null) {
 				player.displayClientMessage(player.getDisplayName().copy().append(" is no longer muted"), false);
 			}
-			FTBEPlayerData data = FTBEPlayerData.get(player);
+			FTBEPlayerData data = FTBEPlayerData.get(player == null ? new GameProfile(id, "?") : player.getGameProfile());
 			if (data != null) {
 				data.muted = false;
+				data.markDirty();
+				if (player == null) {
+					data.saveNow();  // ensure data for offline player is correct before they log in again
+				}
+				FTBEssentials.LOGGER.info("auto-unmuted {} - timeout expired", id);
+			} else {
+				FTBEssentials.LOGGER.warn("can't auto-unmute {} - player id not known?", id);
 			}
 			muteTimeouts.remove(id);
 			markDirty();

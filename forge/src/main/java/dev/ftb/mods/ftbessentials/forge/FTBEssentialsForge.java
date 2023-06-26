@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbessentials.forge;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
-import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
@@ -25,8 +24,6 @@ public class FTBEssentialsForge {
 
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::playerName);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::playerNameLow);
-		MinecraftForge.EVENT_BUS.addListener(this::playerLoad);
-		MinecraftForge.EVENT_BUS.addListener(this::playerSaved);
 		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::vanillaTeleportCommand);
 
 		FTBEssentials.init();
@@ -50,26 +47,6 @@ public class FTBEssentialsForge {
 			if (data != null && data.recording > 0) {
 				event.setDisplayname(Component.literal("\u23FA ").withStyle(data.recording == 1 ? RECORDING_STYLE : STREAMING_STYLE)
 						.append(event.getDisplayname()));
-			}
-		}
-	}
-
-	public void playerLoad(PlayerEvent.LoadFromFile event) {
-		if (FTBEWorldData.instance != null) {
-			FTBEPlayerData data = FTBEPlayerData.get(event.getEntity());
-
-			if (data != null) {
-				data.load();
-			}
-		}
-	}
-
-	public void playerSaved(PlayerEvent.SaveToFile event) {
-		if (FTBEWorldData.instance != null) {
-			FTBEPlayerData data = FTBEPlayerData.get(event.getEntity());
-
-			if (data != null) {
-				data.saveNow();
 			}
 		}
 	}

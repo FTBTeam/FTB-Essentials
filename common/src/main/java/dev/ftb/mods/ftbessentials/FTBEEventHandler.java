@@ -93,21 +93,14 @@ public class FTBEEventHandler {
 	private static void levelSave(ServerLevel serverLevel) {
 		if (FTBEWorldData.instance != null) {
 			FTBEWorldData.instance.saveNow();
-
-			if (Platform.isFabric()) {
-				// on Forge, data is saved by the PlayerEvent.SaveToFile event handler
-				FTBEPlayerData.MAP.values().forEach(FTBEPlayerData::saveNow);
-			}
+			FTBEPlayerData.MAP.values().forEach(FTBEPlayerData::saveNow);
 		}
 	}
 
 	private static void playerLoggedIn(ServerPlayer serverPlayer) {
 		FTBEPlayerData data = FTBEPlayerData.get(serverPlayer);
 		if (data != null) {
-			if (Platform.isFabric()) {
-				// on Forge, data is loaded by the PlayerEvent.LoadFromFile event handler
-				data.load();
-			}
+			data.load();
 			data.lastSeen = new TeleportPos(serverPlayer);
 			data.markDirty();
 
