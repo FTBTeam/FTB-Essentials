@@ -35,6 +35,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
@@ -76,6 +77,10 @@ public class FTBEEventHandler {
 		} catch (Exception ex) {
 			FTBEssentials.LOGGER.error("Failed to load world data: " + ex);
 			ex.printStackTrace();
+		}
+
+		for(String s : FTBEConfig.DISALLOWED_DIMENSION_PATTERNS.get()) {
+			FTBEssentials.DISALLOWED_DIMENSION_PATTERNS.add(Pattern.compile(s));
 		}
 	}
 

@@ -1,5 +1,7 @@
 package dev.ftb.mods.ftbessentials.util;
 
+import dev.ftb.mods.ftbessentials.FTBEssentials;
+import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.core.BlockPos;
@@ -12,6 +14,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
@@ -35,6 +39,12 @@ public class TeleportPos {
 			player.displayClientMessage(new TextComponent("Dimension not found!"), false);
 			return 0;
 		};
+
+		TeleportResult DIMENSION_NOT_ALLOWED = player -> {
+			player.displayClientMessage(new TextComponent("Teleportation to this dimension is not allowed!"), false);
+			return 0;
+		};
+
 
 		int runCommand(ServerPlayer player);
 
@@ -89,6 +99,12 @@ public class TeleportPos {
 	}
 
 	public TeleportResult teleport(ServerPlayer player) {
+		for (Pattern p : FTBEssentials.DISALLOWED_DIMENSION_PATTERNS) {
+			if(p.matcher(dimension.location().getPath()).matches()) {
+				return TeleportResult.DIMENSION_NOT_ALLOWED;
+			}
+		}
+
 		ServerLevel world = player.server.getLevel(dimension);
 
 		if (world == null) {
