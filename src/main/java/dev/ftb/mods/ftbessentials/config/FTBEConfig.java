@@ -3,6 +3,9 @@ package dev.ftb.mods.ftbessentials.config;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftblibrary.snbt.config.IntValue;
 import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
+import dev.ftb.mods.ftblibrary.snbt.config.StringListValue;
+
+import java.util.List;
 
 /**
  * @author LatvianModder
@@ -79,4 +82,7 @@ public interface FTBEConfig {
 			.comment("Allows users to access their ender chest, as well as admins to manage other players' ender chests.");
 	ToggleableConfig LEADERBOARD = new ToggleableConfig(MISC, "leaderboard")
 			.comment("Allows users to view player leaderboard stats.");
+
+	StringListValue DISALLOWED_DIMENSION_PATTERNS = MISC.getStringList("disallowed_dimensions", List.of(new String[]{""}))
+			.comment("List of REGEX patterns matching dimensions teleports are restricted to.");
 }

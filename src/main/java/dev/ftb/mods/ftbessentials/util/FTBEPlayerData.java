@@ -19,6 +19,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * @author LatvianModder
@@ -168,6 +169,12 @@ public class FTBEPlayerData {
 	}
 
 	public void addTeleportHistory(ServerPlayer player, TeleportPos pos) {
+		for (Pattern p : FTBEssentials.DISALLOWED_DIMENSION_PATTERNS) {
+			if(p.matcher(pos.dimension.location().getPath()).matches()) {
+				return;
+			}
+		}
+
 		teleportHistory.add(pos);
 
 		while (teleportHistory.size() > FTBEConfig.MAX_BACK.get(player)) {
