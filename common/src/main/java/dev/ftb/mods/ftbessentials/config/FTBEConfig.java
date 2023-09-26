@@ -73,8 +73,10 @@ public interface FTBEConfig {
 			.comment("Allows admins to toggle invincibility using a command, without having to use Creative Mode");
 	ToggleableConfig INVSEE = new ToggleableConfig(ADMIN, "invsee")
 			.comment("Allows admins to view other users' inventories using a command");
-	ToggleableConfig MUTE = new ToggleableConfig(ADMIN, "mute") // todo: temp mute?
+	ToggleableConfig MUTE = new ToggleableConfig(ADMIN, "mute")
 			.comment("Allows admins to restrict players from chatting by using a command to mute (or unmute) them");
+	ToggleableConfig KIT = new ToggleableConfig(ADMIN, "kit")
+			.comment("Allows admins to configure kits of items that can be given to players.");
 
 	SNBTConfig MISC = CONFIG.addGroup("misc").comment("Miscellaneous features and utilities");
 	ToggleableConfig KICKME = new ToggleableConfig(MISC, "kickme")
@@ -91,6 +93,5 @@ public interface FTBEConfig {
 			.comment("Allows users to access their ender chest, as well as admins to manage other players' ender chests.");
 	ToggleableConfig LEADERBOARD = new ToggleableConfig(MISC, "leaderboard")
 			.comment("Allows users to view leaderboard stats about everyone on the server.");
-
 }
 

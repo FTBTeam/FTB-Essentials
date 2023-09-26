@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbessentials.util;
 
 import com.mojang.authlib.GameProfile;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
+import dev.ftb.mods.ftbessentials.kit.KitManager;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import net.minecraft.server.MinecraftServer;
@@ -86,6 +87,8 @@ public class FTBEWorldData {
 		muteTimeouts.forEach((id, until) -> mutesTag.putLong(id.toString(), until));
 		tag.put("mute_timeouts", mutesTag);
 
+		tag.put("kits", KitManager.getInstance().save());
+
 		return tag;
 	}
 
@@ -97,6 +100,8 @@ public class FTBEWorldData {
 		for (String key : mutesTag.getAllKeys()) {
 			muteTimeouts.put(UUID.fromString(key), mutesTag.getLong(key));
 		}
+
+		KitManager.getInstance().load(tag.getCompound("kits"));
 	}
 
 	public void tickMuteTimeouts(MinecraftServer server) {

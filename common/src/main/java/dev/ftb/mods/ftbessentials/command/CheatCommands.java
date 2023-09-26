@@ -2,8 +2,6 @@ package dev.ftb.mods.ftbessentials.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.ftb.mods.ftbessentials.FTBEssentialsPlatform;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.DurationInfo;
@@ -13,7 +11,6 @@ import dev.ftb.mods.ftbessentials.util.OtherPlayerInventory;
 import dev.ftb.mods.ftblibrary.util.PlayerDisplayNameUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -24,9 +21,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 /**
  * @author LatvianModder
@@ -97,7 +91,7 @@ public class CheatCommands {
 					.then(Commands.argument("player", EntityArgument.player())
 							.executes(context -> mute(context.getSource(), EntityArgument.getPlayer(context, "player"), ""))
 							.then(Commands.argument("until", StringArgumentType.greedyString())
-									.suggests((context, builder) -> suggestMuteTimeouts(builder))
+									.suggests((context, builder) -> FTBEssentialsCommands.suggestDurations(builder))
 									.executes(context -> mute(context.getSource(), EntityArgument.getPlayer(context, "player"), StringArgumentType.getString(context, "until")))
 							)
 					)
@@ -230,10 +224,6 @@ public class CheatCommands {
 
 			return 1;
 		}).orElse(0);
-	}
-
-	private static CompletableFuture<Suggestions> suggestMuteTimeouts(SuggestionsBuilder builder) {
-		return SharedSuggestionProvider.suggest(Stream.of("5m", "10m", "1h", "1d", "1w", "<number>[smhdw]"), builder);
 	}
 
 	private static void notifyMuting(CommandSourceStack source, Player target, Component msg) {

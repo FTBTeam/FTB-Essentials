@@ -7,6 +7,7 @@ import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftbessentials.command.FTBEssentialsCommands;
 import dev.ftb.mods.ftbessentials.command.TPACommands;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.kit.KitManager;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
@@ -104,6 +105,12 @@ public class FTBEEventHandler {
 			data.markDirty();
 
 			FTBEPlayerData.sendPlayerTabs(serverPlayer);
+
+			KitManager.getInstance().allKits().forEach(kit -> {
+				if (kit.isAutoGrant()) {
+					kit.giveToPlayer(serverPlayer, data, false);
+				}
+			});
 		});
 	}
 
