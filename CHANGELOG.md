@@ -4,17 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2001.1.4]
-
-### Fixed
-* Fixed server crash related to auto-unmuting players who have gone offline
 
 ## [2001.1.3]
 
 ### Added
+* Added Kits!  Kits are configurable collections of items which can be given to players with a single command
+  * See https://github.com/FTBTeam/FTB-Essentials/wiki/kits.md for a quick overview of how to manage kits
 * Fire a cancellable Architectury event when player is about to teleport due to any Essentials command
   * Can be caught and cancelled by other mods if they want to prevent teleportation under specific circumstances
   * Event is `TeleportEvent.TELEPORT`
+
+### Fixed
+* Fixed server crash related to auto-unmuting players who have gone offline
 
 ## [2001.1.2]
 
