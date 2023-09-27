@@ -77,6 +77,8 @@ public interface FTBEConfig {
 			.comment("Allows admins to restrict players from chatting by using a command to mute (or unmute) them");
 	ToggleableConfig KIT = new ToggleableConfig(ADMIN, "kit")
 			.comment("Allows admins to configure kits of items that can be given to players.");
+	ToggleableConfig TP_OFFLINE = new ToggleableConfig(ADMIN, "tp_offline")
+			.comment("Allows admins to change the location of offline players.");
 
 	SNBTConfig MISC = CONFIG.addGroup("misc").comment("Miscellaneous features and utilities");
 	ToggleableConfig KICKME = new ToggleableConfig(MISC, "kickme")
