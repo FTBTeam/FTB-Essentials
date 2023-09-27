@@ -101,5 +101,7 @@ public interface FTBEConfig {
 			.comment("Allows users to access their ender chest, as well as admins to manage other players' ender chests.");
 	ToggleableConfig LEADERBOARD = new ToggleableConfig(MISC, "leaderboard")
 			.comment("Allows users to view leaderboard stats about everyone on the server.");
+	ToggleableConfig NEAR = new ToggleableConfig(MISC, "near")
+			.comment("Allows users to list nearby players, sorted by distance");
 }
 

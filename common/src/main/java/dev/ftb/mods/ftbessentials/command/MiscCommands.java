@@ -2,8 +2,10 @@ package dev.ftb.mods.ftbessentials.command;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.integration.PermissionsHelper;
 import dev.ftb.mods.ftbessentials.mixin.PlayerListAccess;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData.RecordingStatus;
@@ -12,7 +14,6 @@ import dev.ftb.mods.ftbessentials.util.Leaderboard;
 import dev.ftb.mods.ftblibrary.util.PlayerDisplayNameUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -38,30 +39,36 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
+
 /**
  * @author LatvianModder
  */
 public class MiscCommands {
+	protected static final int DEFAULT_RADIUS = 200;   // default radius for /near command
+	protected static final int MAX_PLAYER_RADIUS = 16; // max radius for non-admin users (adjustable with FTB Ranks)
+
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		if (FTBEConfig.KICKME.isEnabled()) {
-			dispatcher.register(Commands.literal("kickme")
+			dispatcher.register(literal("kickme")
 					.requires(FTBEConfig.KICKME)
 					.executes(context -> kickme(context.getSource().getPlayerOrException()))
 			);
 		}
 
 		if (FTBEConfig.TRASHCAN.isEnabled()) {
-			dispatcher.register(Commands.literal("trashcan")
+			dispatcher.register(literal("trashcan")
 					.requires(FTBEConfig.TRASHCAN)
 					.executes(context -> trashcan(context.getSource().getPlayerOrException()))
 			);
 		}
 
 		if (FTBEConfig.ENDER_CHEST.isEnabled()) {
-			dispatcher.register(Commands.literal("enderchest")
+			dispatcher.register(literal("enderchest")
 					.requires(FTBEConfig.ENDER_CHEST)
 					.executes(context -> enderChest(context.getSource().getPlayerOrException(), null))
-					.then(Commands.argument("player", EntityArgument.player())
+					.then(argument("player", EntityArgument.player())
 							.requires(source -> source.hasPermission(2))
 							.executes(context -> enderChest(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "player")))
 					)
@@ -73,29 +80,45 @@ public class MiscCommands {
 		}
 
 		if (FTBEConfig.REC.isEnabled()) {
-			dispatcher.register(Commands.literal("recording")
+			dispatcher.register(literal("recording")
 					.requires(FTBEConfig.REC)
 					.executes(context -> recording(context.getSource().getPlayerOrException()))
 			);
-			dispatcher.register(Commands.literal("streaming")
+			dispatcher.register(literal("streaming")
 					.requires(FTBEConfig.REC)
 					.executes(context -> streaming(context.getSource().getPlayerOrException()))
 			);
 		}
 
 		if (FTBEConfig.HAT.isEnabled()) {
-			dispatcher.register(Commands.literal("hat")
+			dispatcher.register(literal("hat")
 					.requires(FTBEConfig.HAT.enabledAndOp())
 					.executes(context -> hat(context.getSource().getPlayerOrException()))
 			);
 		}
 
 		if (FTBEConfig.NICK.isEnabled()) {
-			dispatcher.register(Commands.literal("nickname")
+			dispatcher.register(literal("nickname")
 					.requires(FTBEConfig.NICK)
 					.executes(context -> nickname(context.getSource().getPlayerOrException(), ""))
-					.then(Commands.argument("nickname", StringArgumentType.greedyString())
+					.then(argument("nickname", StringArgumentType.greedyString())
 							.executes(context -> nickname(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "nickname")))
+					)
+			);
+		}
+
+		if (FTBEConfig.NEAR.isEnabled()) {
+			dispatcher.register(literal("near")
+					.requires(FTBEConfig.NEAR.enabledAndOp())
+					.executes(context -> showNear(context.getSource(), context.getSource().getPlayerOrException(), DEFAULT_RADIUS))
+					.then(argument("radius", IntegerArgumentType.integer(1, Integer.MAX_VALUE))
+							.executes(context -> showNear(context.getSource(), context.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(context, "radius")))
+					)
+					.then(argument("player", EntityArgument.player())
+							.executes(context -> showNear(context.getSource(), EntityArgument.getPlayer(context, "player"), DEFAULT_RADIUS))
+							.then(argument("radius", IntegerArgumentType.integer(1, Integer.MAX_VALUE))
+									.executes(context -> showNear(context.getSource(), EntityArgument.getPlayer(context, "player"), IntegerArgumentType.getInteger(context, "radius")))
+							)
 					)
 			);
 		}
@@ -275,18 +298,47 @@ public class MiscCommands {
 		}).orElse(0);
 	}
 
-    /**
-     * Like {@link net.minecraft.server.players.PlayerList#getPlayerStats(Player)} but doesn't need an online player.
-     * @param server the server
-     * @param playerId UUID of the player
-     * @return the server stats
-     */
-    private static ServerStatsCounter getPlayerStats(MinecraftServer server, UUID playerId) {
-        Map<UUID, ServerStatsCounter> stats = ((PlayerListAccess) server.getPlayerList()).getStats();
-        return stats.computeIfAbsent(playerId, k -> {
-            File file1 = server.getWorldPath(LevelResource.PLAYER_STATS_DIR).toFile();
-            File file2 = new File(file1, playerId + ".json");
-            return new ServerStatsCounter(server, file2);
-        });
-    }
+	/**
+	 * Like {@link net.minecraft.server.players.PlayerList#getPlayerStats(Player)} but doesn't need an online player.
+	 * @param server the server
+	 * @param playerId UUID of the player
+	 * @return the server stats
+	 */
+	private static ServerStatsCounter getPlayerStats(MinecraftServer server, UUID playerId) {
+		Map<UUID, ServerStatsCounter> stats = ((PlayerListAccess) server.getPlayerList()).getStats();
+		return stats.computeIfAbsent(playerId, k -> {
+			File file1 = server.getWorldPath(LevelResource.PLAYER_STATS_DIR).toFile();
+			File file2 = new File(file1, playerId + ".json");
+			return new ServerStatsCounter(server, file2);
+		});
+	}
+
+	private static int showNear(CommandSourceStack source, ServerPlayer target, int radius) {
+		if (!source.hasPermission(2) && source.isPlayer()) {
+			int max = PermissionsHelper.getInstance().getInt(source.getPlayer(), MAX_PLAYER_RADIUS, "ftbessentials.near.max_radius");
+			if (radius > max) {
+				source.sendSuccess(() -> Component.literal("Limiting radius to " + max).withStyle(ChatFormatting.GOLD), false);
+				radius = max;
+			}
+		}
+
+		int radius2 = radius * radius;
+		List<ServerPlayer> l = target.getServer().getPlayerList().getPlayers().stream()
+				.filter(other -> other != target)
+				.filter(other -> other.distanceToSqr(target) < radius2)
+				.sorted(Comparator.comparingDouble(o -> o.distanceToSqr(target)))
+				.toList();
+
+		final int r = radius;
+		source.sendSuccess(() -> Component.literal(l.size() + " player(s) within " + r + "m").withStyle(ChatFormatting.YELLOW), false);
+		l.forEach(player ->
+				source.sendSuccess(() -> Component.literal("• ")
+								.append(player.getDisplayName()).withStyle(ChatFormatting.AQUA)
+								.append(String.format(" - %5.2fm", player.distanceTo(target))),
+						false
+				)
+		);
+
+		return 1;
+	}
 }
