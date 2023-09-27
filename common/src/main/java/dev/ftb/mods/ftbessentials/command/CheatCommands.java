@@ -62,6 +62,24 @@ public class CheatCommands {
 					)
 			);
 		}
+		if (FTBEConfig.FEED.isEnabled()) {
+			dispatcher.register(literal("feed")
+					.requires(FTBEConfig.FEED.enabledAndOp())
+					.executes(context -> feed(context.getSource().getPlayerOrException()))
+					.then(argument("player", EntityArgument.player())
+							.executes(context -> feed(EntityArgument.getPlayer(context, "player")))
+					)
+			);
+		}
+		if (FTBEConfig.EXTINGUISH.isEnabled()) {
+			dispatcher.register(literal("extinguish")
+					.requires(FTBEConfig.EXTINGUISH.enabledAndOp())
+					.executes(context -> extinguish(context.getSource().getPlayerOrException()))
+					.then(argument("player", EntityArgument.player())
+							.executes(context -> extinguish(EntityArgument.getPlayer(context, "player")))
+					)
+			);
+		}
 
 		if (FTBEConfig.FLY.isEnabled()) {
 			dispatcher.register(literal("fly")
@@ -151,6 +169,16 @@ public class CheatCommands {
 		player.getFoodData().eat(40, 40F);
 		player.clearFire();
 		FTBEssentialsPlatform.curePotionEffects(player);
+		return 1;
+	}
+
+	public static int feed(ServerPlayer player) {
+		player.getFoodData().eat(40, 40F);
+		return 1;
+	}
+
+	public static int extinguish(ServerPlayer player) {
+		player.clearFire();
 		return 1;
 	}
 

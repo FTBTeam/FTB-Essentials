@@ -68,7 +68,11 @@ public interface FTBEConfig {
 
 	SNBTConfig ADMIN = CONFIG.addGroup("admin").comment("Admin commands for cheating and moderation");
 	ToggleableConfig HEAL = new ToggleableConfig(ADMIN, "heal")
-			.comment("Allows admins to heal themselves using a command");
+			.comment("Allows admins to fully heal (health, food, fire, potion effects) themselves or a player using a command");
+	ToggleableConfig FEED = new ToggleableConfig(ADMIN, "feed")
+			.comment("Allows admins to fully feed themselves or a player using a command");
+	ToggleableConfig EXTINGUISH = new ToggleableConfig(ADMIN, "extinguish")
+			.comment("Allows admins to extinguish themselves or a player using a command");
 	ToggleableConfig FLY = new ToggleableConfig(ADMIN, "fly")
 			.comment("Allows admins to toggle flying status using a command, without having to use Creative Mode");
 	ToggleableConfig GOD = new ToggleableConfig(ADMIN, "god")
