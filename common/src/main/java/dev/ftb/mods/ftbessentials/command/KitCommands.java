@@ -9,6 +9,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.kit.Kit;
 import dev.ftb.mods.ftbessentials.kit.KitManager;
+import dev.ftb.mods.ftbessentials.util.BlockUtil;
 import dev.ftb.mods.ftbessentials.util.DurationInfo;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.InventoryUtil;
@@ -25,14 +26,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -136,7 +133,7 @@ public class KitCommands {
     private static int putKitInBlockInv(CommandSourceStack source, String kitName) {
         try {
             ServerPlayer player = source.getPlayerOrException();
-            BlockHitResult res = getFocusedBlock(player).orElseThrow(() -> new IllegalArgumentException("Not looking at a block"));
+            BlockHitResult res = BlockUtil.getFocusedBlock(player, 5.5d).orElseThrow(() -> new IllegalArgumentException("Not looking at a block"));
             Kit kit = KitManager.getInstance().get(kitName).orElseThrow(() -> new IllegalArgumentException("No such kit: " + kitName));
             if (!InventoryUtil.putItemsInInventory(kit.getItems(), player.level(), res.getBlockPos(), res.getDirection())) {
                 throw new RuntimeException("Not enough space");
@@ -169,7 +166,7 @@ public class KitCommands {
         try {
             long secs = DurationInfo.getSeconds(cooldown);
             ServerPlayer player = source.getPlayerOrException();
-            BlockHitResult res = getFocusedBlock(player).orElseThrow(() -> new IllegalArgumentException("Not looking at a block"));
+            BlockHitResult res = BlockUtil.getFocusedBlock(player, 5.5d).orElseThrow(() -> new IllegalArgumentException("Not looking at a block"));
 
             KitManager.getInstance().createFromBlockInv(name, player.level(), res.getBlockPos(), res.getDirection(), secs);
             source.sendSuccess(() -> Component.literal("Kit '" + name + "' created").withStyle(ChatFormatting.YELLOW), false);
@@ -295,11 +292,4 @@ public class KitCommands {
         return 0;
     }
 
-    private static Optional<BlockHitResult> getFocusedBlock(ServerPlayer player) {
-        Vec3 entityVec = player.getEyePosition(1f);
-        Vec3 maxDistVec = entityVec.add(player.getViewVector(1F).scale(5d));
-        ClipContext ctx = new ClipContext(entityVec, maxDistVec, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player);
-        BlockHitResult hitResult = player.level().clip(ctx);
-        return hitResult.getType() == HitResult.Type.BLOCK ? Optional.of(hitResult) : Optional.empty();
-    }
 }

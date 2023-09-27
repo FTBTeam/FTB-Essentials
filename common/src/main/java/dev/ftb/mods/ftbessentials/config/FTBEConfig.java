@@ -63,6 +63,8 @@ public interface FTBEConfig {
 
 	ToggleableConfig TPX = new ToggleableConfig(TELEPORTATION, "tpx")
 			.comment("Allows admins to teleport to dimension");
+	ToggleableConfig JUMP = new ToggleableConfig(TELEPORTATION, "jump")
+			.comment("Allows admins to jump (teleport) to the focused block");
 
 	SNBTConfig ADMIN = CONFIG.addGroup("admin").comment("Admin commands for cheating and moderation");
 	ToggleableConfig HEAL = new ToggleableConfig(ADMIN, "heal")

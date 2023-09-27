@@ -6,6 +6,7 @@ import dev.architectury.event.EventResult;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.FTBEssentialsEvents;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.util.BlockUtil;
 import dev.ftb.mods.ftbessentials.util.DimensionFilter;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
@@ -30,6 +31,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * @author LatvianModder
@@ -76,6 +79,39 @@ public class TeleportCommands {
 					)
 			);
 		}
+
+		if (FTBEConfig.JUMP.isEnabled()) {
+			dispatcher.register(Commands.literal("jump")
+					.requires(FTBEConfig.JUMP.enabledAndOp())
+					.executes(ctx -> jump(ctx.getSource()))
+			);
+		}
+	}
+
+	private static int jump(CommandSourceStack source) {
+		try {
+			ServerPlayer player = source.getPlayerOrException();
+
+			BlockHitResult res = BlockUtil.getFocusedBlock(player, player.getServer().getPlayerList().getViewDistance() * 16)
+					.orElseThrow(() -> new IllegalArgumentException("Not looking at a block"));
+			// want to land the player on top of the focused block, so scan up as far as needed
+			BlockPos.MutableBlockPos mPos = res.getBlockPos().above().mutable();
+			while (true) {
+				Level level = player.level();
+				if (isEmptyShape(level, mPos.above()) && isEmptyShape(level, mPos.above(2)) || mPos.getY() >= level.getMaxBuildHeight())
+					break;
+				mPos.move(Direction.UP, 2);
+			}
+			Vec3 vec = Vec3.atBottomCenterOf(mPos);
+			player.teleportTo(vec.x(), vec.y(), vec.z());
+		} catch (Exception e) {
+			source.sendFailure(Component.literal("Can't jump: " + e.getMessage()));
+		}
+		return 0;
+	}
+
+	private static boolean isEmptyShape(Level level, BlockPos pos) {
+		return level.getBlockState(pos).getCollisionShape(level, pos).isEmpty();
 	}
 
 	public static int back(ServerPlayer player) {
