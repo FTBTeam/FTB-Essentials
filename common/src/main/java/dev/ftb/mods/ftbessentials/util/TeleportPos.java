@@ -59,7 +59,7 @@ public class TeleportPos {
 		int xpLevel = player.experienceLevel;
 		float xrot = (this.xRot == null) ? player.getXRot() : this.xRot;
 		float yrot = (this.yRot == null) ? player.getYRot() : this.yRot;
-		player.teleportTo(level, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, xrot, yrot);
+		player.teleportTo(level, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, yrot, xrot);
 		player.setExperienceLevels(xpLevel);
 		return TeleportResult.SUCCESS;
 	}
