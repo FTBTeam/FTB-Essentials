@@ -10,12 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 * Added Kits!  Kits are configurable collections of items which can be given to players with a single command
   * See https://github.com/FTBTeam/FTB-Essentials/wiki/kits.md for a quick overview of how to manage kits
+* Added `/tp_offline` command, allowing admins to change the position of offline players
+  * Dimension can also be changed using the standard vanilla `/execute in <dimension> run tp_offline ...` syntax
 * Fire a cancellable Architectury event when player is about to teleport due to any Essentials command
   * Can be caught and cancelled by other mods if they want to prevent teleportation under specific circumstances
   * Event is `TeleportEvent.TELEPORT`
 
 ### Fixed
 * Fixed server crash related to auto-unmuting players who have gone offline
+* Fixed pitch and yaw being swapped when teleporting to saved positions (homes, warps)
 
 ## [2001.1.2]
 
