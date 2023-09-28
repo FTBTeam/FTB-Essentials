@@ -75,6 +75,8 @@ public interface FTBEConfig {
 			.comment("Allows admins to extinguish themselves or a player using a command");
 	ToggleableConfig FLY = new ToggleableConfig(ADMIN, "fly")
 			.comment("Allows admins to toggle flying status using a command, without having to use Creative Mode");
+	ToggleableConfig SPEED = new ToggleableConfig(ADMIN, "speed")
+			.comment("Allows admins to change walk speed for themselves or a player");
 	ToggleableConfig GOD = new ToggleableConfig(ADMIN, "god")
 			.comment("Allows admins to toggle invincibility using a command, without having to use Creative Mode");
 	ToggleableConfig INVSEE = new ToggleableConfig(ADMIN, "invsee")

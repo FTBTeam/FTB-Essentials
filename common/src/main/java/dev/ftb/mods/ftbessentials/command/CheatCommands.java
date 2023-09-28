@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbessentials.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.ftb.mods.ftbessentials.FTBEssentialsPlatform;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.DurationInfo;
@@ -12,7 +12,6 @@ import dev.ftb.mods.ftbessentials.util.OtherPlayerInventory;
 import dev.ftb.mods.ftblibrary.util.PlayerDisplayNameUtil;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
@@ -27,6 +26,10 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -47,8 +50,10 @@ import static net.minecraft.commands.Commands.literal;
  * @author LatvianModder
  */
 public class CheatCommands {
+	private static final UUID ESSENTIALS_SPEED_UUID = UUID.fromString("3a8a9187-94ab-4272-99c0-ca764a19f8f1");
+
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		/*
+        /*
 		killall
 		dumpchunkloaders
 		 */
@@ -87,6 +92,19 @@ public class CheatCommands {
 					.executes(context -> fly(context.getSource().getPlayerOrException()))
 					.then(argument("player", EntityArgument.player())
 							.executes(context -> fly(EntityArgument.getPlayer(context, "player")))
+					)
+			);
+		}
+
+		if (FTBEConfig.SPEED.isEnabled()) {
+			dispatcher.register(literal("speed")
+					.executes(context -> speed(context.getSource(), Attributes.MOVEMENT_SPEED, context.getSource().getPlayerOrException()))
+					.then(argument("boost_percent", IntegerArgumentType.integer(-100, 2000))
+							.requires(FTBEConfig.SPEED.enabledAndOp())
+							.executes(context -> speed(context.getSource(), Attributes.MOVEMENT_SPEED, context.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(context, "boost_percent")))
+							.then(argument("player", EntityArgument.player())
+									.executes(context -> speed(context.getSource(), Attributes.MOVEMENT_SPEED, EntityArgument.getPlayer(context, "player"), IntegerArgumentType.getInteger(context, "boost_percent")))
+							)
 					)
 			);
 		}
@@ -161,6 +179,48 @@ public class CheatCommands {
 							)
 					)
 			);
+		}
+	}
+
+	private static int speed(CommandSourceStack source, Attribute attr, ServerPlayer player) {
+		AttributeInstance attrInstance = player.getAttribute(attr);
+
+		showSpeed(source, player, attrInstance);
+
+		return 1;
+	}
+
+	private static int speed(CommandSourceStack source, Attribute attr, ServerPlayer target, int boostPct) {
+		AttributeInstance attrInstance = target.getAttribute(attr);
+
+		if (attrInstance != null) {
+			float speedMult = boostPct / 100f;
+			attrInstance.removeModifier(ESSENTIALS_SPEED_UUID);
+			if (speedMult != 0f) {
+				attrInstance.addPermanentModifier(new AttributeModifier(ESSENTIALS_SPEED_UUID,
+						"FTB Essentials speed boost", speedMult, AttributeModifier.Operation.MULTIPLY_BASE
+				));
+			}
+			showSpeed(source, target, attrInstance);
+		}
+
+		return 1;
+	}
+
+	private static void showSpeed(CommandSourceStack source, ServerPlayer target, AttributeInstance attrInstance) {
+		Component msg;
+		if (attrInstance != null && attrInstance.getModifier(ESSENTIALS_SPEED_UUID) != null) {
+			double speedMult = attrInstance.getModifier(ESSENTIALS_SPEED_UUID).getAmount();
+			int boostPct = (int) (speedMult * 100);
+			msg = Component.literal("Speed boost for ")
+					.append(target.getDisplayName())
+					.append(" (").append(Component.translatable(attrInstance.getAttribute().getDescriptionId())).append(") = " + boostPct + "%");
+		} else {
+			msg = Component.literal("No speed boost for ").append(target.getDisplayName());
+		}
+		source.sendSuccess(() -> msg, false);
+		if (!source.isPlayer() || source.getPlayer() != target) {
+			target.displayClientMessage(msg, false);
 		}
 	}
 
