@@ -27,9 +27,9 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.LevelResource;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -72,6 +72,34 @@ public class MiscCommands {
 							.requires(source -> source.hasPermission(2))
 							.executes(context -> enderChest(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "player")))
 					)
+			);
+		}
+
+		if (FTBEConfig.ANVIL.isEnabled()) {
+			dispatcher.register(literal("anvil")
+					.requires(FTBEConfig.ANVIL.enabledAndOp())
+					.executes(context -> openWorkSite(context.getSource().getPlayerOrException(), "block.minecraft.anvil", (id, inv, player) -> new VirtualAnvilMenu(id, inv, (ServerPlayer) player)))
+			);
+		}
+
+		if (FTBEConfig.SMITHING_TABLE.isEnabled()) {
+			dispatcher.register(literal("smithing")
+					.requires(FTBEConfig.SMITHING_TABLE.enabledAndOp())
+					.executes(context -> openWorkSite(context.getSource().getPlayerOrException(), "block.minecraft.smithing_table", (id, inv, player) -> new VirtualSmithingMenu(id, inv, (ServerPlayer) player)))
+			);
+		}
+
+		if (FTBEConfig.CRAFTING_TABLE.isEnabled()) {
+			dispatcher.register(literal("crafting")
+					.requires(FTBEConfig.CRAFTING_TABLE.enabledAndOp())
+					.executes(context -> openWorkSite(context.getSource().getPlayerOrException(), "block.minecraft.crafting_table", (id, inv, player) -> new VirtualCraftingMenu(id, inv, (ServerPlayer) player)))
+			);
+		}
+
+		if (FTBEConfig.STONECUTTER.isEnabled()) {
+			dispatcher.register(literal("stonecutter")
+					.requires(FTBEConfig.STONECUTTER.enabledAndOp())
+					.executes(context -> openWorkSite(context.getSource().getPlayerOrException(), "block.minecraft.stonecutter", (id, inv, player) -> new VirtualStoneCutterMenu(id, inv, (ServerPlayer) player)))
 			);
 		}
 
@@ -124,8 +152,13 @@ public class MiscCommands {
 		}
 	}
 
-	private static int enderChest(ServerPlayer player, @Nullable ServerPlayer target) {
+	private static int openWorkSite(ServerPlayer player, String xlateKey, MenuConstructor ctor) {
+		player.openMenu(new SimpleMenuProvider((id, inv, p) -> ctor.createMenu(id, inv, player), Component.translatable(xlateKey)));
 
+		return 1;
+	}
+
+	private static int enderChest(ServerPlayer player, @Nullable ServerPlayer target) {
 		MutableComponent title = Component.translatable("container.enderchest");
 		if (target != null) {
 			title.append(" × ").append(target.getDisplayName());
@@ -340,5 +373,49 @@ public class MiscCommands {
 		);
 
 		return 1;
+	}
+
+	private static class VirtualAnvilMenu extends AnvilMenu {
+		public VirtualAnvilMenu(int id, Inventory inv, ServerPlayer player) {
+			super(id, inv, ContainerLevelAccess.create(player.level(), player.blockPosition()));
+		}
+
+		@Override
+		protected boolean isValidBlock(BlockState blockState) {
+			return true;
+		}
+	}
+
+	private static class VirtualSmithingMenu extends SmithingMenu {
+		public VirtualSmithingMenu(int id, Inventory inv, ServerPlayer player) {
+			super(id, inv, ContainerLevelAccess.create(player.level(), player.blockPosition()));
+		}
+
+		@Override
+		protected boolean isValidBlock(BlockState blockState) {
+			return true;
+		}
+	}
+
+	private static class VirtualStoneCutterMenu extends StonecutterMenu {
+		public VirtualStoneCutterMenu(int id, Inventory inv, ServerPlayer player) {
+			super(id, inv, ContainerLevelAccess.create(player.level(), player.blockPosition()));
+		}
+
+		@Override
+		public boolean stillValid(Player player) {
+			return true;
+		}
+	}
+
+	private static class VirtualCraftingMenu extends CraftingMenu {
+		public VirtualCraftingMenu(int id, Inventory inv, ServerPlayer player) {
+			super(id, inv, ContainerLevelAccess.create(player.level(), player.blockPosition()));
+		}
+
+		@Override
+		public boolean stillValid(Player player) {
+			return true;
+		}
 	}
 }

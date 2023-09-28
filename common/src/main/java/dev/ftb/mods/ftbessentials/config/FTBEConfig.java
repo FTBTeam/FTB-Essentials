@@ -101,6 +101,14 @@ public interface FTBEConfig {
 			.comment("Allows users to change their display name, as well as admins to change nicknames for other users");
 	ToggleableConfig ENDER_CHEST = new ToggleableConfig(MISC, "enderchest")
 			.comment("Allows users to access their ender chest, as well as admins to manage other players' ender chests.");
+	ToggleableConfig CRAFTING_TABLE = new ToggleableConfig(MISC, "crafting")
+			.comment("Allows users to access a Crafting Table GUI without needing a Crafting Table.");
+	ToggleableConfig STONECUTTER = new ToggleableConfig(MISC, "stonecutter")
+			.comment("Allows users to access a Stonecutter GUI without needing a Stonecutter.");
+	ToggleableConfig ANVIL = new ToggleableConfig(MISC, "anvil")
+			.comment("Allows users to access an Anvil GUI without needing an Anvil.");
+	ToggleableConfig SMITHING_TABLE = new ToggleableConfig(MISC, "smithing")
+			.comment("Allows users to access a Smithing Table GUI without needing a Smithing Table.");
 	ToggleableConfig LEADERBOARD = new ToggleableConfig(MISC, "leaderboard")
 			.comment("Allows users to view leaderboard stats about everyone on the server.");
 	ToggleableConfig NEAR = new ToggleableConfig(MISC, "near")
