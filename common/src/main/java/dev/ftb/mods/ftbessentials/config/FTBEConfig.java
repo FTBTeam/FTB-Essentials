@@ -63,18 +63,30 @@ public interface FTBEConfig {
 
 	ToggleableConfig TPX = new ToggleableConfig(TELEPORTATION, "tpx")
 			.comment("Allows admins to teleport to dimension");
+	ToggleableConfig JUMP = new ToggleableConfig(TELEPORTATION, "jump")
+			.comment("Allows admins to jump (teleport) to the focused block");
 
 	SNBTConfig ADMIN = CONFIG.addGroup("admin").comment("Admin commands for cheating and moderation");
 	ToggleableConfig HEAL = new ToggleableConfig(ADMIN, "heal")
-			.comment("Allows admins to heal themselves using a command");
+			.comment("Allows admins to fully heal (health, food, fire, potion effects) themselves or a player using a command");
+	ToggleableConfig FEED = new ToggleableConfig(ADMIN, "feed")
+			.comment("Allows admins to fully feed themselves or a player using a command");
+	ToggleableConfig EXTINGUISH = new ToggleableConfig(ADMIN, "extinguish")
+			.comment("Allows admins to extinguish themselves or a player using a command");
 	ToggleableConfig FLY = new ToggleableConfig(ADMIN, "fly")
 			.comment("Allows admins to toggle flying status using a command, without having to use Creative Mode");
+	ToggleableConfig SPEED = new ToggleableConfig(ADMIN, "speed")
+			.comment("Allows admins to change walk speed for themselves or a player");
 	ToggleableConfig GOD = new ToggleableConfig(ADMIN, "god")
 			.comment("Allows admins to toggle invincibility using a command, without having to use Creative Mode");
 	ToggleableConfig INVSEE = new ToggleableConfig(ADMIN, "invsee")
 			.comment("Allows admins to view other users' inventories using a command");
-	ToggleableConfig MUTE = new ToggleableConfig(ADMIN, "mute") // todo: temp mute?
+	ToggleableConfig MUTE = new ToggleableConfig(ADMIN, "mute")
 			.comment("Allows admins to restrict players from chatting by using a command to mute (or unmute) them");
+	ToggleableConfig KIT = new ToggleableConfig(ADMIN, "kit")
+			.comment("Allows admins to configure kits of items that can be given to players.");
+	ToggleableConfig TP_OFFLINE = new ToggleableConfig(ADMIN, "tp_offline")
+			.comment("Allows admins to change the location of offline players.");
 
 	SNBTConfig MISC = CONFIG.addGroup("misc").comment("Miscellaneous features and utilities");
 	ToggleableConfig KICKME = new ToggleableConfig(MISC, "kickme")
@@ -89,8 +101,17 @@ public interface FTBEConfig {
 			.comment("Allows users to change their display name, as well as admins to change nicknames for other users");
 	ToggleableConfig ENDER_CHEST = new ToggleableConfig(MISC, "enderchest")
 			.comment("Allows users to access their ender chest, as well as admins to manage other players' ender chests.");
+	ToggleableConfig CRAFTING_TABLE = new ToggleableConfig(MISC, "crafting")
+			.comment("Allows users to access a Crafting Table GUI without needing a Crafting Table.");
+	ToggleableConfig STONECUTTER = new ToggleableConfig(MISC, "stonecutter")
+			.comment("Allows users to access a Stonecutter GUI without needing a Stonecutter.");
+	ToggleableConfig ANVIL = new ToggleableConfig(MISC, "anvil")
+			.comment("Allows users to access an Anvil GUI without needing an Anvil.");
+	ToggleableConfig SMITHING_TABLE = new ToggleableConfig(MISC, "smithing")
+			.comment("Allows users to access a Smithing Table GUI without needing a Smithing Table.");
 	ToggleableConfig LEADERBOARD = new ToggleableConfig(MISC, "leaderboard")
 			.comment("Allows users to view leaderboard stats about everyone on the server.");
-
+	ToggleableConfig NEAR = new ToggleableConfig(MISC, "near")
+			.comment("Allows users to list nearby players, sorted by distance");
 }
 

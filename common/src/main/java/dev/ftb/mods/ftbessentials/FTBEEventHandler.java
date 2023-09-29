@@ -7,6 +7,7 @@ import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftbessentials.command.FTBEssentialsCommands;
 import dev.ftb.mods.ftbessentials.command.TPACommands;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.kit.KitManager;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
@@ -92,25 +93,24 @@ public class FTBEEventHandler {
 
 	private static void levelSave(ServerLevel serverLevel) {
 		if (FTBEWorldData.instance != null) {
-			FTBEWorldData.instance.saveNow();
-
-			if (Platform.isFabric()) {
-				// on Forge, data is saved by the PlayerEvent.SaveToFile event handler
-				FTBEPlayerData.saveAll();
-			}
+			FTBEWorldData.instance.saveIfChanged();
+			FTBEPlayerData.saveAll();
 		}
 	}
 
 	private static void playerLoggedIn(ServerPlayer serverPlayer) {
 		FTBEPlayerData.getOrCreate(serverPlayer).ifPresent(data -> {
-			if (Platform.isFabric()) {
-				// on Forge, data is loaded by the PlayerEvent.LoadFromFile event handler
-				data.load();
-			}
+			data.load();
 			data.setLastSeenPos(new TeleportPos(serverPlayer));
 			data.markDirty();
 
 			FTBEPlayerData.sendPlayerTabs(serverPlayer);
+
+			KitManager.getInstance().allKits().forEach(kit -> {
+				if (kit.isAutoGrant()) {
+					kit.giveToPlayer(serverPlayer, data, false);
+				}
+			});
 		});
 	}
 

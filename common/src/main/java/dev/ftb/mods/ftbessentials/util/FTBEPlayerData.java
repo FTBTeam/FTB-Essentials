@@ -8,6 +8,7 @@ import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -40,6 +41,7 @@ public class FTBEPlayerData {
 	private TeleportPos lastSeenPos;
 	private final SavedTeleportManager.HomeManager homes;
 	private RecordingStatus recording;
+	private final Map<String,Long> kitUseTimes;
 
 	public final WarmupCooldownTeleporter backTeleporter;
 	public final WarmupCooldownTeleporter spawnTeleporter;
@@ -63,6 +65,7 @@ public class FTBEPlayerData {
 		lastSeenPos = new TeleportPos(Level.OVERWORLD, BlockPos.ZERO);
 		recording = RecordingStatus.NONE;
 
+		kitUseTimes = new HashMap<>();
 		homes = new SavedTeleportManager.HomeManager(this);
 
 		backTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.BACK::getCooldown, FTBEConfig.BACK::getWarmup, true);
@@ -72,6 +75,10 @@ public class FTBEPlayerData {
 		tpaTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.TPA::getCooldown, FTBEConfig.TPA::getWarmup);
 		rtpTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.RTP::getCooldown, FTBEConfig.RTP::getWarmup);
 		teleportHistory = new LinkedList<>();
+	}
+
+	public static void cleanupKitCooldowns(String kitName) {
+		MAP.values().forEach(data -> data.setLastKitUseTime(kitName, 0L));
 	}
 
 	public UUID getUuid() {
@@ -182,7 +189,7 @@ public class FTBEPlayerData {
 	}
 
 	public static void saveAll() {
-		MAP.values().forEach(FTBEPlayerData::saveNow);
+		MAP.values().forEach(FTBEPlayerData::saveIfChanged);
 	}
 
 	public static void sendPlayerTabs(ServerPlayer serverPlayer) {
@@ -216,6 +223,8 @@ public class FTBEPlayerData {
 
 		nbt.put("homes", homes.writeNBT());
 
+		nbt.put("kit_use_times", Util.make(new CompoundTag(), tag -> kitUseTimes.forEach(tag::putLong)));
+
 		return nbt;
 	}
 
@@ -233,6 +242,12 @@ public class FTBEPlayerData {
 
 		for (int i = 0; i < th.size(); i++) {
 			teleportHistory.add(new TeleportPos(th.getCompound(i)));
+		}
+
+		kitUseTimes.clear();
+		CompoundTag kitTag = tag.getCompound("kit_use_times");
+		for (String name : kitTag.getAllKeys()) {
+			kitUseTimes.put(name, kitTag.getLong(name));
 		}
 
 		homes.readNBT(tag.getCompound("homes"));
@@ -265,7 +280,7 @@ public class FTBEPlayerData {
 		}
 	}
 
-	public void saveNow() {
+	public void saveIfChanged() {
 		if (needSave && SNBT.write(FTBEWorldData.instance.mkdirs("playerdata").resolve(uuid + ".snbt"), write())) {
 			needSave = false;
 		}
@@ -277,6 +292,21 @@ public class FTBEPlayerData {
 
 	public void sendTabName(ServerPlayer to) {
 		new UpdateTabNameMessage(uuid, name, nick, recording, false).sendTo(to);
+	}
+
+	public long getLastKitUseTime(String kitName) {
+		return kitUseTimes.getOrDefault(kitName, 0L);
+	}
+
+	public void setLastKitUseTime(String kitName, long when) {
+		if (when == 0L) {
+			if (kitUseTimes.remove(kitName) != null) {
+				markDirty();
+			}
+		} else {
+			kitUseTimes.put(kitName, when);
+			markDirty();
+		}
 	}
 
 	public enum RecordingStatus {

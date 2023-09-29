@@ -59,7 +59,7 @@ public class TeleportPos {
 		int xpLevel = player.experienceLevel;
 		float xrot = (this.xRot == null) ? player.getXRot() : this.xRot;
 		float yrot = (this.yRot == null) ? player.getYRot() : this.yRot;
-		player.teleportTo(level, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, xrot, yrot);
+		player.teleportTo(level, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, yrot, xrot);
 		player.setExperienceLevels(xpLevel);
 		return TeleportResult.SUCCESS;
 	}
@@ -112,15 +112,16 @@ public class TeleportPos {
 			}
 		};
 
-		TeleportResult DIMENSION_NOT_FOUND = player -> {
-			player.displayClientMessage(Component.literal("Dimension not found!"), false);
-			return 0;
-		};
+		static TeleportResult failed(Component msg) {
+			return player -> {
+				player.displayClientMessage(msg, false);
+				return 0;
+			};
+		}
 
-		TeleportResult UNKNOWN_DESTINATION = player -> {
-			player.displayClientMessage(Component.literal("Unknown destination!"), false);
-			return 0;
-		};
+		TeleportResult DIMENSION_NOT_FOUND = failed(Component.literal("Dimension not found!"));
+
+		TeleportResult UNKNOWN_DESTINATION = failed(Component.literal("Unknown destination!"));
 
 		int runCommand(ServerPlayer player);
 

@@ -1,6 +1,8 @@
 package dev.ftb.mods.ftbessentials.util;
 
+import com.mojang.authlib.GameProfile;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
+import dev.ftb.mods.ftbessentials.kit.KitManager;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import net.minecraft.server.MinecraftServer;
@@ -58,7 +60,7 @@ public class FTBEWorldData {
 		needSave = true;
 	}
 
-	public void saveNow() {
+	public void saveIfChanged() {
 		if (needSave && SNBT.write(mkdirs("").resolve(DATA_FILE), toNBT())) {
 			needSave = false;
 		}
@@ -85,6 +87,8 @@ public class FTBEWorldData {
 		muteTimeouts.forEach((id, until) -> mutesTag.putLong(id.toString(), until));
 		tag.put("mute_timeouts", mutesTag);
 
+		tag.put("kits", KitManager.getInstance().save());
+
 		return tag;
 	}
 
@@ -96,6 +100,8 @@ public class FTBEWorldData {
 		for (String key : mutesTag.getAllKeys()) {
 			muteTimeouts.put(UUID.fromString(key), mutesTag.getLong(key));
 		}
+
+		KitManager.getInstance().load(tag.getCompound("kits"));
 	}
 
 	public void tickMuteTimeouts(MinecraftServer server) {
@@ -111,7 +117,13 @@ public class FTBEWorldData {
 			if (player != null) {
 				player.displayClientMessage(player.getDisplayName().copy().append(" is no longer muted"), false);
 			}
-			FTBEPlayerData.getOrCreate(player).ifPresent(data -> data.setMuted(false));
+			FTBEPlayerData.getOrCreate(new GameProfile(id, "")).ifPresent(data -> {
+				data.setMuted(false);
+				if (player == null) {
+					data.saveIfChanged();  // ensure data for offline player is correct before they log in again
+				}
+				FTBEssentials.LOGGER.info("auto-unmuted {} - timeout expired", id);
+			});
 			muteTimeouts.remove(id);
 			markDirty();
 		});

@@ -21,7 +21,7 @@ public record DurationInfo(String desc, long until) {
     );
 
     public static DurationInfo fromString(String durationStr) {
-        if (durationStr.isEmpty()) {
+        if (durationStr.isEmpty() || durationStr.startsWith("*")) {
             return INDEFINITE;
         }
         if (durationStr.length() < 2) {
@@ -34,5 +34,10 @@ public record DurationInfo(String desc, long until) {
         }
         long duration = Math.max(0, (long) (Double.parseDouble(count) * UNIT_MAP.get(unit)));
         return new DurationInfo("for " + TimeUtils.prettyTimeString(duration / 1000L),System.currentTimeMillis() + duration);
+    }
+
+    public static long getSeconds(String durationStr) {
+        DurationInfo info = fromString(durationStr.isEmpty() ? "0s" : durationStr);
+        return (info.until() - System.currentTimeMillis()) / 1000L;
     }
 }
