@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fixed saved player data (homes etc.) not always getting reloaded correctly on player login
 * Hopefully fixed server ConcurrentModificationException crash
   * Could not reproduce this, but added some extra defensive coding
+* The `/rtp` command now uses a proper biome tag check (`minecraft:is_ocean`) to check for ocean biomes when looking for a good random spot
+  * Previously it just checked for "ocean" in the biome name, which was not ideal...
 
 ## [1902.3.3]
 
