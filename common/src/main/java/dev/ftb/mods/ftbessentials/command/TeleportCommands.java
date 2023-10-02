@@ -16,16 +16,15 @@ import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
@@ -138,9 +137,7 @@ public class TeleportCommands {
 			return findBlockPos(world, player, attempt + 1);
 		}
 
-		Holder<Biome> biomeKey = world.getBiome(currentPos);
-
-		if (biomeKey.unwrapKey().isPresent() && biomeKey.unwrapKey().get().location().getPath().contains("ocean")) {
+		if (world.getBiome(currentPos).is(BiomeTags.IS_OCEAN)) {
 			return findBlockPos(world, player, attempt + 1);
 		}
 

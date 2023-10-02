@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.3.4]
+
+### Fixed
+* Fixed saved player data (homes etc.) not always getting reloaded correctly on player login
+* Hopefully fixed server ConcurrentModificationException crash
+  * Could not reproduce this, but added some extra defensive coding
+* The `/rtp` command now uses a proper biome tag check (`minecraft:is_ocean`) to check for ocean biomes when looking for a good random spot
+  * Previously it just checked for "ocean" in the biome name, which was not ideal...
+
 ## [1902.3.3]
 
 ### Fixed

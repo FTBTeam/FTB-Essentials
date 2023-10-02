@@ -23,6 +23,8 @@ public class WarmupCooldownTeleporter {
 	private long cooldown;
 
 	private static final Map<UUID, Warmup> WARMUPS = new HashMap<>();
+	private static final Map<UUID, Warmup> pendingAdditions = new HashMap<>();
+	private static final Set<UUID> pendingRemovals = new HashSet<>();
 
 	public WarmupCooldownTeleporter(FTBEPlayerData playerData, ToIntFunction<ServerPlayer> cooldownConfig, ToIntFunction<ServerPlayer> warmupConfig) {
 		this(playerData, cooldownConfig, warmupConfig, false);
@@ -59,7 +61,7 @@ public class WarmupCooldownTeleporter {
 			return teleportNow(player, positionGetter);
 		} else {
 			// schedule the teleport
-			WARMUPS.put(player.getUUID(), new Warmup(System.currentTimeMillis() + warmupTime * 1000L, this, player.position(), positionGetter));
+			pendingAdditions.put(player.getUUID(), new Warmup(System.currentTimeMillis() + warmupTime * 1000L, this, player.position(), positionGetter));
 			return TeleportPos.TeleportResult.SUCCESS;
 		}
 	}
@@ -84,6 +86,12 @@ public class WarmupCooldownTeleporter {
 	}
 
 	public static void tickWarmups(MinecraftServer server) {
+		WARMUPS.putAll(pendingAdditions);
+		pendingAdditions.clear();
+
+		pendingRemovals.forEach(WARMUPS::remove);
+		pendingRemovals.clear();
+
 		if (WARMUPS.isEmpty()) {
 			return;
 		}
@@ -122,7 +130,8 @@ public class WarmupCooldownTeleporter {
 	}
 
 	public static void cancelWarmup(ServerPlayer player) {
-		if (WARMUPS.remove(player.getUUID()) != null) {
+		if (WARMUPS.containsKey(player.getUUID())) {
+			pendingRemovals.add(player.getUUID());
 			player.displayClientMessage(Component.literal("Teleportation interrupted!").withStyle(ChatFormatting.RED), true);
 		}
 	}
