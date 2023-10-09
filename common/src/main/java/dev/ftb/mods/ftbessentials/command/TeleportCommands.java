@@ -17,7 +17,6 @@ import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -30,7 +29,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -39,7 +37,8 @@ import net.minecraft.world.phys.Vec3;
  * @author LatvianModder
  */
 public class TeleportCommands {
-	public static final TagKey<Block> IGNORE_RTP = TagKey.create(Registries.BLOCK, new ResourceLocation(FTBEssentials.MOD_ID, "ignore_rtp"));
+	public static final TagKey<Block> IGNORE_RTP_BLOCKS = TagKey.create(Registries.BLOCK, new ResourceLocation(FTBEssentials.MOD_ID, "ignore_rtp"));
+	public static final TagKey<Biome> IGNORE_RTP_BIOMES = TagKey.create(Registries.BIOME, new ResourceLocation(FTBEssentials.MOD_ID, "ignore_rtp"));
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		if (FTBEConfig.BACK.isEnabled()) {
@@ -145,62 +144,58 @@ public class TeleportCommands {
 		}
 		return FTBEPlayerData.getOrCreate(player).map(data -> data.rtpTeleporter.teleport(player, p -> {
 					p.displayClientMessage(Component.literal("Looking for random location..."), false);
-					return findBlockPos((ServerLevel) player.level(), p, 1);
+					return findBlockPos((ServerLevel) player.level(), p);
 				}).runCommand(player))
 				.orElse(0);
 	}
 
-	private static TeleportPos findBlockPos(ServerLevel world, ServerPlayer player, int attempt) {
-		if (attempt > FTBEConfig.RTP_MAX_TRIES.get()) {
-			player.displayClientMessage(Component.literal("Could not find a valid location to teleport to!").withStyle(ChatFormatting.RED), false);
-			return new TeleportPos(player);
-		}
+	private static TeleportPos findBlockPos(ServerLevel world, ServerPlayer player) {
+		for (int attempt = 0; attempt < FTBEConfig.RTP_MAX_TRIES.get(); attempt++) {
+			double dist = FTBEConfig.RTP_MIN_DISTANCE.get() + world.random.nextDouble() * (FTBEConfig.RTP_MAX_DISTANCE.get() - FTBEConfig.RTP_MIN_DISTANCE.get());
+			double angle = world.random.nextDouble() * Math.PI * 2D;
 
-		double dist = FTBEConfig.RTP_MIN_DISTANCE.get() + world.random.nextDouble() * (FTBEConfig.RTP_MAX_DISTANCE.get() - FTBEConfig.RTP_MIN_DISTANCE.get());
-		double angle = world.random.nextDouble() * Math.PI * 2D;
+			int x = Mth.floor(Math.cos(angle) * dist);
+			int y = 256;
+			int z = Mth.floor(Math.sin(angle) * dist);
+			BlockPos currentPos = new BlockPos(x, y, z);
 
-		int x = Mth.floor(Math.cos(angle) * dist);
-		int y = 256;
-		int z = Mth.floor(Math.sin(angle) * dist);
-		BlockPos currentPos = new BlockPos(x, y, z);
+			if (!world.getWorldBorder().isWithinBounds(currentPos)) {
+				continue;
+			}
+			if (world.getBiome(currentPos).is(IGNORE_RTP_BIOMES)) {
+				continue;
+			}
+			// TODO: FTB Chunks will listen to RTPEvent and cancel it if position is inside a claimed chunk
+			EventResult res = FTBEssentialsEvents.RTP_EVENT.invoker().teleport(world, player, currentPos, attempt);
+			if (res.isFalse()) {
+				continue;
+			}
 
-		WorldBorder border = world.getWorldBorder();
+			world.getChunkAt(currentPos);
+			BlockPos hmPos = world.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, currentPos);
 
-		if (!border.isWithinBounds(currentPos)) {
-			return findBlockPos(world, player, attempt + 1);
-		}
-
-		Holder<Biome> biomeKey = world.getBiome(currentPos);
-		if (biomeKey.is(BiomeTags.IS_OCEAN)) {
-			return findBlockPos(world, player, attempt + 1);
-		}
-
-		// TODO: FTB Chunks will listen to RTPEvent and cancel it if position is inside a claimed chunk
-		EventResult res = FTBEssentialsEvents.RTP_EVENT.invoker().teleport(world, player, currentPos, attempt);
-		if (res.isFalse()) {
-			return findBlockPos(world, player, attempt + 1);
-		}
-
-		// TODO: is there an equivalent to HEIGHTMAPS on 1.20?
-		world.getChunk(currentPos.getX() >> 4, currentPos.getZ() >> 4/*, ChunkStatus.HEIGHTMAPS*/);
-		BlockPos hmPos = world.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, currentPos);
-
-		if (hmPos.getY() > 0) {
-			if (hmPos.getY() >= world.getLogicalHeight()) { // broken heightmap (nether, other mod dimensions)
-				for (BlockPos newPos : BlockPos.spiralAround(new BlockPos(hmPos.getX(), world.getSeaLevel(), hmPos.getY()), 16, Direction.EAST, Direction.SOUTH)) {
-					BlockState bs = world.getBlockState(newPos);
-					if (bs.blocksMotion() && !bs.is(IGNORE_RTP) && world.isEmptyBlock(newPos.above(1)) && world.isEmptyBlock(newPos.above(2)) && world.isEmptyBlock(newPos.above(3))) {
-						player.displayClientMessage(Component.literal(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, z %d]", attempt, newPos.getX(), newPos.getZ())), false);
-						return new TeleportPos(world.dimension(), newPos.above());
+			if (hmPos.getY() > 0) {
+				BlockPos goodPos = null;
+				if (hmPos.getY() < world.getLogicalHeight()) {
+					goodPos = hmPos;
+				} else {
+					// broken heightmap (nether, other mod dimensions)
+					for (BlockPos newPos : BlockPos.spiralAround(new BlockPos(hmPos.getX(), world.getSeaLevel(), hmPos.getY()), 16, Direction.EAST, Direction.SOUTH)) {
+						BlockState bs = world.getBlockState(newPos);
+						if (bs.blocksMotion() && !bs.is(IGNORE_RTP_BLOCKS) && world.isEmptyBlock(newPos.above(1))
+								&& world.isEmptyBlock(newPos.above(2)) && world.isEmptyBlock(newPos.above(3))) {
+							goodPos = newPos;
+						}
 					}
 				}
-			} else {
-				player.displayClientMessage(Component.literal(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, z %d]", attempt, hmPos.getX(), hmPos.getZ())), false);
-				return new TeleportPos(world.dimension(), hmPos.above());
+				if (goodPos != null) {
+					player.displayClientMessage(Component.literal(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, z %d]", attempt, goodPos.getX(), goodPos.getZ())), false);
+					return new TeleportPos(world.dimension(), goodPos.above());
+				}
 			}
 		}
-
-		return findBlockPos(world, player, attempt + 1);
+		player.displayClientMessage(Component.literal("Could not find a valid location to teleport to!").withStyle(ChatFormatting.RED), false);
+		return new TeleportPos(player);
 	}
 
 	public static int tpLast(ServerPlayer player, GameProfile to) {
