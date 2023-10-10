@@ -5,6 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2001.2.1]
+
+### Added
+* The `/rtp` command now makes better use of block and biome tags to control valid RTP destinations
+  * `ftbessentials:ignore_rtp` block tag lists blocks which are not valid for the player to land on (leaves and Bedrock by default)
+  * `ftbessentials:ignore_rtp` biome tag lists biomes which are not valid for the player to land in (`#minecraft:is_ocean` by default)
+
+### Fixed
+* Fixed an event handler running on the client side which shouldn't have been
+  * Led to undesirable effects like players flying when they shouldn't
+
 ## [2001.2.0]
 
 ### Added
