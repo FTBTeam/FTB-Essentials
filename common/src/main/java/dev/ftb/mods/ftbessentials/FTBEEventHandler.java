@@ -122,19 +122,21 @@ public class FTBEEventHandler {
 	}
 
 	private static void playerTickPost(Player player) {
-		FTBEPlayerData.getOrCreate(player).ifPresent(data -> {
-			var abilities = player.getAbilities();
+		if (!player.level().isClientSide) {
+			FTBEPlayerData.getOrCreate(player).ifPresent(data -> {
+				var abilities = player.getAbilities();
 
-			if (data.isGod() && !abilities.invulnerable) {
-				abilities.invulnerable = true;
-				player.onUpdateAbilities();
-			}
+				if (data.isGod() && !abilities.invulnerable) {
+					abilities.invulnerable = true;
+					player.onUpdateAbilities();
+				}
 
-			if (data.canFly() && !abilities.mayfly) {
-				abilities.mayfly = true;
-				player.onUpdateAbilities();
-			}
-		});
+				if (data.canFly() && !abilities.mayfly) {
+					abilities.mayfly = true;
+					player.onUpdateAbilities();
+				}
+			});
+		}
 	}
 
 	private static void serverTickPost(MinecraftServer server) {
