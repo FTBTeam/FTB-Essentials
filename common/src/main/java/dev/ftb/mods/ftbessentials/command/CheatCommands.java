@@ -25,6 +25,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -369,13 +370,20 @@ public class CheatCommands {
 	}
 
 	private static int tpOffline(CommandSourceStack source, String playerName, ServerLevel level, Coordinates dest) {
-		source.getServer().getProfileCache().getAsync(playerName, profileOpt -> {
-			source.getServer().executeIfPossible(() ->
-					profileOpt.ifPresentOrElse(profile -> tpOffline(source, profile.getId(), level, dest),
-							() -> source.sendFailure(Component.literal("Unknown player: " + playerName))
-					)
-			);
-		});
+		GameProfileCache profileCache = source.getServer().getProfileCache();
+
+		try {
+			var profile = profileCache.getAsync(playerName).get();
+			if (profile.isEmpty()) {
+				source.sendFailure(Component.literal("Unknown player: " + playerName));
+				return 0;
+			}
+
+			tpOffline(source, profile.get().getId(), level, dest);
+		} catch (Exception e) {
+			source.sendFailure(Component.literal("Unknown player: " + playerName));
+			return 0;
+		}
 
 		return 1;
 	}
