@@ -11,4 +11,4 @@ include("common")
 include("fabric")
 include("forge")
 
-rootProject.name = "FTB-Essentials-1.20.1"
+rootProject.name = "FTB-Essentials-1.20.2"

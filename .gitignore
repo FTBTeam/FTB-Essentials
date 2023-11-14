@@ -22,3 +22,6 @@ logs
 eclipse
 run
 .vscode
+
+.DS_Store
+.architectury-transformer
