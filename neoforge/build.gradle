@@ -35,7 +35,7 @@ dependencies {
     modApi "dev.architectury:architectury-neoforge:${rootProject.architectury_version}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
 
     modImplementation("dev.ftb.mods:ftb-library-neoforge:${rootProject.ftb_library_version}") {
         exclude module: 'me.shedaniel:RoughlyEnoughItems-neoforge'
@@ -132,11 +132,11 @@ if (ENV.CURSEFORGE_KEY) {
             id = project.curseforge_id
             releaseType = ftbPublishing.relType
             addGameVersion project.minecraft_version
-            addGameVersion "Forge"
+            addGameVersion "NeoForge"
             mainArtifact(remapJar.archiveFile)
             relations {
-                requiredDependency 'ftb-library-forge'
-                optionalDependency 'ftb-ranks-forge'
+                requiredDependency 'ftb-library-neoforge'
+                optionalDependency 'ftb-ranks-neoforge'
             }
             changelog = ENV.CHANGELOG  // expected to exist if ENV.CURSEFORGE_KEY does
             changelogType = 'markdown'
