@@ -1,26 +1,27 @@
-package dev.ftb.mods.ftbessentials.forge;
+package dev.ftb.mods.ftbessentials.neoforge;
 
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.EntityTeleportEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.fml.IExtensionPoint.DisplayTest;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.fml.IExtensionPoint.DisplayTest;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.network.NetworkConstants;
 
 @Mod(FTBEssentials.MOD_ID)
-public class FTBEssentialsForge {
-	public FTBEssentialsForge() {
-		ModLoadingContext.get().registerExtensionPoint(DisplayTest.class, () -> new DisplayTest(() -> DisplayTest.IGNORESERVERONLY, (a, b) -> true));
+public class FTBEssentialsNeoForge {
+	public FTBEssentialsNeoForge() {
+		ModLoadingContext.get().registerExtensionPoint(DisplayTest.class, () -> new DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
 
-		MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::playerName);
-		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::playerNameLow);
-		MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::vanillaTeleportCommand);
+		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::playerName);
+		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::playerNameLow);
+		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::vanillaTeleportCommand);
 
 		FTBEssentials.init();
 	}

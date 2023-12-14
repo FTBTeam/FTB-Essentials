@@ -79,6 +79,7 @@ public enum KitManager {
     private void createKit(String kitName, long cooldownSecs, Supplier<NonNullList<ItemStack>> itemSupplier) {
         List<ItemStack> items = itemSupplier.get().stream()
                 .filter(stack -> !stack.isEmpty())
+                .map(ItemStack::copy)
                 .toList();
         if (items.isEmpty()) {
             throw new IllegalArgumentException("No items found!");

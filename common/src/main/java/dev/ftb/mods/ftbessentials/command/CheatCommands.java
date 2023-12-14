@@ -16,10 +16,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.DoubleTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
@@ -369,7 +366,7 @@ public class CheatCommands {
 	}
 
 	private static int tpOffline(CommandSourceStack source, String playerName, ServerLevel level, Coordinates dest) {
-		source.getServer().getProfileCache().getAsync(playerName, profileOpt -> {
+		source.getServer().getProfileCache().getAsync(playerName).whenComplete((profileOpt, throwable) -> {
 			source.getServer().executeIfPossible(() ->
 					profileOpt.ifPresentOrElse(profile -> tpOffline(source, profile.getId(), level, dest),
 							() -> source.sendFailure(Component.literal("Unknown player: " + playerName))
@@ -384,7 +381,7 @@ public class CheatCommands {
 		MinecraftServer server = source.getServer();
 
 		Path playerDir = server.getWorldPath(LevelResource.PLAYER_DATA_DIR);
-		File datFile = playerDir.resolve(playerId + ".dat").toFile();
+		Path datFile = playerDir.resolve(playerId + ".dat");
 
 		if (server.getPlayerList().getPlayer(playerId) != null) {
 			source.sendFailure(Component.literal("Player is online! Use regular /tp command instead"));
@@ -392,7 +389,7 @@ public class CheatCommands {
 		}
 
 		try {
-			CompoundTag tag = NbtIo.readCompressed(datFile);
+			CompoundTag tag = NbtIo.readCompressed(datFile, NbtAccounter.unlimitedHeap());
 
 			Vec3 vec = dest.getPosition(source);
 			ListTag newPos = new ListTag();
@@ -403,9 +400,9 @@ public class CheatCommands {
 
 			tag.putString("Dimension", level.dimension().location().toString());
 
-			File tempFile = File.createTempFile(playerId + "-", ".dat", playerDir.toFile());
+			Path tempFile = File.createTempFile(playerId + "-", ".dat", playerDir.toFile()).toPath();
 			NbtIo.writeCompressed(tag, tempFile);
-			File backupFile = new File(playerDir.toFile(), playerId + ".dat_old");
+			Path backupFile = playerDir.resolve(playerId + ".dat_old");
 			Util.safeReplaceFile(datFile, tempFile, backupFile);
 
 			source.sendSuccess(() -> Component.literal(String.format("Offline player %s moved to [%.2f,%.2f,%.2f] in %s",
