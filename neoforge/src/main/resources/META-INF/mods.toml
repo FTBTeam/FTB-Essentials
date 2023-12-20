@@ -17,35 +17,35 @@ Adds many essential utility commands for servers
 
 [[dependencies.ftbessentials]]
 modId = "neoforge"
-mandatory = true
+type = "required"
 versionRange = "[${neoforgeversion},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbessentials]]
 modId = "minecraft"
-mandatory = true
+type = "required"
 versionRange = "[${mcversion},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbessentials]]
 modId = "ftblibrary"
-mandatory = true
+type = "required"
 versionRange = "[${libraryversion},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbessentials]]
 modId = "ftbranks"
-mandatory = false
+type = "optional"
 versionRange = "[${ranksversion},)"
 ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.ftbessentials]]
 modId = "luckperms"
-mandatory = false
+type = "optional"
 versionRange = "[5.4.83,)"
 ordering = "AFTER"
 side = "SERVER"
