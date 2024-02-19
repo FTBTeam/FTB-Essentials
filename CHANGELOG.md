@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1902.3.5]
+
+### Fixed
+
+* Fixed an event handler running on the client side which shouldn't have been
+  * Led to undesirable effects like players flying when they shouldn't
+
 ## [1902.3.4]
 
 ### Fixed
