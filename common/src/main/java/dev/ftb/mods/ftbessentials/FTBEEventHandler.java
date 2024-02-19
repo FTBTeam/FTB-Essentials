@@ -119,21 +119,23 @@ public class FTBEEventHandler {
 	}
 
 	private static void playerTickPost(Player player) {
-		var data = FTBEPlayerData.get(player);
-		var abilities = player.getAbilities();
+		if (!player.level.isClientSide) {
+			var data = FTBEPlayerData.get(player);
+			var abilities = player.getAbilities();
 
-		if (data == null) {
-			return;
-		}
+			if (data == null) {
+				return;
+			}
 
-		if (data.god && !abilities.invulnerable) {
-			abilities.invulnerable = true;
-			player.onUpdateAbilities();
-		}
+			if (data.god && !abilities.invulnerable) {
+				abilities.invulnerable = true;
+				player.onUpdateAbilities();
+			}
 
-		if (data.fly && !abilities.mayfly) {
-			abilities.mayfly = true;
-			player.onUpdateAbilities();
+			if (data.fly && !abilities.mayfly) {
+				abilities.mayfly = true;
+				player.onUpdateAbilities();
+			}
 		}
 	}
 
