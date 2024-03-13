@@ -12,12 +12,11 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.network.NetworkConstants;
 
 @Mod(FTBEssentials.MOD_ID)
 public class FTBEssentialsNeoForge {
 	public FTBEssentialsNeoForge() {
-		ModLoadingContext.get().registerExtensionPoint(DisplayTest.class, () -> new DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+		ModLoadingContext.get().registerExtensionPoint(DisplayTest.class, () -> new DisplayTest(() -> DisplayTest.IGNORESERVERONLY, (a, b) -> true));
 
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::playerName);
 		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::playerNameLow);
