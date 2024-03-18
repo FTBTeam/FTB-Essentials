@@ -55,6 +55,8 @@ public class CheatCommands {
 		dumpchunkloaders
 		 */
 
+
+		// DONE
 		if (FTBEConfig.HEAL.isEnabled()) {
 			dispatcher.register(literal("heal")
 					.requires(FTBEConfig.HEAL.enabledAndOp())
@@ -82,7 +84,6 @@ public class CheatCommands {
 					)
 			);
 		}
-
 		if (FTBEConfig.FLY.isEnabled()) {
 			dispatcher.register(literal("fly")
 					.requires(FTBEConfig.FLY.enabledAndOp())
