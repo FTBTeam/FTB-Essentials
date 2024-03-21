@@ -13,27 +13,18 @@ import java.util.List;
 /**
  * Abstraction around a command that takes a single entity selector argument and performs an action on it.
  */
-public class SimpleCommandPlayer implements FTBCommand {
-    private final ToggleableConfig config;
-
-    private final String name;
-    private final int permissionLevel;
-
-    EntitySelectorAction action;
-
+public record SimpleCommandPlayer(
+        String name,
+        int permissionLevel,
+        ToggleableConfig config,
+        EntitySelectorAction action
+) implements FTBCommand {
     public static SimpleCommandPlayer create(String name, int permissionLevel, ToggleableConfig config, EntitySelectorAction action) {
         return new SimpleCommandPlayer(name, permissionLevel, config, action);
     }
 
     public static SimpleCommandPlayer create(String name, ToggleableConfig config, EntitySelectorAction action) {
         return new SimpleCommandPlayer(name,0, config, action);
-    }
-
-    public SimpleCommandPlayer(String name, int permissionLevel, ToggleableConfig config, EntitySelectorAction action) {
-        this.name = name;
-        this.action = action;
-        this.permissionLevel = permissionLevel;
-        this.config = config;
     }
 
     @Override

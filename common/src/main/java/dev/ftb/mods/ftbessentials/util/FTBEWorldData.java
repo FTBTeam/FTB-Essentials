@@ -13,9 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-/**
- * @author LatvianModder
- */
 public class FTBEWorldData {
 	private static final LevelResource FTBESSENTIALS_DIRECTORY = new LevelResource("ftbessentials");
 	private static final String DATA_FILE = "data.snbt";

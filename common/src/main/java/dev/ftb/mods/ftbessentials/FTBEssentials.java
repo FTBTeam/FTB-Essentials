@@ -8,9 +8,6 @@ import net.minecraft.network.chat.TextColor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * @author LatvianModder
- */
 public class FTBEssentials {
 	public static final String MOD_ID = "ftbessentials";
 	public static final Logger LOGGER = LogManager.getLogger("FTB Essentials");

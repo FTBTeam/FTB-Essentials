@@ -8,11 +8,17 @@ import dev.ftb.mods.ftblibrary.snbt.config.StringListValue;
 
 import java.util.List;
 
-/**
- * @author LatvianModder
- */
 public interface FTBEConfig {
 	SNBTConfig CONFIG = SNBTConfig.create(FTBEssentials.MOD_ID).comment("FTB Essentials config file", "If you're a modpack maker, edit defaultconfigs/ftbessentials-server.snbt instead");
+
+	BooleanValue REGISTER_TO_NAMESPACE = CONFIG.addBoolean("register_to_namespace", false)
+			.comment("If true, the mod will register its commands to the 'ftbessentials' namespace,",
+					"otherwise it will register to the root namespace");
+
+	BooleanValue REGISTER_ALIAS_AS_WELL_AS_NAMESPACE = CONFIG.addBoolean("register_alias_as_well_as_namespace", false)
+			.comment("If true, the mod will register its commands to the 'ftbessentials' namespace as well as the root namespace",
+					"otherwise it will only register to the root namespace",
+					"This setting has no effect if 'register_to_namespace' is false");
 
 	SNBTConfig TELEPORTATION = CONFIG.addGroup("teleportation").comment("Teleportation-related settings");
 	// back

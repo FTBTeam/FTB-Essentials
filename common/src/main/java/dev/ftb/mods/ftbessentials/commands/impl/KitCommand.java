@@ -1,11 +1,13 @@
-package dev.ftb.mods.ftbessentials.command;
+package dev.ftb.mods.ftbessentials.commands.impl;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import dev.ftb.mods.ftbessentials.commands.CommandUtils;
+import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.kit.Kit;
 import dev.ftb.mods.ftbessentials.kit.KitManager;
@@ -28,106 +30,105 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
-public class KitCommands {
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        if (FTBEConfig.KIT.isEnabled()) {
-            dispatcher.register(literal("kit")
-                    .requires(FTBEConfig.KIT.enabledAndOp())
-                    .then(literal("create_from_player_inv")
-                            .then(argument("name", StringArgumentType.word())
-                                    .executes(ctx -> createKitFromPlayer(ctx.getSource(), StringArgumentType.getString(ctx, "name"), "", false))
-                                    .then(argument("cooldown", StringArgumentType.greedyString())
-                                            .suggests((ctx, builder) -> FTBEssentialsCommands.suggestCooldowns(builder))
-                                            .executes(ctx -> createKitFromPlayer(ctx.getSource(), StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "cooldown"), false))
-                                    )
-                            )
-                    )
-                    .then(literal("create_from_player_hotbar")
-                            .then(argument("name", StringArgumentType.word())
-                                    .executes(ctx -> createKitFromPlayer(ctx.getSource(), StringArgumentType.getString(ctx, "name"), "", true))
-                                    .then(argument("cooldown", StringArgumentType.greedyString())
-                                            .suggests((ctx, builder) -> FTBEssentialsCommands.suggestCooldowns(builder))
-                                            .executes(ctx -> createKitFromPlayer(ctx.getSource(), StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "cooldown"), true))
-                                    )
-                            )
-                    )
-                    .then(literal("create_from_block_inv")
-                            .then(argument("name", StringArgumentType.word())
-                                    .executes(ctx -> createKitFromBlock(ctx.getSource(), StringArgumentType.getString(ctx, "name"), ""))
-                                    .then(argument("cooldown", StringArgumentType.greedyString())
-                                            .suggests((ctx, builder) -> FTBEssentialsCommands.suggestCooldowns(builder))
-                                            .executes(ctx -> createKitFromBlock(ctx.getSource(), StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "cooldown")))
-                                    )
-                            )
-                    )
-                    .then(literal("delete")
-                            .then(argument("name", StringArgumentType.word())
-                                    .suggests((ctx, builder) -> suggestKits(builder))
-                                    .executes(ctx -> deleteKit(ctx.getSource(), StringArgumentType.getString(ctx, "name")))
-                            )
-                    )
-                    .then(literal("list")
-                            .executes(ctx -> listKits(ctx.getSource()))
-                    )
-                    .then(literal("show")
-                            .then(argument("name", StringArgumentType.word())
-                                    .suggests((ctx, builder) -> suggestKits(builder))
-                                    .executes(ctx -> showKit(ctx.getSource(), StringArgumentType.getString(ctx, "name")))
-                            )
-                    )
-                    .then(literal("give")
-                            .then(argument("players", EntityArgument.players())
-                                    .then(argument("name", StringArgumentType.word())
-                                            .suggests((ctx, builder) -> suggestKits(builder))
-                                            .executes(ctx -> giveKit(ctx.getSource(), StringArgumentType.getString(ctx, "name"), EntityArgument.getPlayers(ctx, "players")))
-                                    )
-                            )
-                    )
-                    .then(literal("put_in_block_inv")
-                            .then(argument("name", StringArgumentType.word())
-                                    .suggests((ctx, builder) -> suggestKits(builder))
-                                    .executes(ctx -> putKitInBlockInv(ctx.getSource(), StringArgumentType.getString(ctx, "name")))
-                            )
-                    )
-                    .then(literal("cooldown")
-                            .then(argument("name", StringArgumentType.word())
-                                    .suggests((ctx, builder) -> suggestKits(builder))
-                                    .then(argument("cooldown", StringArgumentType.greedyString())
-                                            .suggests((ctx, builder) -> FTBEssentialsCommands.suggestCooldowns(builder))
-                                            .executes(ctx -> modifyCooldown(ctx.getSource(), StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "cooldown")))
-                                    )
-                            )
-                    )
-                    .then(literal("reset_cooldown")
-                            .then(argument("name", StringArgumentType.word())
-                                    .suggests((ctx, builder) -> suggestKits(builder))
-                                    .executes(ctx -> resetCooldowns(ctx.getSource(), StringArgumentType.getString(ctx, "name")))
-                                    .then(argument("player", EntityArgument.player())
-                                            .executes(ctx -> resetCooldowns(ctx.getSource(), StringArgumentType.getString(ctx, "name"), EntityArgument.getPlayer(ctx, "player")))
-                                    )
-                                    .then(argument("id", UuidArgument.uuid())
-                                            .executes(ctx -> resetCooldowns(ctx.getSource(), StringArgumentType.getString(ctx, "name"), UuidArgument.getUuid(ctx, "id")))
-                                    )
-                            )
-                    )
-                    .then(literal("set_autogrant")
-                            .then(argument("name", StringArgumentType.word())
-                                    .suggests((ctx, builder) -> suggestKits(builder))
-                                    .then(argument("grant", BoolArgumentType.bool())
-                                            .executes(ctx -> modifyAutogrant(ctx.getSource(), StringArgumentType.getString(ctx, "name"), BoolArgumentType.getBool(ctx, "grant")))
-                                    )
-                            )
-                    )
-            );
-        }
+public class KitCommand implements FTBCommand {
+    @Override
+    public boolean enabled() {
+        return FTBEConfig.KIT.isEnabled();
+    }
+
+    @Override
+    public List<LiteralArgumentBuilder<CommandSourceStack>> register() {
+        return Collections.singletonList(literal("kit")
+                .requires(CommandUtils.isGamemaster())
+                .then(literal("create_from_player_inv")
+                        .then(argument("name", StringArgumentType.word())
+                                .executes(ctx -> createKitFromPlayer(ctx.getSource(), StringArgumentType.getString(ctx, "name"), "", false))
+                                .then(argument("cooldown", StringArgumentType.greedyString())
+                                        .suggests((ctx, builder) -> CommandUtils.suggestCooldowns(builder))
+                                        .executes(ctx -> createKitFromPlayer(ctx.getSource(), StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "cooldown"), false))
+                                )
+                        )
+                )
+                .then(literal("create_from_player_hotbar")
+                        .then(argument("name", StringArgumentType.word())
+                                .executes(ctx -> createKitFromPlayer(ctx.getSource(), StringArgumentType.getString(ctx, "name"), "", true))
+                                .then(argument("cooldown", StringArgumentType.greedyString())
+                                        .suggests((ctx, builder) -> CommandUtils.suggestCooldowns(builder))
+                                        .executes(ctx -> createKitFromPlayer(ctx.getSource(), StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "cooldown"), true))
+                                )
+                        )
+                )
+                .then(literal("create_from_block_inv")
+                        .then(argument("name", StringArgumentType.word())
+                                .executes(ctx -> createKitFromBlock(ctx.getSource(), StringArgumentType.getString(ctx, "name"), ""))
+                                .then(argument("cooldown", StringArgumentType.greedyString())
+                                        .suggests((ctx, builder) -> CommandUtils.suggestCooldowns(builder))
+                                        .executes(ctx -> createKitFromBlock(ctx.getSource(), StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "cooldown")))
+                                )
+                        )
+                )
+                .then(literal("delete")
+                        .then(argument("name", StringArgumentType.word())
+                                .suggests((ctx, builder) -> suggestKits(builder))
+                                .executes(ctx -> deleteKit(ctx.getSource(), StringArgumentType.getString(ctx, "name")))
+                        )
+                )
+                .then(literal("list").executes(ctx -> listKits(ctx.getSource())))
+                .then(literal("show")
+                        .then(argument("name", StringArgumentType.word())
+                                .suggests((ctx, builder) -> suggestKits(builder))
+                                .executes(ctx -> showKit(ctx.getSource(), StringArgumentType.getString(ctx, "name")))
+                        )
+                )
+                .then(literal("give")
+                        .then(argument("players", EntityArgument.players())
+                                .then(argument("name", StringArgumentType.word())
+                                        .suggests((ctx, builder) -> suggestKits(builder))
+                                        .executes(ctx -> giveKit(ctx.getSource(), StringArgumentType.getString(ctx, "name"), EntityArgument.getPlayers(ctx, "players")))
+                                )
+                        )
+                )
+                .then(literal("put_in_block_inv")
+                        .then(argument("name", StringArgumentType.word())
+                                .suggests((ctx, builder) -> suggestKits(builder))
+                                .executes(ctx -> putKitInBlockInv(ctx.getSource(), StringArgumentType.getString(ctx, "name")))
+                        )
+                )
+                .then(literal("cooldown")
+                        .then(argument("name", StringArgumentType.word())
+                                .suggests((ctx, builder) -> suggestKits(builder))
+                                .then(argument("cooldown", StringArgumentType.greedyString())
+                                        .suggests((ctx, builder) -> CommandUtils.suggestCooldowns(builder))
+                                        .executes(ctx -> modifyCooldown(ctx.getSource(), StringArgumentType.getString(ctx, "name"), StringArgumentType.getString(ctx, "cooldown")))
+                                )
+                        )
+                )
+                .then(literal("reset_cooldown")
+                        .then(argument("name", StringArgumentType.word())
+                                .suggests((ctx, builder) -> suggestKits(builder))
+                                .executes(ctx -> resetCooldowns(ctx.getSource(), StringArgumentType.getString(ctx, "name")))
+                                .then(argument("player", EntityArgument.player())
+                                        .executes(ctx -> resetCooldowns(ctx.getSource(), StringArgumentType.getString(ctx, "name"), EntityArgument.getPlayer(ctx, "player")))
+                                )
+                                .then(argument("id", UuidArgument.uuid())
+                                        .executes(ctx -> resetCooldowns(ctx.getSource(), StringArgumentType.getString(ctx, "name"), UuidArgument.getUuid(ctx, "id")))
+                                )
+                        )
+                )
+                .then(literal("set_autogrant")
+                        .then(argument("name", StringArgumentType.word())
+                                .suggests((ctx, builder) -> suggestKits(builder))
+                                .then(argument("grant", BoolArgumentType.bool())
+                                        .executes(ctx -> modifyAutogrant(ctx.getSource(), StringArgumentType.getString(ctx, "name"), BoolArgumentType.getBool(ctx, "grant")))
+                                )
+                        )
+                ));
     }
 
     private static int putKitInBlockInv(CommandSourceStack source, String kitName) {
@@ -291,5 +292,4 @@ public class KitCommands {
 
         return 0;
     }
-
 }

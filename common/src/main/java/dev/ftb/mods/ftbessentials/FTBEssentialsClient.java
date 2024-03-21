@@ -8,9 +8,6 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
-/**
- * @author LatvianModder
- */
 public class FTBEssentialsClient extends FTBEssentialsCommon {
 	@Override
 	public void updateTabName(UpdateTabNameMessage packet) {

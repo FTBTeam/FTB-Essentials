@@ -1,4 +1,4 @@
-package dev.ftb.mods.ftbessentials.commands.impl;
+package dev.ftb.mods.ftbessentials.commands.impl.cheat;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;

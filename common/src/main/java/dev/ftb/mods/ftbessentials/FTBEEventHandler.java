@@ -4,8 +4,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.*;
 import dev.architectury.platform.Platform;
-import dev.ftb.mods.ftbessentials.command.FTBEssentialsCommands;
-import dev.ftb.mods.ftbessentials.command.TPACommands;
+import dev.ftb.mods.ftbessentials.api.records.TPARequest;
+import dev.ftb.mods.ftbessentials.commands.FTBCommands;
+import dev.ftb.mods.ftbessentials.commands.impl.teleporting.TPACommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.kit.KitManager;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
@@ -32,9 +33,6 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.file.Path;
 import java.util.Iterator;
 
-/**
- * @author LatvianModder
- */
 public class FTBEEventHandler {
 	public static final LevelResource CONFIG_FILE = new LevelResource("serverconfig/ftbessentials.snbt");
 	private static final String[] DEFAULT_CONFIG = {
@@ -84,11 +82,11 @@ public class FTBEEventHandler {
 
 	private static void serverStopped(MinecraftServer minecraftServer) {
 		FTBEWorldData.instance = null;
-		TPACommands.REQUESTS.clear();
+		TPACommand.clearRequests();
 	}
 
 	private static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection commandSelection) {
-		FTBEssentialsCommands.registerCommands(dispatcher);
+		FTBCommands.register(dispatcher);
 	}
 
 	private static void levelSave(ServerLevel serverLevel) {
@@ -142,10 +140,10 @@ public class FTBEEventHandler {
 	private static void serverTickPost(MinecraftServer server) {
 		long now = System.currentTimeMillis();
 
-		Iterator<TPACommands.TPARequest> iterator = TPACommands.REQUESTS.values().iterator();
+		Iterator<TPARequest> iterator = TPACommand.requests().values().iterator();
 
 		while (iterator.hasNext()) {
-			TPACommands.TPARequest r = iterator.next();
+			TPARequest r = iterator.next();
 
 			if (now > r.created() + 60000L) {
 				ServerPlayer source = server.getPlayerList().getPlayer(r.source().getUuid());

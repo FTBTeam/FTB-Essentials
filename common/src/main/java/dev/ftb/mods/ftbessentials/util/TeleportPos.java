@@ -13,9 +13,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 
-/**
- * @author LatvianModder
- */
 public class TeleportPos {
 	private final ResourceKey<Level> dimension;
 	private final BlockPos pos;
@@ -25,7 +22,7 @@ public class TeleportPos {
 	public TeleportPos(ResourceKey<Level> d, BlockPos p) {
 		this(d, p, null, null);
 	}
-	
+
 	public TeleportPos(ResourceKey<Level> d, BlockPos p, Float yRot, Float xRot) {
 		dimension = d;
 		pos = p;
