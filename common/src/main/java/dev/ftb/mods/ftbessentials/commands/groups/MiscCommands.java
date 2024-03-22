@@ -6,9 +6,15 @@ import dev.ftb.mods.ftbessentials.commands.SimpleConfigurableCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.misc.LeaderboardCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.misc.NearCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -24,7 +30,11 @@ public class MiscCommands {
                     .executes(context -> hat(context.getSource().getPlayerOrException()))),
 
             new LeaderboardCommand(),
-            new NearCommand()
+            new NearCommand(),
+
+            // Trash command
+            new SimpleConfigurableCommand(FTBEConfig.TRASHCAN, Commands.literal("trashcan")
+                    .executes(context -> trashcan(context.getSource().getPlayerOrException())))
     );
 
     public static int kickme(ServerPlayer player) {
@@ -43,6 +53,22 @@ public class MiscCommands {
         player.setItemSlot(EquipmentSlot.HEAD, targetStack);
         player.setItemSlot(EquipmentSlot.MAINHAND, headStack);
         player.inventoryMenu.broadcastChanges();
+        return 1;
+    }
+
+    public static int trashcan(ServerPlayer player) {
+        player.openMenu(new MenuProvider() {
+            @Override
+            public Component getDisplayName() {
+                return Component.translatable("sidebar_button.ftbessentials.trash_can");
+            }
+
+            @Override
+            public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
+                return ChestMenu.fourRows(id, playerInventory);
+            }
+        });
+
         return 1;
     }
 }

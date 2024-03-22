@@ -3,7 +3,6 @@ package dev.ftb.mods.ftbessentials.commands.groups;
 import dev.ftb.mods.ftbessentials.FTBEssentialsPlatform;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.commands.SimpleCommandPlayer;
-import dev.ftb.mods.ftbessentials.commands.SimpleConfigurableCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.cheat.SpeedCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.cheat.VirtualInventoryCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
@@ -12,11 +11,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 
 import java.util.List;
@@ -45,12 +40,7 @@ public class CheatCommands {
             new VirtualInventoryCommand(),
 
             // Enderchest
-            new SimpleCommandPlayer("enderchest", Commands.LEVEL_GAMEMASTERS, FTBEConfig.ENDER_CHEST, (ctx, player) -> enderChest(player)),
-
-            // TODO: Is this really a cheat or is more a utility command?
-            // Trash command
-            new SimpleConfigurableCommand(FTBEConfig.TRASHCAN, Commands.literal("trash")
-                    .executes(context -> trashcan(context.getSource().getPlayerOrException())))
+            new SimpleCommandPlayer("enderchest", Commands.LEVEL_GAMEMASTERS, FTBEConfig.ENDER_CHEST, (ctx, player) -> enderChest(player))
     );
 
     private static void enderChest(ServerPlayer player) {
@@ -60,22 +50,6 @@ public class CheatCommands {
         }
 
         player.openMenu(new SimpleMenuProvider((i, inv, p) -> ChestMenu.threeRows(i, inv, player.getEnderChestInventory()), title));
-    }
-
-    public static int trashcan(ServerPlayer player) {
-        player.openMenu(new MenuProvider() {
-            @Override
-            public Component getDisplayName() {
-                return Component.translatable("sidebar_button.ftbessentials.trash_can");
-            }
-
-            @Override
-            public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
-                return ChestMenu.fourRows(id, playerInventory);
-            }
-        });
-
-        return 1;
     }
 
     public static void heal(ServerPlayer player) {
