@@ -3,11 +3,9 @@ package dev.ftb.mods.ftbessentials;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.*;
-import dev.architectury.platform.Platform;
 import dev.ftb.mods.ftbessentials.api.records.TPARequest;
 import dev.ftb.mods.ftbessentials.commands.FTBCommands;
 import dev.ftb.mods.ftbessentials.commands.impl.teleporting.TPACommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.kit.KitManager;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
@@ -30,6 +28,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
 
@@ -59,6 +59,18 @@ public class FTBEEventHandler {
 		FTBEPlayerData.clear();
 		FTBEWorldData.instance = new FTBEWorldData(minecraftServer);
 		FTBEWorldData.instance.load();
+
+		Path oldConfigPath = minecraftServer.getWorldPath(LevelResource.ROOT)
+				.resolve("serverconfig")
+				.resolve(FTBEssentials.CONFIG_FILE);
+		if (!Files.exists(oldConfigPath)) {
+			// create a placeholder file for where config used to be
+			try {
+				Files.writeString(oldConfigPath, "# File has moved!\n# FTB Essentials configuration is now in <instance-folder>/config/ftbessentials.snbt\n");
+			} catch (IOException e) {
+				FTBEssentials.LOGGER.error("can't write {}: {}", oldConfigPath, e.getMessage());
+			}
+		}
 	}
 
 	private static void serverStopped(MinecraftServer minecraftServer) {

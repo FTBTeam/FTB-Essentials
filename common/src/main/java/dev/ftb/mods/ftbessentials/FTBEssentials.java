@@ -7,7 +7,6 @@ import dev.ftb.mods.ftbessentials.net.FTBEssentialsNet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.world.level.storage.LevelResource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,7 +19,7 @@ public class FTBEssentials {
 	public static final Style RECORDING_STYLE = Style.EMPTY.applyFormat(ChatFormatting.RED);
 	public static final Style STREAMING_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x9146FF));
 
-	private static final String CONFIG_FILE = MOD_ID + ".snbt";
+	public static final String CONFIG_FILE = MOD_ID + ".snbt";
 	private static final String[] DEFAULT_CONFIG = {
 			"Default config file that will be copied to instance's config/ftbessentials.snbt location",
 			"Copy values you wish to override in here",
