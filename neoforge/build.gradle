@@ -136,8 +136,8 @@ if (ENV.CURSEFORGE_KEY) {
             addGameVersion "NeoForge"
             mainArtifact(remapJar.archiveFile)
             relations {
-                requiredDependency 'ftb-library-neoforge'
-                optionalDependency 'ftb-ranks-neoforge'
+                requiredDependency 'ftb-library-forge'
+                optionalDependency 'ftb-ranks-forge'
             }
             changelog = ENV.CHANGELOG  // expected to exist if ENV.CURSEFORGE_KEY does
             changelogType = 'markdown'
