@@ -34,20 +34,6 @@ import java.nio.file.Path;
 import java.util.Iterator;
 
 public class FTBEEventHandler {
-	public static final LevelResource CONFIG_FILE = new LevelResource("serverconfig/ftbessentials.snbt");
-	private static final String[] DEFAULT_CONFIG = {
-			"Default config file that will be copied to world's serverconfig/ftbessentials.snbt location",
-			"Copy values you wish to override in here",
-			"Example:",
-			"",
-			"{",
-			"	misc: {",
-			"		enderchest: {",
-			"			enabled: false",
-			"		}",
-			"	}",
-			"}",
-	};
 
 	public static void init() {
 		LifecycleEvent.SERVER_BEFORE_START.register(FTBEEventHandler::serverAboutToStart);
@@ -70,11 +56,6 @@ public class FTBEEventHandler {
 	}
 
 	private static void serverAboutToStart(MinecraftServer minecraftServer) {
-		Path configFilePath = minecraftServer.getWorldPath(CONFIG_FILE);
-		Path defaultConfigFilePath = Platform.getConfigFolder().resolve("../defaultconfigs/ftbessentials-server.snbt");
-
-		FTBEConfig.CONFIG.load(configFilePath, defaultConfigFilePath, () -> DEFAULT_CONFIG);
-
 		FTBEPlayerData.clear();
 		FTBEWorldData.instance = new FTBEWorldData(minecraftServer);
 		FTBEWorldData.instance.load();
