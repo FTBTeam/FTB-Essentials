@@ -9,9 +9,6 @@ import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.UUID;
 
-/**
- * @author LatvianModder
- */
 public class UpdateTabNameMessage extends BaseS2CMessage {
 	public final UUID uuid;
 	public final String name;

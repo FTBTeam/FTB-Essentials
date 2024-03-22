@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbessentials.util;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import dev.ftb.mods.ftbessentials.command.MiscCommands;
+import dev.ftb.mods.ftbessentials.commands.impl.misc.LeaderboardCommand;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -17,9 +17,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-/**
- * @author LatvianModder
- */
 public class Leaderboard<N extends Number> {
 	private static final DecimalFormat DECIMAL_FORMAT = Util.make(new DecimalFormat("########0.00"), decimalFormat -> decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT)));
 
@@ -35,7 +32,7 @@ public class Leaderboard<N extends Number> {
 		LiteralArgumentBuilder<CommandSourceStack> res = Commands.literal("leaderboard");
 		for (Leaderboard<?> leaderboard : MAP.values()) {
 			res = res.then(Commands.literal(leaderboard.name)
-					.executes(context -> MiscCommands.leaderboard(context.getSource(), leaderboard, false))
+					.executes(context -> LeaderboardCommand.leaderboard(context.getSource(), leaderboard, false))
 			);
 		}
 		return res;

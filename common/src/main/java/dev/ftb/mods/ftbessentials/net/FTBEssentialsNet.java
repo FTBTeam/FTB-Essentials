@@ -4,9 +4,6 @@ import dev.architectury.networking.simple.MessageType;
 import dev.architectury.networking.simple.SimpleNetworkManager;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 
-/**
- * @author LatvianModder
- */
 public interface FTBEssentialsNet {
 	SimpleNetworkManager NET = SimpleNetworkManager.create(FTBEssentials.MOD_ID);
 

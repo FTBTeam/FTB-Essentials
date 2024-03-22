@@ -14,9 +14,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
-/**
- * @author LatvianModder
- */
 public class WarmupCooldownTeleporter {
 	private final FTBEPlayerData playerData;
 	private final ToIntFunction<ServerPlayer> cooldownConfig;

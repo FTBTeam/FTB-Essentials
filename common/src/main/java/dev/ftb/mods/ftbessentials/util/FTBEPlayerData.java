@@ -24,9 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
-/**
- * @author LatvianModder
- */
 public class FTBEPlayerData {
 	private static final Map<UUID, FTBEPlayerData> MAP = new HashMap<>();
 
