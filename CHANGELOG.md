@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2004.1.1]
+
+### Changed
+* Ported to MC 1.20.4. Support for Forge, NeoForge & Fabric.
+* Essentials commands can now optionally be registered under the top-level `/ftbessentials` command
+  * By default, commands are still registered as their own top-level command, as before
+  * See the `register_to_namespace` and `register_alias_as_well_as_namespace` boolean options in the `ftbessentials.snbt` config file
+* Server configuration file has moved from `<world>/serverconfig/ftbessentials.snbt` to `<instance>/config/ftbessentials.snbt`
+  * This was necessary due to command registration (which happens before server start) needing to know the config
+
 ## [2001.2.2]
 
 ### Fixed

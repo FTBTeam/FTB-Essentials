@@ -1,0 +1,51 @@
+modLoader = "javafml"
+loaderVersion = "[${neoforgeloaderversion},)"
+issueTrackerURL = "https://go.ftb.team/support-mod-issues"
+license = "All Rights Reserved"
+
+[[mixins]]
+config = "ftbessentials-common.mixins.json"
+
+[[mods]]
+modId = "ftbessentials"
+version = "${version}"
+displayName = "FTB Essentials"
+authors = "FTB Team"
+description = '''
+Adds many essential utility commands for servers
+'''
+
+[[dependencies.ftbessentials]]
+modId = "neoforge"
+type = "required"
+versionRange = "[${neoforgeversion},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.ftbessentials]]
+modId = "minecraft"
+type = "required"
+versionRange = "[${mcversion},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.ftbessentials]]
+modId = "ftblibrary"
+type = "required"
+versionRange = "[${libraryversion},)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.ftbessentials]]
+modId = "ftbranks"
+type = "optional"
+versionRange = "[${ranksversion},)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.ftbessentials]]
+modId = "luckperms"
+type = "optional"
+versionRange = "[5.4.83,)"
+ordering = "AFTER"
+side = "SERVER"
