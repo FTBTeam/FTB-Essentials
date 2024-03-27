@@ -95,6 +95,14 @@ public class TeleportPos {
 		}
 	}
 
+	public BlockPos getPos() {
+		return pos;
+	}
+
+	public String posAsString() {
+		return pos.getX() + " " + pos.getY() + " " + pos.getZ();
+	}
+
 	@FunctionalInterface
 	public interface TeleportResult {
 		TeleportResult SUCCESS = new TeleportResult() {

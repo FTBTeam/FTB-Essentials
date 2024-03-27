@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class Leaderboard<N extends Number> {
 	private static final DecimalFormat DECIMAL_FORMAT = Util.make(new DecimalFormat("########0.00"), decimalFormat -> decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT)));
@@ -102,6 +103,18 @@ public class Leaderboard<N extends Number> {
 
 	public String getName() {
 		return name;
+	}
+
+	/**
+	 * Remove the underscores from the name and capitalize the first letter of each word
+	 * @return the formatted name
+	 */
+	public String formattedName() {
+		var parts = this.name.split("_");
+		return Stream.of(parts)
+				.map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
+				.reduce((s1, s2) -> s1 + " " + s2)
+				.orElse("");
 	}
 
 	public Leaderboard<N> withValueGetter(Function<ServerStatsCounter, N> v) {

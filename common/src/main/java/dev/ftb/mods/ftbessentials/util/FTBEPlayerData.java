@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import com.mojang.authlib.GameProfile;
 import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
@@ -20,15 +19,24 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class FTBEPlayerData {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FTBEPlayerData.class);
+
+	private static final String PLAYER_DATA_PATH = "playerdata";
 	private static final Map<UUID, FTBEPlayerData> MAP = new HashMap<>();
 
 	private final UUID uuid;
 	private final String name;
+
 	private boolean needSave;
 
 	private boolean muted;
@@ -154,19 +162,25 @@ public class FTBEPlayerData {
 		return homes;
 	}
 
-	public static Optional<FTBEPlayerData> getOrCreate(@Nullable GameProfile profile) {
-		if (profile == null || profile.getId() == null || profile.getName() == null) {
+	public static Optional<FTBEPlayerData> getOrCreate(MinecraftServer server, UUID playerId) {;
+		if (MAP.containsKey(playerId)) {
+			return Optional.of(MAP.get(playerId));
+		}
+
+		// Check if the player file exists
+		if (server.getProfileCache() == null) {
 			return Optional.empty();
 		}
 
-		return Optional.of(MAP.computeIfAbsent(profile.getId(), k -> {
-			String profileName = profile.getName() != null && !profile.getName().isEmpty() ? profile.getName() : "Unknown";
-			return new FTBEPlayerData(profile.getId(), profileName);
-		}));
-	}
+		return server.getProfileCache().get(playerId).map(data -> new FTBEPlayerData(playerId, data.getName()));
+    }
 
 	public static Optional<FTBEPlayerData> getOrCreate(Player player) {
-		return player == null || PlayerHooks.isFake(player) ? Optional.empty() : getOrCreate(player.getGameProfile());
+		if (player == null || PlayerHooks.isFake(player)) {
+			return Optional.empty();
+		}
+
+		return Optional.of(MAP.computeIfAbsent(player.getUUID(), k -> new FTBEPlayerData(player.getUUID(), player.getName().getString())));
 	}
 
 	public static boolean playerExists(UUID playerId) {
@@ -270,7 +284,7 @@ public class FTBEPlayerData {
 	}
 
 	public void load() {
-		CompoundTag tag = SNBT.read(FTBEWorldData.instance.mkdirs("playerdata").resolve(uuid + ".snbt"));
+		CompoundTag tag = SNBT.read(FTBEWorldData.instance.mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".snbt"));
 
 		if (tag != null) {
 			read(tag);
@@ -278,7 +292,7 @@ public class FTBEPlayerData {
 	}
 
 	public void saveIfChanged() {
-		if (needSave && SNBT.write(FTBEWorldData.instance.mkdirs("playerdata").resolve(uuid + ".snbt"), write())) {
+		if (needSave && SNBT.write(FTBEWorldData.instance.mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".snbt"), write())) {
 			needSave = false;
 		}
 	}
@@ -303,6 +317,38 @@ public class FTBEPlayerData {
 		} else {
 			kitUseTimes.put(kitName, when);
 			markDirty();
+		}
+	}
+
+	/**
+	 * Get all the known players UUID's from the playerdata folder
+	 * @return a list of all the known players UUID's
+	 */
+	public static List<UUID> getAllKnownPlayers() {
+		try (Stream<Path> files = Files.list(FTBEWorldData.instance.mkdirs(PLAYER_DATA_PATH))) {
+			return files.filter(path -> path.toString().endsWith(".snbt"))
+					.map(path -> tryParseUUID(path.getFileName().toString().replace(".snbt", "")))
+					.filter(Objects::nonNull)
+					.toList();
+		} catch (Exception ex) {
+			LOGGER.error("Failed to get all known players: " + ex);
+		}
+
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Attempt to parse a UUID from a string without fatal errors
+	 * @param inputUUID the string to parse
+	 *
+	 * @return the UUID if it could be parsed, otherwise null
+	 */
+	@Nullable
+	private static UUID tryParseUUID(String inputUUID) {
+		try {
+			return UUID.fromString(inputUUID);
+		} catch (Exception ex) {
+			return null;
 		}
 	}
 

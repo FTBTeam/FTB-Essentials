@@ -179,12 +179,15 @@ public class TeleportingCommands {
             new TeleportPos(toPlayer).teleport(player);
             return 1;
         }
+
         // dest player not online; teleport to where they were last seen
-        return FTBEPlayerData.getOrCreate(to).map(dataTo -> {
-            FTBEPlayerData.addTeleportHistory(player);
-            dataTo.getLastSeenPos().teleport(player);
-            return 1;
-        }).orElse(0);
+        return FTBEPlayerData.getOrCreate(player.getServer(), to.getId())
+                .map(data -> {
+                    FTBEPlayerData.addTeleportHistory(player);
+                    data.getLastSeenPos().teleport(player);
+
+                    return 1;
+                }).orElse(0);
     }
 
     private static int tpx(ServerPlayer player, ServerLevel to) {

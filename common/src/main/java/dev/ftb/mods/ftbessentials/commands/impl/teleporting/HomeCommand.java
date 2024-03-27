@@ -10,12 +10,13 @@ import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.SavedTeleportManager;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
@@ -54,7 +55,7 @@ public class HomeCommand implements FTBCommand {
                         .requires(FTBEConfig.HOME)
                         .executes(context -> listHomes(context.getSource(), context.getSource().getPlayerOrException().getGameProfile()))
                         .then(Commands.argument("player", GameProfileArgument.gameProfile())
-                                .requires(source -> source.getServer().isSingleplayer() || source.hasPermission(2))
+                                .requires(source -> source.getServer().isSingleplayer() || source.hasPermission(Commands.LEVEL_GAMEMASTERS))
                                 .executes(context -> listHomes(context.getSource(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
                         )
         );
@@ -98,15 +99,28 @@ public class HomeCommand implements FTBCommand {
     }
 
     public static int listHomes(CommandSourceStack source, GameProfile of) {
-        return FTBEPlayerData.getOrCreate(of).map(data -> {
-            if (data.homeManager().getNames().isEmpty()) {
-                source.sendSuccess(() -> Component.literal("None"), false);
-            } else {
-                TeleportPos origin = new TeleportPos(source.getLevel().dimension(), BlockPos.containing(source.getPosition()));
-                data.homeManager().destinations().forEach(entry ->
-                        source.sendSuccess(() -> Component.literal(entry.name() + ": " + entry.destination().distanceString(origin)), false));
-            }
-            return 1;
-        }).orElse(0);
+        return FTBEPlayerData.getOrCreate(source.getServer(), of.getId())
+                .map(data -> {
+                    if (data.homeManager().getNames().isEmpty()) {
+                        source.sendSuccess(() -> Component.literal("None"), false);
+                    } else {
+                        source.sendSuccess(() -> Component.literal("Homes for " + of.getName() + "\n---").withStyle(ChatFormatting.GOLD), false);
+
+                        TeleportPos origin = new TeleportPos(source.getLevel().dimension(), BlockPos.containing(source.getPosition()));
+                        data.homeManager().destinations().forEach(entry ->
+                                source.sendSuccess(() -> {
+                                    MutableComponent literal = Component.empty().append(Component.literal(entry.name()).withStyle(ChatFormatting.AQUA).withStyle(ChatFormatting.BOLD)).append(Component.literal( ": " + entry.destination().distanceString(origin) + " away"));
+                                    if (source.hasPermission(Commands.LEVEL_GAMEMASTERS)) {
+                                        literal.withStyle(Style.EMPTY
+                                                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp @s " + entry.destination().posAsString()))
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to teleport")))
+                                        );
+                                    }
+                                    return literal;
+                                }, false));
+                    }
+
+                    return 1;
+                }).orElse(0);
     }
 }
