@@ -1,12 +1,10 @@
 package dev.ftb.mods.ftbessentials.commands.impl.misc;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.mixin.PlayerListAccess;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
-import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.Leaderboard;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -20,6 +18,8 @@ import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -27,6 +27,8 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class LeaderboardCommand implements FTBCommand {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LeaderboardCommand.class);
+
     @Override
     public boolean enabled() {
         return FTBEConfig.LEADERBOARD.isEnabled();
@@ -38,27 +40,28 @@ public class LeaderboardCommand implements FTBCommand {
     }
 
     public static <T extends Number> int leaderboard(CommandSourceStack source, Leaderboard<T> leaderboard, boolean reverse) {
-        try (var stream = Files.list(FTBEWorldData.instance.mkdirs("playerdata"))) {
-            stream.filter(path -> path.toString().endsWith(".json"))
-                    .map(Path::getFileName)
-                    .map(path -> new GameProfile(UUID.fromString(path.toString().replace(".json", "")), null))
-                    .filter(profile -> !FTBEPlayerData.playerExists(profile.getId()))
-                    .map(FTBEPlayerData::getOrCreate)
-                    .filter(Optional::isPresent)
-                    .forEach(data -> data.get().load());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        var knownPlayers = FTBEPlayerData.getAllKnownPlayers();
+        var playerData = knownPlayers
+                .stream()
+                .map(uuid -> FTBEPlayerData.getOrCreate(source.getServer(), uuid))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
 
         List<Pair<FTBEPlayerData, T>> list = new ArrayList<>();
         int self = -1;
 
-        FTBEPlayerData.forEachPlayer(playerData -> {
-            ServerStatsCounter stats = getPlayerStats(source.getServer(), playerData.getUuid());
+        Path worldPath = source.getServer().getWorldPath(LevelResource.PLAYER_STATS_DIR);
+        if (!Files.exists(worldPath)) {
+            return 1;
+        }
+
+        playerData.forEach(pd -> {
+            ServerStatsCounter stats = getPlayerStats(source.getServer(), pd.getUuid());
 
             T num = leaderboard.getValue(stats);
             if (leaderboard.test(num)) {
-                list.add(Pair.of(playerData, num));
+                list.add(Pair.of(pd, num));
             }
         });
 
@@ -77,7 +80,7 @@ public class LeaderboardCommand implements FTBCommand {
             }
         }
 
-        source.sendSuccess(() -> Component.literal("== Leaderboard [" + leaderboard.getName() + "] ==").withStyle(ChatFormatting.DARK_GREEN), false);
+        source.sendSuccess(() -> Component.literal("== Leaderboard [" + leaderboard.formattedName() + "] ==").withStyle(ChatFormatting.DARK_GREEN), false);
 
         if (list.isEmpty()) {
             source.sendSuccess(() -> Component.literal("No data!").withStyle(ChatFormatting.GRAY), false);
@@ -86,28 +89,26 @@ public class LeaderboardCommand implements FTBCommand {
 
         for (int i = 0; i < Math.min(20, list.size()); i++) {
             Pair<FTBEPlayerData, T> pair = list.get(i);
-            String num = String.valueOf(i + 1);
-
-            if (i < 10) {
-                num = "0" + num;
-            }
+            String num = String.format("%02d", i + 1);
 
             MutableComponent component = Component.literal("");
             component.withStyle(ChatFormatting.GRAY);
 
             if (i == 0) {
-                component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xD4AF37))));
+                component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD)));
             } else if (i == 1) {
-                component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xC0C0C0))));
+                component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xB0D9FF))));
             } else if (i == 2) {
-                component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0x9F7A34))));
+                component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xCD7F32))));
             } else {
-                component.append(Component.literal("#" + num + " "));
+                component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xB4B4B4))));
             }
+
+            var color = TextColor.fromRgb(0xCD7F32);
 
             component.append(Component.literal(pair.getLeft().getName()).withStyle(i == self ? ChatFormatting.GREEN : ChatFormatting.YELLOW));
             component.append(Component.literal(": "));
-            component.append(Component.literal(leaderboard.asString(pair.getRight())));
+            component.append(Component.literal(leaderboard.asString(pair.getRight())).withStyle(ChatFormatting.WHITE));
             source.sendSuccess(() -> component, false);
         }
 

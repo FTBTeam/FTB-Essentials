@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbessentials.commands.impl.cheat;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import net.minecraft.commands.CommandSourceStack;
@@ -20,12 +21,20 @@ import java.util.List;
 public class VirtualInventoryCommand implements FTBCommand {
     @Override
     public boolean enabled() {
-        return false;
+        // Not the best but it'll do
+        boolean enabled = false;
+        enabled |= FTBEConfig.ANVIL.isEnabled();
+        enabled |= FTBEConfig.CRAFTING_TABLE.isEnabled();
+        enabled |= FTBEConfig.SMITHING_TABLE.isEnabled();
+        enabled |= FTBEConfig.STONECUTTER.isEnabled();
+
+        return enabled;
     }
 
     @Override
     public List<LiteralArgumentBuilder<CommandSourceStack>> register() {
-        var openCommand = Commands.literal("open");
+        var openCommand = Commands.literal("open")
+                .requires(CommandUtils.isGamemaster());
 
         if (FTBEConfig.ANVIL.isEnabled()) {
             openCommand.then(createMenu("anvil", "block.minecraft.anvil", VirtualAnvilMenu::new));
@@ -48,7 +57,6 @@ public class VirtualInventoryCommand implements FTBCommand {
 
     public static LiteralArgumentBuilder<CommandSourceStack> createMenu(String name, String translate, VirtualMenuFactory factory) {
         return Commands.literal(name)
-                .requires(ctx -> ctx.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .executes(context -> {
                     var player = context.getSource().getPlayerOrException();
                     player.openMenu(new SimpleMenuProvider((id, inv, p) -> factory.create(id, inv, (ServerPlayer) p), Component.translatable(translate)));

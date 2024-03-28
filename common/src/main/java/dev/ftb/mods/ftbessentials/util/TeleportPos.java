@@ -95,6 +95,15 @@ public class TeleportPos {
 		}
 	}
 
+	public BlockPos getPos() {
+		return pos;
+	}
+
+	public String posAsString() {
+		// Normal shortString would be 1, 2, 3 so we remove the commas
+		return pos.toShortString().replaceAll(",", "");
+	}
+
 	@FunctionalInterface
 	public interface TeleportResult {
 		TeleportResult SUCCESS = new TeleportResult() {

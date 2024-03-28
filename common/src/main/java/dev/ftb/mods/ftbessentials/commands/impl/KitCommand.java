@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbessentials.commands.impl;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -273,12 +272,12 @@ public class KitCommand implements FTBCommand {
             return 0;
         }
 
-        FTBEPlayerData.getOrCreate(new GameProfile(playerId, "")).ifPresent(data -> {
-            data.setLastKitUseTime(name, 0L);
-            source.sendSuccess(() -> Component.literal("Cooldown for '" + name + "' reset for UUID " + playerId).withStyle(ChatFormatting.YELLOW), false);
-        });
-
-        return 1;
+        return FTBEPlayerData.getOrCreate(source.getServer(), playerId)
+                .map(data -> {
+                    data.setLastKitUseTime(name, 0L);
+                    source.sendSuccess(() -> Component.literal("Cooldown for '" + name + "' reset for UUID " + playerId).withStyle(ChatFormatting.YELLOW), false);
+                    return 1;
+                }).orElse(0);
     }
 
     private static int resetCooldowns(CommandSourceStack source, String name) {

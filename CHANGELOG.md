@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2004.1.2]
+
+### Changed
+* `/tpl` is now `/teleport_last` (Technically this happened last version)
+* `/anvil`, `/crafting`, `/smithing`, `/stonecutter` have been moved under the `/open` namespace
+  * E.g. `/open anvil` will open an Anvil GUI
+* `/listhomes` now allows you to click to teleport to a home (When OP) and has had the output improved.
+
+### Fixed
+* `/leaderboard` will now correctly show offline players
+* `/leaderboard` will no longer show `#010` :joy:
+
 ## [2004.1.1]
 
 ### Changed
