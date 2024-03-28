@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Leaderboard<N extends Number> {
@@ -112,9 +113,8 @@ public class Leaderboard<N extends Number> {
 	public String formattedName() {
 		var parts = this.name.split("_");
 		return Stream.of(parts)
-				.map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
-				.reduce((s1, s2) -> s1 + " " + s2)
-				.orElse("");
+				.map(s -> Character.toTitleCase(s.charAt(0)) + s.substring(1).toLowerCase())
+				.collect(Collectors.joining(" "));
 	}
 
 	public Leaderboard<N> withValueGetter(Function<ServerStatsCounter, N> v) {

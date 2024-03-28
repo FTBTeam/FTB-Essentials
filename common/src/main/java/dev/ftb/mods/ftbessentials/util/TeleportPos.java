@@ -100,7 +100,8 @@ public class TeleportPos {
 	}
 
 	public String posAsString() {
-		return pos.getX() + " " + pos.getY() + " " + pos.getZ();
+		// Normal shortString would be 1, 2, 3 so we remove the commas
+		return pos.toShortString().replaceAll(",", "");
 	}
 
 	@FunctionalInterface

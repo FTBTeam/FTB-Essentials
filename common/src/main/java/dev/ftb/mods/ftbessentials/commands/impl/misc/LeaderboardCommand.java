@@ -89,11 +89,7 @@ public class LeaderboardCommand implements FTBCommand {
 
         for (int i = 0; i < Math.min(20, list.size()); i++) {
             Pair<FTBEPlayerData, T> pair = list.get(i);
-            String num = String.valueOf(i + 1);
-
-            if (i + 1 < 10) {
-                num = "0" + num;
-            }
+            String num = String.format("%02d", i + 1);
 
             MutableComponent component = Component.literal("");
             component.withStyle(ChatFormatting.GRAY);
@@ -101,7 +97,7 @@ public class LeaderboardCommand implements FTBCommand {
             if (i == 0) {
                 component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD)));
             } else if (i == 1) {
-                component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xE0E0E0))));
+                component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xB0D9FF))));
             } else if (i == 2) {
                 component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xCD7F32))));
             } else {

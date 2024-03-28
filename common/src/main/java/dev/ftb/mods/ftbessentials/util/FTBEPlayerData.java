@@ -172,7 +172,8 @@ public class FTBEPlayerData {
 			return Optional.empty();
 		}
 
-		return server.getProfileCache().get(playerId).map(data -> new FTBEPlayerData(playerId, data.getName()));
+        return server.getProfileCache().get(playerId)
+				.map(profile -> MAP.computeIfAbsent(playerId, k -> new FTBEPlayerData(playerId, profile.getName())));
     }
 
 	public static Optional<FTBEPlayerData> getOrCreate(Player player) {
@@ -180,7 +181,7 @@ public class FTBEPlayerData {
 			return Optional.empty();
 		}
 
-		return Optional.of(MAP.computeIfAbsent(player.getUUID(), k -> new FTBEPlayerData(player.getUUID(), player.getName().getString())));
+		return Optional.of(MAP.computeIfAbsent(player.getUUID(), k -> new FTBEPlayerData(player.getUUID(), player.getGameProfile().getName())));
 	}
 
 	public static boolean playerExists(UUID playerId) {
@@ -347,7 +348,7 @@ public class FTBEPlayerData {
 	private static UUID tryParseUUID(String inputUUID) {
 		try {
 			return UUID.fromString(inputUUID);
-		} catch (Exception ex) {
+		} catch (IllegalArgumentException ex) {
 			return null;
 		}
 	}
