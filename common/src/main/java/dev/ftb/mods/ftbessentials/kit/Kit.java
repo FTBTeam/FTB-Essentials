@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbessentials.kit;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -47,11 +48,11 @@ public class Kit {
         return autoGrant;
     }
 
-    public CompoundTag toNBT() {
+    public CompoundTag toNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
 
         ListTag list = new ListTag();
-        items.forEach(stack -> list.add(saveStack(stack)));
+        items.forEach(stack -> list.add(saveStack(stack, provider)));
 
         tag.put("items", list);
 
@@ -61,19 +62,19 @@ public class Kit {
         return tag;
     }
 
-    private SNBTCompoundTag saveStack(ItemStack stack) {
+    private SNBTCompoundTag saveStack(ItemStack stack, HolderLookup.Provider provider) {
         SNBTCompoundTag tag = new SNBTCompoundTag();
         tag.singleLine();
-        stack.save(tag);
+        stack.save(provider, tag);
         return tag;
     }
 
-    public static Kit fromNBT(String kitName, CompoundTag tag) {
+    public static Kit fromNBT(String kitName, CompoundTag tag, HolderLookup.Provider provider) {
         List<ItemStack> items = new ArrayList<>();
         ListTag list = tag.getList("items", Tag.TAG_COMPOUND);
         list.forEach(el -> {
             if (el instanceof CompoundTag c) {
-                items.add(ItemStack.of(c));
+                ItemStack.parse(provider, c).ifPresent(items::add);
             }
         });
         return new Kit(kitName, items, tag.getLong("cooldown"), tag.getBoolean("auto_grant"));

@@ -6,8 +6,6 @@ import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.EventPriority;
-import net.neoforged.fml.IExtensionPoint.DisplayTest;
-import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
@@ -16,8 +14,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 @Mod(FTBEssentials.MOD_ID)
 public class FTBEssentialsNeoForge {
 	public FTBEssentialsNeoForge() {
-		ModLoadingContext.get().registerExtensionPoint(DisplayTest.class, () -> new DisplayTest(() -> DisplayTest.IGNORESERVERONLY, (a, b) -> true));
-
 		NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::playerName);
 		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::playerNameLow);
 		NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::vanillaTeleportCommand);

@@ -1,14 +1,9 @@
 package dev.ftb.mods.ftbessentials.net;
 
-import dev.architectury.networking.simple.MessageType;
-import dev.architectury.networking.simple.SimpleNetworkManager;
-import dev.ftb.mods.ftbessentials.FTBEssentials;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 
-public interface FTBEssentialsNet {
-	SimpleNetworkManager NET = SimpleNetworkManager.create(FTBEssentials.MOD_ID);
-
-	MessageType UPDATE_TAB_NAME = NET.registerS2C("update_tab_name", UpdateTabNameMessage::new);
-
-	static void init() {
+public class FTBEssentialsNet {
+	public static void init() {
+		NetworkHelper.registerS2C(UpdateTabNameMessage.TYPE, UpdateTabNameMessage.STREAM_CODEC, UpdateTabNameMessage::handle);
 	}
 }

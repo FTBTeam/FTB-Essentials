@@ -14,6 +14,7 @@ authors = "FTB Team"
 description = '''
 Adds many essential utility commands for servers
 '''
+displayTest="IGNORE_SERVER_VERSION"
 
 [[dependencies.ftbessentials]]
 modId = "neoforge"

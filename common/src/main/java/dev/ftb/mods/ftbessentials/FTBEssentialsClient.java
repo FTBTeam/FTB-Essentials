@@ -11,19 +11,19 @@ import net.minecraft.network.chat.MutableComponent;
 public class FTBEssentialsClient extends FTBEssentialsCommon {
 	@Override
 	public void updateTabName(UpdateTabNameMessage packet) {
-		PlayerInfo info = Minecraft.getInstance().getConnection().getPlayerInfo(packet.uuid);
+		PlayerInfo info = Minecraft.getInstance().getConnection().getPlayerInfo(packet.uuid());
 
 		if (info == null) {
 			return;
 		}
 
 		MutableComponent component = Component.literal("");
-		if (packet.recording != RecordingStatus.NONE) {
-			component.append(Component.literal("⏺").withStyle(packet.recording.getStyle()));
+		if (packet.recording() != RecordingStatus.NONE) {
+			component.append(Component.literal("⏺").withStyle(packet.recording().getStyle()));
 		}
 
-		MutableComponent nameComponent = Component.literal(packet.nickname.isEmpty() ? packet.name : packet.nickname);
-		if (packet.afk) {
+		MutableComponent nameComponent = Component.literal(packet.nickname().isEmpty() ? packet.name() : packet.nickname());
+		if (packet.afk()) {
 			nameComponent.withStyle(ChatFormatting.GRAY);
 		}
 

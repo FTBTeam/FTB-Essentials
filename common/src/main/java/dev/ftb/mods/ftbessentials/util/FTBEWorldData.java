@@ -69,7 +69,7 @@ public class FTBEWorldData {
 				loadNBT(tag);
 			}
 		} catch (Exception ex) {
-			FTBEssentials.LOGGER.error("Failed to load world data: " + ex);
+			FTBEssentials.LOGGER.error("Failed to load world data: {}", ex);
 			ex.printStackTrace();
 		}
 	}
@@ -83,7 +83,7 @@ public class FTBEWorldData {
 		muteTimeouts.forEach((id, until) -> mutesTag.putLong(id.toString(), until));
 		tag.put("mute_timeouts", mutesTag);
 
-		tag.put("kits", KitManager.getInstance().save());
+		tag.put("kits", KitManager.getInstance().save(server.registryAccess()));
 
 		return tag;
 	}
@@ -97,7 +97,7 @@ public class FTBEWorldData {
 			muteTimeouts.put(UUID.fromString(key), mutesTag.getLong(key));
 		}
 
-		KitManager.getInstance().load(tag.getCompound("kits"));
+		KitManager.getInstance().load(tag.getCompound("kits"), server.registryAccess());
 	}
 
 	public void tickMuteTimeouts(MinecraftServer server) {

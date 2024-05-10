@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbessentials.util.InventoryUtil;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,13 +26,13 @@ public enum KitManager {
         return INSTANCE;
     }
 
-    public void load(CompoundTag kits) {
+    public void load(CompoundTag kits, HolderLookup.Provider provider) {
         allKits.clear();
-        kits.getAllKeys().forEach(key -> allKits.put(key, Kit.fromNBT(key, kits.getCompound(key))));
+        kits.getAllKeys().forEach(key -> allKits.put(key, Kit.fromNBT(key, kits.getCompound(key), provider)));
     }
 
-    public CompoundTag save() {
-        return Util.make(new CompoundTag(), tag -> allKits.forEach((name, kit) -> tag.put(name, kit.toNBT())));
+    public CompoundTag save(HolderLookup.Provider provider) {
+        return Util.make(new CompoundTag(), tag -> allKits.forEach((name, kit) -> tag.put(name, kit.toNBT(provider))));
     }
 
     public Optional<Kit> get(String kitName) {
