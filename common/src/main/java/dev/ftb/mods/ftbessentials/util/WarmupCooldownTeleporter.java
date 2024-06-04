@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbessentials.util;
 
 import dev.architectury.event.CompoundEventResult;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
+import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.TeleportPos.TeleportResult;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;

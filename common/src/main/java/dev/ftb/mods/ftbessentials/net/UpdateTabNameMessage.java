@@ -1,54 +1,36 @@
 package dev.ftb.mods.ftbessentials.net;
 
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.BaseS2CMessage;
-import dev.architectury.networking.simple.MessageType;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData.RecordingStatus;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.UUID;
 
-public class UpdateTabNameMessage extends BaseS2CMessage {
-	public final UUID uuid;
-	public final String name;
-	public final String nickname;
-	public final RecordingStatus recording;
-	public final boolean afk;
+public record UpdateTabNameMessage(UUID uuid, String name, String nickname, RecordingStatus recording, boolean afk) implements CustomPacketPayload {
+	public static final Type<UpdateTabNameMessage> TYPE = new Type<>(new ResourceLocation(FTBEssentials.MOD_ID, "update_tab_name"));
 
-	public UpdateTabNameMessage(UUID id, String n, String nn, RecordingStatus r, boolean a) {
-		uuid = id;
-		name = n;
-		nickname = nn;
-		recording = r;
-		afk = a;
-	}
+	public static StreamCodec<FriendlyByteBuf, UpdateTabNameMessage> STREAM_CODEC = StreamCodec.composite(
+			UUIDUtil.STREAM_CODEC, UpdateTabNameMessage::uuid,
+			ByteBufCodecs.STRING_UTF8, UpdateTabNameMessage::name,
+			ByteBufCodecs.STRING_UTF8, UpdateTabNameMessage::nickname,
+			NetworkHelper.enumStreamCodec(RecordingStatus.class), UpdateTabNameMessage::recording,
+			ByteBufCodecs.BOOL, UpdateTabNameMessage::afk,
+			UpdateTabNameMessage::new
+	);
 
-	public UpdateTabNameMessage(FriendlyByteBuf buf) {
-		uuid = new UUID(buf.readLong(), buf.readLong());
-		name = buf.readUtf(Short.MAX_VALUE);
-		nickname = buf.readUtf(Short.MAX_VALUE);
-		recording = buf.readEnum(RecordingStatus.class);
-		afk = buf.readBoolean();
+	public static void handle(UpdateTabNameMessage message, NetworkManager.PacketContext packetContext) {
+		packetContext.queue(() -> FTBEssentials.PROXY.updateTabName(message));
 	}
 
 	@Override
-	public MessageType getType() {
-		return FTBEssentialsNet.UPDATE_TAB_NAME;
-	}
-
-	@Override
-	public void write(FriendlyByteBuf buf) {
-		buf.writeLong(uuid.getMostSignificantBits());
-		buf.writeLong(uuid.getLeastSignificantBits());
-		buf.writeUtf(name, Short.MAX_VALUE);
-		buf.writeUtf(nickname, Short.MAX_VALUE);
-		buf.writeEnum(recording);
-		buf.writeBoolean(afk);
-	}
-
-	@Override
-	public void handle(NetworkManager.PacketContext packetContext) {
-		FTBEssentials.PROXY.updateTabName(this);
+	public Type<UpdateTabNameMessage> type() {
+		return TYPE;
 	}
 }

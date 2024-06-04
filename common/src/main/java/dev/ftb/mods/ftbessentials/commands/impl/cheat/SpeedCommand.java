@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -42,7 +43,7 @@ public class SpeedCommand implements FTBCommand {
         );
     }
 
-    private static int speed(CommandSourceStack source, Attribute attr, ServerPlayer player) {
+    private static int speed(CommandSourceStack source, Holder<Attribute> attr, ServerPlayer player) {
         AttributeInstance attrInstance = player.getAttribute(attr);
 
         showSpeed(source, player, attrInstance);
@@ -51,7 +52,7 @@ public class SpeedCommand implements FTBCommand {
     }
 
 
-    private static int speed(CommandSourceStack source, Attribute attr, ServerPlayer target, int boostPct) {
+    private static int speed(CommandSourceStack source, Holder<Attribute> attr, ServerPlayer target, int boostPct) {
         AttributeInstance attrInstance = target.getAttribute(attr);
 
         if (attrInstance != null) {
@@ -59,7 +60,7 @@ public class SpeedCommand implements FTBCommand {
             attrInstance.removeModifier(ESSENTIALS_SPEED_UUID);
             if (speedMult != 0f) {
                 attrInstance.addPermanentModifier(new AttributeModifier(ESSENTIALS_SPEED_UUID,
-                        "FTB Essentials speed boost", speedMult, AttributeModifier.Operation.MULTIPLY_BASE
+                        "FTB Essentials speed boost", speedMult, AttributeModifier.Operation.ADD_MULTIPLIED_BASE
                 ));
             }
             showSpeed(source, target, attrInstance);
@@ -71,11 +72,11 @@ public class SpeedCommand implements FTBCommand {
     private static void showSpeed(CommandSourceStack source, ServerPlayer target, AttributeInstance attrInstance) {
         Component msg;
         if (attrInstance != null && attrInstance.getModifier(ESSENTIALS_SPEED_UUID) != null) {
-            double speedMult = attrInstance.getModifier(ESSENTIALS_SPEED_UUID).getAmount();
+            double speedMult = attrInstance.getModifier(ESSENTIALS_SPEED_UUID).amount();
             int boostPct = (int) (speedMult * 100);
             msg = Component.literal("Speed boost for ")
                     .append(target.getDisplayName())
-                    .append(" (").append(Component.translatable(attrInstance.getAttribute().getDescriptionId())).append(") = " + boostPct + "%");
+                    .append(" (").append(Component.translatable(attrInstance.getAttribute().value().getDescriptionId())).append(") = " + boostPct + "%");
         } else {
             msg = Component.literal("No speed boost for ").append(target.getDisplayName());
         }
