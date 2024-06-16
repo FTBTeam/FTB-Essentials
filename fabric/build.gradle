@@ -3,8 +3,6 @@ plugins {
     id "com.matthewprenger.cursegradle" version "1.4.0"
 }
 
-def ENV = System.getenv()
-
 architectury {
     platformSetupLoomIde()
     fabric()
@@ -111,26 +109,3 @@ publishing {
         }
     }
 }
-
-if (ENV.CURSEFORGE_KEY) {
-    curseforge {
-        apiKey = ENV.CURSEFORGE_KEY
-        project {
-            id = project.curseforge_id
-            releaseType = ftbPublishing.relType
-            addGameVersion "Fabric"
-            addGameVersion project.minecraft_version
-            mainArtifact(remapJar.archiveFile)
-            relations {
-                requiredDependency 'architectury-api'
-                requiredDependency 'fabric-api'
-                requiredDependency 'ftb-library-fabric'
-                optionalDependency 'ftb-ranks-fabric'
-            }
-            changelog = ENV.CHANGELOG  // expected to exist if ENV.CURSEFORGE_KEY does
-            changelogType = 'markdown'
-        }
-    }
-}
-
-rootProject.tasks.getByName("curseforgePublish").dependsOn tasks.getByName("curseforge")
