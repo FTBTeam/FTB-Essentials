@@ -9,12 +9,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.UUID;
 
 public record UpdateTabNameMessage(UUID uuid, String name, String nickname, RecordingStatus recording, boolean afk) implements CustomPacketPayload {
-	public static final Type<UpdateTabNameMessage> TYPE = new Type<>(new ResourceLocation(FTBEssentials.MOD_ID, "update_tab_name"));
+	public static final Type<UpdateTabNameMessage> TYPE = new Type<>(FTBEssentials.essentialsId("update_tab_name"));
 
 	public static StreamCodec<FriendlyByteBuf, UpdateTabNameMessage> STREAM_CODEC = StreamCodec.composite(
 			UUIDUtil.STREAM_CODEC, UpdateTabNameMessage::uuid,

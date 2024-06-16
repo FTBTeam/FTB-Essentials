@@ -13,7 +13,7 @@ dependencies {
     // Do NOT use other classes from fabric loader
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     // Remove the next line if you don't want to depend on the API
-    modApi "dev.architectury:architectury:${rootProject.architectury_version}"
+    modApi "dev.architectury:architectury:${rootProject.architectury_api_version}"
 
     modImplementation("dev.ftb.mods:ftb-library:${rootProject.ftb_library_version}") { transitive = false }
     modImplementation("dev.ftb.mods:ftb-ranks:${rootProject.ftb_ranks_version}") { transitive = false }

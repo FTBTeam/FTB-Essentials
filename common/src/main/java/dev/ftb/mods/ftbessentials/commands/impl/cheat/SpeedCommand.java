@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbessentials.commands.impl.cheat;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import net.minecraft.commands.CommandSourceStack;
@@ -9,6 +10,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -16,13 +18,12 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 import java.util.List;
-import java.util.UUID;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
 public class SpeedCommand implements FTBCommand {
-    private static final UUID ESSENTIALS_SPEED_UUID = UUID.fromString("3a8a9187-94ab-4272-99c0-ca764a19f8f1");
+    private static final ResourceLocation ESSENTIALS_SPEED_ID = FTBEssentials.essentialsId("speed_boost");
 
     @Override
     public boolean enabled() {
@@ -57,11 +58,9 @@ public class SpeedCommand implements FTBCommand {
 
         if (attrInstance != null) {
             float speedMult = boostPct / 100f;
-            attrInstance.removeModifier(ESSENTIALS_SPEED_UUID);
+            attrInstance.removeModifier(ESSENTIALS_SPEED_ID);
             if (speedMult != 0f) {
-                attrInstance.addPermanentModifier(new AttributeModifier(ESSENTIALS_SPEED_UUID,
-                        "FTB Essentials speed boost", speedMult, AttributeModifier.Operation.ADD_MULTIPLIED_BASE
-                ));
+                attrInstance.addPermanentModifier(new AttributeModifier(ESSENTIALS_SPEED_ID, speedMult, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
             }
             showSpeed(source, target, attrInstance);
         }
@@ -71,8 +70,11 @@ public class SpeedCommand implements FTBCommand {
 
     private static void showSpeed(CommandSourceStack source, ServerPlayer target, AttributeInstance attrInstance) {
         Component msg;
-        if (attrInstance != null && attrInstance.getModifier(ESSENTIALS_SPEED_UUID) != null) {
-            double speedMult = attrInstance.getModifier(ESSENTIALS_SPEED_UUID).amount();
+        if (attrInstance != null && attrInstance.getModifier(ESSENTIALS_SPEED_ID) != null) {
+            AttributeModifier modifier = attrInstance.getModifier(ESSENTIALS_SPEED_ID);
+            assert modifier != null;
+
+            double speedMult = modifier.amount();
             int boostPct = (int) (speedMult * 100);
             msg = Component.literal("Speed boost for ")
                     .append(target.getDisplayName())
