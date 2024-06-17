@@ -3,8 +3,6 @@ plugins {
     id "com.matthewprenger.cursegradle" version "1.4.0"
 }
 
-def ENV = System.getenv()
-
 architectury {
     platformSetupLoomIde()
     neoForge()
@@ -32,7 +30,7 @@ repositories {
 dependencies {
     neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
 
-    modApi "dev.architectury:architectury-neoforge:${rootProject.architectury_version}"
+    modApi "dev.architectury:architectury-neoforge:${rootProject.architectury_api_version}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
@@ -102,47 +100,4 @@ publishing {
             from components.java
         }
     }
-
-    repositories {
-        if (ftbPublishing.ftbToken) {
-            maven {
-                url ftbPublishing.ftbURL
-                credentials {
-                    username = ftbPublishing.ftbUser
-                    password = ftbPublishing.ftbToken
-                }
-            }
-        }
-
-        if (ftbPublishing.sapsToken) {
-            maven {
-                url ftbPublishing.sapsURL
-                credentials {
-                    username = ftbPublishing.sapsUser
-                    password = ftbPublishing.sapsToken
-                }
-            }
-        }
-    }
 }
-
-if (ENV.CURSEFORGE_KEY) {
-    curseforge {
-        apiKey = ENV.CURSEFORGE_KEY
-        project {
-            id = project.curseforge_id
-            releaseType = ftbPublishing.relType
-            addGameVersion project.minecraft_version
-            addGameVersion "NeoForge"
-            mainArtifact(remapJar.archiveFile)
-            relations {
-                requiredDependency 'ftb-library-forge'
-                optionalDependency 'ftb-ranks-forge'
-            }
-            changelog = ENV.CHANGELOG  // expected to exist if ENV.CURSEFORGE_KEY does
-            changelogType = 'markdown'
-        }
-    }
-}
-
-rootProject.tasks.getByName("curseforgePublish").dependsOn tasks.getByName("curseforge")

@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbessentials.net.FTBEssentialsNet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -46,5 +47,9 @@ public class FTBEssentials {
 		FTBEEventHandler.init();
 
 		PROXY = EnvExecutor.getEnvSpecific(() -> FTBEssentialsCommon::new, () -> FTBEssentialsClient::new);
+	}
+
+	public static ResourceLocation essentialsId(String path) {
+		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
 	}
 }

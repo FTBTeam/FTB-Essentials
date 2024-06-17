@@ -25,7 +25,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
@@ -41,8 +40,8 @@ import net.minecraft.world.phys.Vec3;
 import java.util.List;
 
 public class TeleportingCommands {
-    public static final TagKey<Block> IGNORE_RTP_BLOCKS = TagKey.create(Registries.BLOCK, new ResourceLocation(FTBEssentials.MOD_ID, "ignore_rtp"));
-    public static final TagKey<Biome> IGNORE_RTP_BIOMES = TagKey.create(Registries.BIOME, new ResourceLocation(FTBEssentials.MOD_ID, "ignore_rtp"));
+    public static final TagKey<Block> IGNORE_RTP_BLOCKS = TagKey.create(Registries.BLOCK, FTBEssentials.essentialsId("ignore_rtp"));
+    public static final TagKey<Biome> IGNORE_RTP_BIOMES = TagKey.create(Registries.BIOME, FTBEssentials.essentialsId("ignore_rtp"));
 
     public static final List<FTBCommand> COMMANDS = List.of(
             new OfflineTeleportCommand(),

@@ -40,7 +40,7 @@ public class TeleportPos {
 	}
 
 	public TeleportPos(CompoundTag tag) {
-		dimension = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(tag.getString("dim")));
+		dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(tag.getString("dim")));
 		pos = new BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"));
 		this.yRot = (tag.getTagType("yRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("yRot") : null;
 		this.xRot = (tag.getTagType("xRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("xRot") : null;
