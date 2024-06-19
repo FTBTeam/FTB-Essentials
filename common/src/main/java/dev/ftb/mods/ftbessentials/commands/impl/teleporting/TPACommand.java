@@ -13,6 +13,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -104,7 +105,13 @@ public class TPACommand implements FTBCommand {
     }
 
     public int tpaccept(ServerPlayer player, String id) {
-        TPARequest request = REQUESTS.get(id);
+        var uuid = attemptUuid(id);
+        if (uuid == null) {
+            player.displayClientMessage(Component.literal("Invalid request!"), false);
+            return 0;
+        }
+
+        TPARequest request = REQUESTS.get(uuid);
 
         if (request == null) {
             player.displayClientMessage(Component.literal("Invalid request!"), false);
@@ -130,8 +137,13 @@ public class TPACommand implements FTBCommand {
     }
 
     public int tpdeny(ServerPlayer player, String id) {
-        TPARequest request = REQUESTS.get(id);
+        var uuid = attemptUuid(id);
+        if (uuid == null) {
+            player.displayClientMessage(Component.literal("Invalid request!"), false);
+            return 0;
+        }
 
+        TPARequest request = REQUESTS.get(uuid);
         if (request == null) {
             player.displayClientMessage(Component.literal("Invalid request!"), false);
             return 0;
@@ -159,6 +171,15 @@ public class TPACommand implements FTBCommand {
 
     public static void clearRequests() {
         REQUESTS.clear();
+    }
+
+    @Nullable
+    private UUID attemptUuid(String id) {
+        try {
+            return UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     public static HashMap<UUID, TPARequest> requests() {
