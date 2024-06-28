@@ -1,5 +1,7 @@
 package dev.ftb.mods.ftbessentials.commands.groups;
 
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftbessentials.FTBEssentialsPlatform;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.commands.SimpleCommandPlayer;
@@ -7,11 +9,13 @@ import dev.ftb.mods.ftbessentials.commands.impl.cheat.SpeedCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.cheat.VirtualInventoryCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 
 import java.util.List;
@@ -40,16 +44,18 @@ public class CheatCommands {
             new VirtualInventoryCommand(),
 
             // Enderchest
-            new SimpleCommandPlayer("enderchest", Commands.LEVEL_GAMEMASTERS, FTBEConfig.ENDER_CHEST, (ctx, player) -> enderChest(player))
+            new SimpleCommandPlayer("enderchest", Commands.LEVEL_GAMEMASTERS, FTBEConfig.ENDER_CHEST, CheatCommands::enderChest)
     );
 
-    private static void enderChest(ServerPlayer player) {
+    private static void enderChest(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
         MutableComponent title = Component.translatable("container.enderchest");
-        if (player != null) {
+        ServerPlayer srcPlayer = ctx.getSource().getPlayer();
+        if (player != null && srcPlayer != null) {
             title.append(" × ").append(player.getDisplayName());
+            srcPlayer.openMenu(new SimpleMenuProvider((i, inv, p) -> ChestMenu.threeRows(i, inv, player.getEnderChestInventory()), title));
+        } else {
+            ctx.getSource().sendFailure(Component.literal("Unable to open enderchest inventory!"));
         }
-
-        player.openMenu(new SimpleMenuProvider((i, inv, p) -> ChestMenu.threeRows(i, inv, player.getEnderChestInventory()), title));
     }
 
     public static void heal(ServerPlayer player) {
