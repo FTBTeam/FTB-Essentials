@@ -24,6 +24,7 @@ import net.minecraft.world.item.Items;
  * @author LatvianModder
  */
 public class CheatCommands {
+
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		/*
 		killall
