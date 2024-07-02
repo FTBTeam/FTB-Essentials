@@ -1,1 +1,1 @@
-+dev.ftb.mods.ftbessentials
++dev.ftb.mods.mlftbessentials
