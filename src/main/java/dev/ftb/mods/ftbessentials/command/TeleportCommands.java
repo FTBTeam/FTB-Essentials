@@ -83,7 +83,7 @@ public class TeleportCommands {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 
 		if (data.teleportHistory.isEmpty()) {
-			player.displayClientMessage(new TranslatableComponent("tp_command_message.mlftbessentials.tp_history_empty").withStyle(ChatFormatting.RED), false);
+			player.displayClientMessage(new TranslatableComponent("tp_command_message.ftbessentials.tp_history_empty").withStyle(ChatFormatting.RED), false);
 			return 0;
 		}
 
@@ -109,14 +109,14 @@ public class TeleportCommands {
 	public static int rtp(ServerPlayer player) {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		return data.rtpTeleporter.teleport(player, p -> {
-			p.displayClientMessage(new TranslatableComponent("tp_command_message.mlftbessentials.rtp_process"), false);
+			p.displayClientMessage(new TranslatableComponent("tp_command_message.ftbessentials.rtp_process"), false);
 			return findBlockPos(player.getLevel(), p, 1);
 		}).runCommand(player);
 	}
 
 	private static TeleportPos findBlockPos(ServerLevel world, ServerPlayer player, int attempt) {
 		if (attempt > FTBEConfig.RTP_MAX_TRIES.get()) {
-			player.displayClientMessage(new TranslatableComponent("tp_command_message.mlftbessentials.rtp_fail").withStyle(ChatFormatting.RED), false);
+			player.displayClientMessage(new TranslatableComponent("tp_command_message.ftbessentials.rtp_fail").withStyle(ChatFormatting.RED), false);
 			return new TeleportPos(player);
 		}
 
@@ -154,12 +154,12 @@ public class TeleportCommands {
 					BlockState bs = world.getBlockState(newPos);
 
 					if (bs.getMaterial().isSolidBlocking() && !bs.is(IGNORE_RTP) && world.isEmptyBlock(newPos.above(1)) && world.isEmptyBlock(newPos.above(2)) && world.isEmptyBlock(newPos.above(3))) {
-						player.displayClientMessage(new TextComponent(String.format(new TranslatableComponent("tp_command_message.mlftbessentials.rtp_result").getString()+" %d " + (attempt == 1 ? new TranslatableComponent("tp_command_message.mlftbessentials.rtp_result_attempt").getString() : new TranslatableComponent("tp_command_message.mlftbessentials.rtp_result_attempts").getString()) + " @ [x %d, z %d]", attempt, newPos.getX(), newPos.getZ())), false);
+						player.displayClientMessage(new TextComponent(String.format(new TranslatableComponent("tp_command_message.ftbessentials.rtp_result").getString()+" %d " + (attempt == 1 ? new TranslatableComponent("tp_command_message.ftbessentials.rtp_result_attempt").getString() : new TranslatableComponent("tp_command_message.ftbessentials.rtp_result_attempts").getString()) + " @ [x %d, z %d]", attempt, newPos.getX(), newPos.getZ())), false);
 						return new TeleportPos(world.dimension(), newPos.above());
 					}
 				}
 			} else {
-				player.displayClientMessage(new TextComponent(String.format(new TranslatableComponent("tp_command_message.mlftbessentials.rtp_result").getString()+" %d " + (attempt == 1 ? new TranslatableComponent("tp_command_message.mlftbessentials.rtp_result_attempt").getString() : new TranslatableComponent("tp_command_message.mlftbessentials.rtp_result_attempts").getString()) + " @ [x %d, z %d]", attempt, hmPos.getX(), hmPos.getZ())), false);
+				player.displayClientMessage(new TextComponent(String.format(new TranslatableComponent("tp_command_message.ftbessentials.rtp_result").getString()+" %d " + (attempt == 1 ? new TranslatableComponent("tp_command_message.ftbessentials.rtp_result_attempt").getString() : new TranslatableComponent("tp_command_message.ftbessentials.rtp_result_attempts").getString()) + " @ [x %d, z %d]", attempt, hmPos.getX(), hmPos.getZ())), false);
 				return new TeleportPos(world.dimension(), hmPos.above());
 			}
 		}

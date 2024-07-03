@@ -123,12 +123,12 @@ public class CheatCommands {
 			data.save();
 			abilities.mayfly = false;
 			abilities.flying = false;
-			player.displayClientMessage(new TranslatableComponent("cheat_command_message.mlftbessentials.flight_disable"), true);
+			player.displayClientMessage(new TranslatableComponent("cheat_command_message.ftbessentials.flight_disable"), true);
 		} else {
 			data.fly = true;
 			data.save();
 			abilities.mayfly = true;
-			player.displayClientMessage(new TranslatableComponent("cheat_command_message.mlftbessentials.flight_enable"), true);
+			player.displayClientMessage(new TranslatableComponent("cheat_command_message.ftbessentials.flight_enable"), true);
 		}
 
 		player.onUpdateAbilities();
@@ -143,12 +143,12 @@ public class CheatCommands {
 			data.god = false;
 			data.save();
 			abilities.invulnerable = false;
-			player.displayClientMessage(new TranslatableComponent("cheat_command_message.mlftbessentials.godmode_disable"), true);
+			player.displayClientMessage(new TranslatableComponent("cheat_command_message.ftbessentials.godmode_disable"), true);
 		} else {
 			data.god = true;
 			data.save();
 			abilities.invulnerable = true;
-			player.displayClientMessage(new TranslatableComponent("cheat_command_message.mlftbessentials.godmode_enable"), true);
+			player.displayClientMessage(new TranslatableComponent("cheat_command_message.ftbessentials.godmode_enable"), true);
 		}
 
 		player.onUpdateAbilities();
@@ -173,7 +173,7 @@ public class CheatCommands {
 
 	public static int nicknamefor(CommandSourceStack source, ServerPlayer player, String nick) {
 		if (nick.length() > 30) {
-			player.displayClientMessage(new TranslatableComponent("cheat_command_message.mlftbessentials.nickname_toolong"), false);
+			player.displayClientMessage(new TranslatableComponent("cheat_command_message.ftbessentials.nickname_toolong"), false);
 			return 0;
 		}
 
@@ -183,9 +183,9 @@ public class CheatCommands {
 		player.refreshDisplayName();
 
 		if (data.nick.isEmpty()) {
-			source.sendSuccess(new TranslatableComponent("cheat_command_message.mlftbessentials.nickname_reset"), true);
+			source.sendSuccess(new TranslatableComponent("cheat_command_message.ftbessentials.nickname_reset"), true);
 		} else {
-			source.sendSuccess(new TranslatableComponent("cheat_command_message.mlftbessentials.nickname_change").append(new TextComponent(data.nick + "'")), true);
+			source.sendSuccess(new TranslatableComponent("cheat_command_message.ftbessentials.nickname_change").append(new TextComponent(data.nick + "'")), true);
 		}
 
 		data.sendTabName(source.getServer());
@@ -196,7 +196,7 @@ public class CheatCommands {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.muted = true;
 		data.save();
-		source.sendSuccess(new TextComponent("").append(player.getDisplayName()).append(new TranslatableComponent("cheat_command_message.mlftbessentials.mute")).append(source.getDisplayName()), true);
+		source.sendSuccess(new TextComponent("").append(player.getDisplayName()).append(new TranslatableComponent("cheat_command_message.ftbessentials.mute")).append(source.getDisplayName()), true);
 		return 1;
 	}
 
@@ -204,7 +204,7 @@ public class CheatCommands {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.muted = false;
 		data.save();
-		source.sendSuccess(new TextComponent("").append(player.getDisplayName()).append(new TranslatableComponent("cheat_command_message.mlftbessentials.unmute")).append(source.getDisplayName()), true);
+		source.sendSuccess(new TextComponent("").append(player.getDisplayName()).append(new TranslatableComponent("cheat_command_message.ftbessentials.unmute")).append(source.getDisplayName()), true);
 		return 1;
 	}
 }

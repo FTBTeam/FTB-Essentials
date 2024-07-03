@@ -4,7 +4,7 @@ issueTrackerURL = "https://github.com/FTBTeam/FTB-Essentials/issues"
 license = "All Rights Reserved"
 
 [[mods]]
-modId = "mlftbessentials"
+modId = "ftbessentials"
 version = "${version}"
 displayName = "MultiLanguage FTB Essentials"
 authors = "LatvianModder&Trih"
@@ -12,35 +12,35 @@ description = '''
 Adds many essential utility commands for servers
 '''
 
-[[dependencies.mlftbessentials]]
+[[dependencies.ftbessentials]]
 modId = "forge"
 mandatory = true
 versionRange = "[39,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.mlftbessentials]]
+[[dependencies.ftbessentials]]
 modId = "minecraft"
 mandatory = true
 versionRange = "[1.16,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.mlftbessentials]]
+[[dependencies.ftbessentials]]
 modId = "ftblibrary"
 mandatory = true
 versionRange = "[1801.3.5-build.98,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.mlftbessentials]]
+[[dependencies.ftbessentials]]
 modId = "ftbranks"
 mandatory = false
 versionRange = "[1801.1.6-build.18,)"
 ordering = "AFTER"
 side = "BOTH"
 
-[[dependencies.mlftbessentials]]
+[[dependencies.ftbessentials]]
 modId = "luckperms"
 mandatory = false
 versionRange = "[5.4.26,)"

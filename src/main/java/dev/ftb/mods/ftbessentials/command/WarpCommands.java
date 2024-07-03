@@ -63,7 +63,7 @@ public class WarpCommands {
 		TeleportPos pos = FTBEWorldData.instance.warps.get(name.toLowerCase());
 
 		if (pos == null) {
-			player.displayClientMessage(new TranslatableComponent("warp_command_message.mlftbessentials.warp_notfound"), false);
+			player.displayClientMessage(new TranslatableComponent("warp_command_message.ftbessentials.warp_notfound"), false);
 			return 0;
 		}
 
@@ -73,24 +73,24 @@ public class WarpCommands {
 	public static int setwarp(ServerPlayer player, String name) {
 		FTBEWorldData.instance.warps.put(name.toLowerCase(), new TeleportPos(player));
 		FTBEWorldData.instance.save();
-		player.displayClientMessage(new TranslatableComponent("warp_command_message.mlftbessentials.warp_set"), false);
+		player.displayClientMessage(new TranslatableComponent("warp_command_message.ftbessentials.warp_set"), false);
 		return 1;
 	}
 
 	public static int delwarp(ServerPlayer player, String name) {
 		if (FTBEWorldData.instance.warps.remove(name.toLowerCase()) != null) {
 			FTBEWorldData.instance.save();
-			player.displayClientMessage(new TranslatableComponent("warp_command_message.mlftbessentials.warp_deleted"), false);
+			player.displayClientMessage(new TranslatableComponent("warp_command_message.ftbessentials.warp_deleted"), false);
 			return 1;
 		} else {
-			player.displayClientMessage(new TranslatableComponent("warp_command_message.mlftbessentials.warp_notfound"), false);
+			player.displayClientMessage(new TranslatableComponent("warp_command_message.ftbessentials.warp_notfound"), false);
 			return 0;
 		}
 	}
 
 	public static int listwarps(CommandSourceStack source) {
 		if (FTBEWorldData.instance.warps.isEmpty()) {
-			source.sendSuccess(new TranslatableComponent("warp_command_message.mlftbessentials.warp_none"), false);
+			source.sendSuccess(new TranslatableComponent("warp_command_message.ftbessentials.warp_none"), false);
 			return 1;
 		}
 

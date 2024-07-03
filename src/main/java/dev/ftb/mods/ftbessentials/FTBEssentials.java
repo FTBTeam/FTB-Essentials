@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
  */
 @Mod(FTBEssentials.MOD_ID)
 public class FTBEssentials {
-	public static final String MOD_ID = "mlftbessentials";
+	public static final String MOD_ID = "ftbessentials";
 	public static final Logger LOGGER = LogManager.getLogger("ML FTB Essentials");
 	public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().setLenient().create();
 

@@ -78,7 +78,7 @@ public class TPACommands {
 		}
 
 		if (REQUESTS.values().stream().anyMatch(r -> r.source == dataSource && r.target == dataTarget)) {
-			player.displayClientMessage(new TranslatableComponent("tpa_command_message.mlftbessentials.tpa_2request"), false);
+			player.displayClientMessage(new TranslatableComponent("tpa_command_message.ftbessentials.tpa_2request"), false);
 			return 0;
 		}
 
@@ -92,30 +92,30 @@ public class TPACommands {
 
 		TPARequest request = create(dataSource, dataTarget, here);
 
-		TranslatableComponent component = new TranslatableComponent("tpa_command_message.mlftbessentials.tpa_request[");
+		TranslatableComponent component = new TranslatableComponent("tpa_command_message.ftbessentials.tpa_request[");
 		component.append((here ? target : player).getDisplayName().copy().withStyle(ChatFormatting.YELLOW));
 		component.append(" \u27A1 ");
 		component.append((here ? player : target).getDisplayName().copy().withStyle(ChatFormatting.YELLOW));
 		component.append(" ]");
 
-		TranslatableComponent component2 = new TranslatableComponent("tpa_command_message.mlftbessentials.tpa_tip");
+		TranslatableComponent component2 = new TranslatableComponent("tpa_command_message.ftbessentials.tpa_tip");
 		component2
-				.append(new TextComponent(new TranslatableComponent("tpa_command_message.mlftbessentials.tpa_accept").getString()+ " \u2714").setStyle(Style.EMPTY
+				.append(new TextComponent(new TranslatableComponent("tpa_command_message.ftbessentials.tpa_accept").getString()+ " \u2714").setStyle(Style.EMPTY
 				.applyFormat(ChatFormatting.GREEN)
 				.withBold(true)
 				.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpaccept " + request.id))
-				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("tpa_command_message.mlftbessentials.tpa_accept_info")))
+				.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("tpa_command_message.ftbessentials.tpa_accept_info")))
 		));
 
 		component2.append(" | ");
 
 		component2
-				.append(new TextComponent(new TranslatableComponent("tpa_command_message.mlftbessentials.tpa_deny").getString() + " \u274C")
+				.append(new TextComponent(new TranslatableComponent("tpa_command_message.ftbessentials.tpa_deny").getString() + " \u274C")
 						.setStyle(Style.EMPTY
 								.applyFormat(ChatFormatting.RED)
 								.withBold(true)
 								.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpdeny " + request.id))
-								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("tpa_command_message.mlftbessentials.tpa_deny_info")))
+								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("tpa_command_message.ftbessentials.tpa_deny_info")))
 		));
 
 		component2.append(" |");
@@ -123,7 +123,7 @@ public class TPACommands {
 		target.displayClientMessage(component, false);
 		target.displayClientMessage(component2, false);
 
-		player.displayClientMessage(new TranslatableComponent("tpa_command_message.mlftbessentials.tpa_request"), false);
+		player.displayClientMessage(new TranslatableComponent("tpa_command_message.ftbessentials.tpa_request"), false);
 		return 1;
 	}
 
@@ -131,14 +131,14 @@ public class TPACommands {
 		TPARequest request = REQUESTS.get(id);
 
 		if (request == null) {
-			player.displayClientMessage(new TranslatableComponent("tpa_command_message.mlftbessentials.tpa_request_invalid"), false);
+			player.displayClientMessage(new TranslatableComponent("tpa_command_message.ftbessentials.tpa_request_invalid"), false);
 			return 0;
 		}
 
 		ServerPlayer sourcePlayer = player.server.getPlayerList().getPlayer(request.source.uuid);
 
 		if (sourcePlayer == null) {
-			player.displayClientMessage(new TranslatableComponent("tpa_command_message.mlftbessentials.tpa_request_offline"), false);
+			player.displayClientMessage(new TranslatableComponent("tpa_command_message.ftbessentials.tpa_request_offline"), false);
 			return 0;
 		}
 
@@ -157,18 +157,18 @@ public class TPACommands {
 		TPARequest request = REQUESTS.get(id);
 
 		if (request == null) {
-			player.displayClientMessage(new TranslatableComponent("tpa_command_message.mlftbessentials.tpa_request_invalid"), false);
+			player.displayClientMessage(new TranslatableComponent("tpa_command_message.ftbessentials.tpa_request_invalid"), false);
 			return 0;
 		}
 
 		REQUESTS.remove(request.id);
 
-		player.displayClientMessage(new TranslatableComponent("tpa_command_message.mlftbessentials.tpa_request_deny"), false);
+		player.displayClientMessage(new TranslatableComponent("tpa_command_message.ftbessentials.tpa_request_deny"), false);
 
 		ServerPlayer player2 = player.server.getPlayerList().getPlayer(request.target.uuid);
 
 		if (player2 != null) {
-			player2.displayClientMessage(new TranslatableComponent("tpa_command_message.mlftbessentials.tpa_request_offline"), false);
+			player2.displayClientMessage(new TranslatableComponent("tpa_command_message.ftbessentials.tpa_request_offline"), false);
 		}
 
 		return 1;

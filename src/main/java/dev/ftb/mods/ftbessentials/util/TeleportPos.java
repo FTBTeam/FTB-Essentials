@@ -33,7 +33,7 @@ public class TeleportPos {
 		};
 
 		TeleportResult DIMENSION_NOT_FOUND = player -> {
-			player.displayClientMessage(new TranslatableComponent("tip.mlftbessentials.dimension_not_found"), false);
+			player.displayClientMessage(new TranslatableComponent("tip.ftbessentials.dimension_not_found"), false);
 			return 0;
 		};
 
@@ -51,7 +51,7 @@ public class TeleportPos {
 		@Override
 		default int runCommand(ServerPlayer player) {
 			String secStr = TimeUtils.prettyTimeString(getCooldown() / 1000L);
-			player.displayClientMessage(new TranslatableComponent("tip.mlftbessentials.can_not_teleport").append(new TextComponent(secStr)), false);
+			player.displayClientMessage(new TranslatableComponent("tip.ftbessentials.can_not_teleport").append(new TextComponent(secStr)), false);
 			return 0;
 		}
 	}

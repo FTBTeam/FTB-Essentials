@@ -84,7 +84,7 @@ public class HomeCommands {
 		TeleportPos pos = data.homes.get(name.toLowerCase());
 
 		if (pos == null) {
-			player.displayClientMessage(new TranslatableComponent("home_command_message.mlftbessentials.home_notfound"), false);
+			player.displayClientMessage(new TranslatableComponent("home_command_message.ftbessentials.home_notfound"), false);
 			return 0;
 		}
 
@@ -99,13 +99,13 @@ public class HomeCommands {
 		}
 
 		if (data.homes.size() >= FTBEConfig.MAX_HOMES.get(player) && !data.homes.containsKey(name.toLowerCase())) {
-			player.displayClientMessage(new TranslatableComponent("home_command_message.mlftbessentials.home_toomuch"), false);
+			player.displayClientMessage(new TranslatableComponent("home_command_message.ftbessentials.home_toomuch"), false);
 			return 0;
 		}
 
 		data.homes.put(name.toLowerCase(), new TeleportPos(player));
 		data.save();
-		player.displayClientMessage(new TranslatableComponent("home_command_message.mlftbessentials.home_set"), false);
+		player.displayClientMessage(new TranslatableComponent("home_command_message.ftbessentials.home_set"), false);
 		return 1;
 	}
 
@@ -118,10 +118,10 @@ public class HomeCommands {
 
 		if (data.homes.remove(name.toLowerCase()) != null) {
 			data.save();
-			player.displayClientMessage(new TranslatableComponent("home_command_message.mlftbessentials.home_deleted"), false);
+			player.displayClientMessage(new TranslatableComponent("home_command_message.ftbessentials.home_deleted"), false);
 			return 1;
 		} else {
-			player.displayClientMessage(new TranslatableComponent("home_command_message.mlftbessentials.home_notfound"), false);
+			player.displayClientMessage(new TranslatableComponent("home_command_message.ftbessentials.home_notfound"), false);
 			return 0;
 		}
 	}
@@ -134,7 +134,7 @@ public class HomeCommands {
 		}
 
 		if (data.homes.isEmpty()) {
-			source.sendSuccess(new TranslatableComponent("home_command_message.mlftbessentials.home_none"), false);
+			source.sendSuccess(new TranslatableComponent("home_command_message.ftbessentials.home_none"), false);
 			return 1;
 		}
 

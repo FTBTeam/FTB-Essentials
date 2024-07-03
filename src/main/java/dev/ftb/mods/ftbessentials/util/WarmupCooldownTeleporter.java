@@ -98,11 +98,11 @@ public class WarmupCooldownTeleporter {
 					if (player.position().distanceToSqr(warmup.initialPos) > 0.25) {
 						// player has moved more than half a block
 						toRemove.add(playerId);
-						player.displayClientMessage(new TranslatableComponent("tip.mlftbessentials.tp_interrupted").withStyle(ChatFormatting.RED), true);
+						player.displayClientMessage(new TranslatableComponent("tip.ftbessentials.tp_interrupted").withStyle(ChatFormatting.RED), true);
 					} else {
 						long seconds = (warmup.when() - now) / 1000L;
 						String secStr = seconds == 1 ? "second" : "seconds";
-						player.displayClientMessage(new TranslatableComponent("tip.mlftbessentials.tp_tip").append(new TextComponent(String.format(" %d %s", seconds, secStr))).withStyle(ChatFormatting.YELLOW), true);
+						player.displayClientMessage(new TranslatableComponent("tip.ftbessentials.tp_tip").append(new TextComponent(String.format(" %d %s", seconds, secStr))).withStyle(ChatFormatting.YELLOW), true);
 					}
 				}
 			} else {
@@ -116,7 +116,7 @@ public class WarmupCooldownTeleporter {
 
 	public static void cancelWarmup(ServerPlayer player) {
 		if (WARMUPS.remove(player.getUUID()) != null) {
-			player.displayClientMessage(new TranslatableComponent("tip.mlftbessentials.tp_interrupted").withStyle(ChatFormatting.RED), true);
+			player.displayClientMessage(new TranslatableComponent("tip.ftbessentials.tp_interrupted").withStyle(ChatFormatting.RED), true);
 		}
 	}
 

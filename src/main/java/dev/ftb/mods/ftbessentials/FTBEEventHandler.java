@@ -188,11 +188,11 @@ public class FTBEEventHandler {
 					ServerPlayer target = server.getPlayerList().getPlayer(r.target().uuid);
 
 					if (source != null) {
-						source.sendMessage(new TranslatableComponent("tip.mlftbessentials.tpa_expired"), Util.NIL_UUID);
+						source.sendMessage(new TranslatableComponent("tip.ftbessentials.tpa_expired"), Util.NIL_UUID);
 					}
 
 					if (target != null) {
-						target.sendMessage(new TranslatableComponent("tip.mlftbessentials.tpa_expired"), Util.NIL_UUID);
+						target.sendMessage(new TranslatableComponent("tip.ftbessentials.tpa_expired"), Util.NIL_UUID);
 					}
 
 					iterator.remove();
@@ -211,7 +211,7 @@ public class FTBEEventHandler {
 
 		if (data != null && data.muted) {
 			event.setCanceled(true);
-			event.getPlayer().displayClientMessage(new TranslatableComponent("tip.mlftbessentials.muted").withStyle(ChatFormatting.RED), false);
+			event.getPlayer().displayClientMessage(new TranslatableComponent("tip.ftbessentials.muted").withStyle(ChatFormatting.RED), false);
 		}
 	}
 
