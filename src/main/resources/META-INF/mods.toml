@@ -6,8 +6,8 @@ license = "All Rights Reserved"
 [[mods]]
 modId = "ftbessentials"
 version = "${version}"
-displayName = "MultiLanguage FTB Essentials"
-authors = "LatvianModder&Trih"
+displayName = "FTB Essentials"
+authors = "LatvianModder"
 description = '''
 Adds many essential utility commands for servers
 '''
