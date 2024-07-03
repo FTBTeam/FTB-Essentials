@@ -1,0 +1,12 @@
+
+name: Java CI - Build Release
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  build:
+    if: |
+      !contains(github.event.head_commit.message, '[ciskip]')
+    uses: FTBTeam/mods-meta/.github/workflows/standard-release.yml@main
