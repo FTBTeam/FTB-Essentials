@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -32,7 +33,7 @@ public class TeleportPos {
 		};
 
 		TeleportResult DIMENSION_NOT_FOUND = player -> {
-			player.displayClientMessage(new TextComponent("Dimension not found!"), false);
+			player.displayClientMessage(new TranslatableComponent("tip.ftbessentials.dimension_not_found"), false);
 			return 0;
 		};
 
@@ -50,7 +51,7 @@ public class TeleportPos {
 		@Override
 		default int runCommand(ServerPlayer player) {
 			String secStr = TimeUtils.prettyTimeString(getCooldown() / 1000L);
-			player.displayClientMessage(new TextComponent("Can't teleport yet! Cooldown: " + secStr), false);
+			player.displayClientMessage(new TranslatableComponent("tip.ftbessentials.can_not_teleport").append(new TextComponent(secStr)), false);
 			return 0;
 		}
 	}

@@ -10,6 +10,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -24,6 +25,7 @@ import net.minecraft.world.item.Items;
  * @author LatvianModder
  */
 public class CheatCommands {
+
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		/*
 		killall
@@ -121,12 +123,12 @@ public class CheatCommands {
 			data.save();
 			abilities.mayfly = false;
 			abilities.flying = false;
-			player.displayClientMessage(new TextComponent("Flight disabled"), true);
+			player.displayClientMessage(new TranslatableComponent("cheat_command_message.ftbessentials.flight_disable"), true);
 		} else {
 			data.fly = true;
 			data.save();
 			abilities.mayfly = true;
-			player.displayClientMessage(new TextComponent("Flight enabled"), true);
+			player.displayClientMessage(new TranslatableComponent("cheat_command_message.ftbessentials.flight_enable"), true);
 		}
 
 		player.onUpdateAbilities();
@@ -141,12 +143,12 @@ public class CheatCommands {
 			data.god = false;
 			data.save();
 			abilities.invulnerable = false;
-			player.displayClientMessage(new TextComponent("God mode disabled"), true);
+			player.displayClientMessage(new TranslatableComponent("cheat_command_message.ftbessentials.godmode_disable"), true);
 		} else {
 			data.god = true;
 			data.save();
 			abilities.invulnerable = true;
-			player.displayClientMessage(new TextComponent("God mode enabled"), true);
+			player.displayClientMessage(new TranslatableComponent("cheat_command_message.ftbessentials.godmode_enable"), true);
 		}
 
 		player.onUpdateAbilities();
@@ -171,7 +173,7 @@ public class CheatCommands {
 
 	public static int nicknamefor(CommandSourceStack source, ServerPlayer player, String nick) {
 		if (nick.length() > 30) {
-			player.displayClientMessage(new TextComponent("Nickname too long!"), false);
+			player.displayClientMessage(new TranslatableComponent("cheat_command_message.ftbessentials.nickname_toolong"), false);
 			return 0;
 		}
 
@@ -181,9 +183,9 @@ public class CheatCommands {
 		player.refreshDisplayName();
 
 		if (data.nick.isEmpty()) {
-			source.sendSuccess(new TextComponent("Nickname reset!"), true);
+			source.sendSuccess(new TranslatableComponent("cheat_command_message.ftbessentials.nickname_reset"), true);
 		} else {
-			source.sendSuccess(new TextComponent("Nickname changed to '" + data.nick + "'"), true);
+			source.sendSuccess(new TranslatableComponent("cheat_command_message.ftbessentials.nickname_change").append(new TextComponent(data.nick + "'")), true);
 		}
 
 		data.sendTabName(source.getServer());
@@ -194,7 +196,7 @@ public class CheatCommands {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.muted = true;
 		data.save();
-		source.sendSuccess(new TextComponent("").append(player.getDisplayName()).append(" has been muted by ").append(source.getDisplayName()), true);
+		source.sendSuccess(new TextComponent("").append(player.getDisplayName()).append(new TranslatableComponent("cheat_command_message.ftbessentials.mute")).append(source.getDisplayName()), true);
 		return 1;
 	}
 
@@ -202,7 +204,7 @@ public class CheatCommands {
 		FTBEPlayerData data = FTBEPlayerData.get(player);
 		data.muted = false;
 		data.save();
-		source.sendSuccess(new TextComponent("").append(player.getDisplayName()).append(" has been unmuted by ").append(source.getDisplayName()), true);
+		source.sendSuccess(new TextComponent("").append(player.getDisplayName()).append(new TranslatableComponent("cheat_command_message.ftbessentials.unmute")).append(source.getDisplayName()), true);
 		return 1;
 	}
 }

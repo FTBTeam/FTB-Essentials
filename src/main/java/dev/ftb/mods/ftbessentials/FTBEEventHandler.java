@@ -15,6 +15,7 @@ import net.minecraft.Util;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -187,11 +188,11 @@ public class FTBEEventHandler {
 					ServerPlayer target = server.getPlayerList().getPlayer(r.target().uuid);
 
 					if (source != null) {
-						source.sendMessage(new TextComponent("TPA request expired!"), Util.NIL_UUID);
+						source.sendMessage(new TranslatableComponent("tip.ftbessentials.tpa_expired"), Util.NIL_UUID);
 					}
 
 					if (target != null) {
-						target.sendMessage(new TextComponent("TPA request expired!"), Util.NIL_UUID);
+						target.sendMessage(new TranslatableComponent("tip.ftbessentials.tpa_expired"), Util.NIL_UUID);
 					}
 
 					iterator.remove();
@@ -210,7 +211,7 @@ public class FTBEEventHandler {
 
 		if (data != null && data.muted) {
 			event.setCanceled(true);
-			event.getPlayer().displayClientMessage(new TextComponent("You can't use chat, you've been muted by an admin!").withStyle(ChatFormatting.RED), false);
+			event.getPlayer().displayClientMessage(new TranslatableComponent("tip.ftbessentials.muted").withStyle(ChatFormatting.RED), false);
 		}
 	}
 

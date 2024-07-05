@@ -12,6 +12,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Map;
@@ -62,7 +63,7 @@ public class WarpCommands {
 		TeleportPos pos = FTBEWorldData.instance.warps.get(name.toLowerCase());
 
 		if (pos == null) {
-			player.displayClientMessage(new TextComponent("Warp not found!"), false);
+			player.displayClientMessage(new TranslatableComponent("warp_command_message.ftbessentials.warp_notfound"), false);
 			return 0;
 		}
 
@@ -72,24 +73,24 @@ public class WarpCommands {
 	public static int setwarp(ServerPlayer player, String name) {
 		FTBEWorldData.instance.warps.put(name.toLowerCase(), new TeleportPos(player));
 		FTBEWorldData.instance.save();
-		player.displayClientMessage(new TextComponent("Warp set!"), false);
+		player.displayClientMessage(new TranslatableComponent("warp_command_message.ftbessentials.warp_set"), false);
 		return 1;
 	}
 
 	public static int delwarp(ServerPlayer player, String name) {
 		if (FTBEWorldData.instance.warps.remove(name.toLowerCase()) != null) {
 			FTBEWorldData.instance.save();
-			player.displayClientMessage(new TextComponent("Warp deleted!"), false);
+			player.displayClientMessage(new TranslatableComponent("warp_command_message.ftbessentials.warp_deleted"), false);
 			return 1;
 		} else {
-			player.displayClientMessage(new TextComponent("Warp not found!"), false);
+			player.displayClientMessage(new TranslatableComponent("warp_command_message.ftbessentials.warp_notfound"), false);
 			return 0;
 		}
 	}
 
 	public static int listwarps(CommandSourceStack source) {
 		if (FTBEWorldData.instance.warps.isEmpty()) {
-			source.sendSuccess(new TextComponent("None"), false);
+			source.sendSuccess(new TranslatableComponent("warp_command_message.ftbessentials.warp_none"), false);
 			return 1;
 		}
 

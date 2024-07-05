@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1802.2.3]
+
+### Added
+* Add the multilanguage support. (`assets/ftbessentials/lang/en_us.json`) and make the majority of
+  the languages (use the AI to translate)
+  * Now the translator can translate the text according to the `en_us.json` file
+    and make more languages support.
+  * The added language include 
+* Player now can enjoy the Localization of the languages.
+
 ## [1802.2.2]
 
 ### Added

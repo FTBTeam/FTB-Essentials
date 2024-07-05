@@ -119,7 +119,7 @@ public class MiscCommands {
 	}
 
 	public static int kickme(ServerPlayer player) {
-		player.connection.disconnect(new TextComponent("You kicked yourself!"));
+		player.connection.disconnect(new TranslatableComponent("misc_command_message.ftbessentials.kickme"));
 		return 1;
 	}
 
@@ -127,7 +127,7 @@ public class MiscCommands {
 		player.openMenu(new MenuProvider() {
 			@Override
 			public Component getDisplayName() {
-				return new TextComponent("Trash Can");
+				return new TranslatableComponent("misc_command_name.ftbessentials.trash_can");
 			}
 
 			@Override
@@ -180,10 +180,10 @@ public class MiscCommands {
 			}
 		}
 
-		source.sendSuccess(new TextComponent("== Leaderboard [" + leaderboard.name + "] ==").withStyle(ChatFormatting.DARK_GREEN), false);
+		source.sendSuccess(new TranslatableComponent("misc_command_message.ftbessentials.leaderboard_title").append(new TextComponent(" ==[" + leaderboard.name + "]== ")).withStyle(ChatFormatting.DARK_GREEN), false);
 
 		if (list.isEmpty()) {
-			source.sendSuccess(new TextComponent("No data!").withStyle(ChatFormatting.GRAY), false);
+			source.sendSuccess(new TranslatableComponent("misc_command_message.ftbessentials.leaderboard_nodata").withStyle(ChatFormatting.GRAY), false);
 			return 1;
 		}
 
@@ -228,9 +228,9 @@ public class MiscCommands {
 		player.refreshDisplayName();
 
 		if (data.recording == 1) {
-			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is now recording!"), ChatType.CHAT, Util.NIL_UUID);
+			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(new TranslatableComponent("misc_command_message.ftbessentials.recording_on")), ChatType.CHAT, Util.NIL_UUID);
 		} else {
-			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is no longer recording!"), ChatType.CHAT, Util.NIL_UUID);
+			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(new TranslatableComponent("misc_command_message.ftbessentials.recording_off")), ChatType.CHAT, Util.NIL_UUID);
 		}
 
 		data.sendTabName(player.server);
@@ -244,9 +244,9 @@ public class MiscCommands {
 		player.refreshDisplayName();
 
 		if (data.recording == 2) {
-			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is now streaming!"), ChatType.CHAT, Util.NIL_UUID);
+			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(new TranslatableComponent("misc_command_message.ftbessentials.streaming_on")), ChatType.CHAT, Util.NIL_UUID);
 		} else {
-			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(" is no longer streaming!"), ChatType.CHAT, Util.NIL_UUID);
+			player.server.getPlayerList().broadcastMessage(new TextComponent("").append(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW)).append(new TranslatableComponent("misc_command_message.ftbessentials.streaming_off")), ChatType.CHAT, Util.NIL_UUID);
 		}
 
 		data.sendTabName(player.server);
@@ -264,7 +264,7 @@ public class MiscCommands {
 
 	public static int nickname(ServerPlayer player, String nick) {
 		if (nick.length() > 30) {
-			player.displayClientMessage(new TextComponent("Nickname too long!"), false);
+			player.displayClientMessage(new TranslatableComponent("misc_command_message.ftbessentials.nickname_toolong"), false);
 			return 0;
 		}
 
@@ -275,9 +275,9 @@ public class MiscCommands {
 		player.refreshDisplayName();
 
 		if (data.nick.isEmpty()) {
-			player.displayClientMessage(new TextComponent("Nickname reset!"), false);
+			player.displayClientMessage(new TranslatableComponent("misc_command_message.ftbessentials.nickname_reset"), false);
 		} else {
-			player.displayClientMessage(new TextComponent("Nickname changed to '" + data.nick + "'"), false);
+			player.displayClientMessage(new TranslatableComponent("misc_command_message.ftbessentials.nickname_changedto").append(new TextComponent(data.nick + "'")), false);
 		}
 
 		data.sendTabName(player.server);
