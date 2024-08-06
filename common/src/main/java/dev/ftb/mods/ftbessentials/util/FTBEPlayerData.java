@@ -1,13 +1,13 @@
 package dev.ftb.mods.ftbessentials.util;
 
 import dev.architectury.hooks.level.entity.PlayerHooks;
-import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -300,11 +300,11 @@ public class FTBEPlayerData {
 	}
 
 	public void sendTabName(MinecraftServer server) {
-		NetworkManager.sendToPlayers(server.getPlayerList().getPlayers(), new UpdateTabNameMessage(uuid, name, nick, recording, false));
+		NetworkHelper.sendToAll(server, new UpdateTabNameMessage(uuid, name, nick, recording, false));
 	}
 
 	public void sendTabName(ServerPlayer to) {
-		NetworkManager.sendToPlayer(to, new UpdateTabNameMessage(uuid, name, nick, recording, false));
+		NetworkHelper.sendTo(to, new UpdateTabNameMessage(uuid, name, nick, recording, false));
 	}
 
 	public long getLastKitUseTime(String kitName) {
