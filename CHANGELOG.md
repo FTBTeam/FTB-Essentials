@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.0]
+
+### Changed
+* Minecraft 1.21.1 is now required; this no longer supports Minecraft 1.21
+
+### Added
+* Sidebar buttons for this and other FTB mods can now be enabled/disabled/rearranged (new functionality in FTB Library 2101.1.0)
+
+## [2100.1.1]
+
+### Fixed
+* Fixed `/enderchest` command opening the Ender Chest GUI on target player's screen instead of executing player
+
+## [2100.1.0]
+
+### Changed
+* Ported to Minecraft 1.20.6. Support for Fabric and NeoForge.
+  * Forge support may be re-added if/when Architectury adds support for Forge
+
 ## [2006.1.0]
 
 ### Changed

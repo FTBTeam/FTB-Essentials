@@ -1,0 +1,10 @@
+{
+  "icon": "ftblibrary:icons/bin",
+  "sort_index": 1000,
+  "click": [
+    "command:/trashcan"
+  ],
+  "required_server_mods": [
+    "ftbessentials"
+  ]
+}
