@@ -1,0 +1,10 @@
+{
+    "sidebar_button.ftbessentials.trash_can": "Poubelle",
+    "ftbessentials.chat.status.start_record": "est en cours d’enregistrement !",
+    "ftbessentials.chat.status.stop_record": "n’enregistre plus !",
+    "ftbessentials.chat.status.start_stream": "est maintenant en streaming !",
+    "ftbessentials.chat.status.stop_stream": "n’est plus en streaming !",
+    "ftbessentials.messages.kick_self": "Vous vous êtes kick du serveur vous même !",
+    "ftbessentials.feedback.limit_radius": "Limitation du rayon à %s",
+    "ftbessentials.feedback.players_within": "%s joueur(s) dans %sm"
+  }
