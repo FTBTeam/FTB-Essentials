@@ -1,0 +1,10 @@
+{
+  "sidebar_button.ftbessentials.trash_can": "Çöp Kovası",
+  "ftbessentials.chat.status.start_record": "şimdi kayıt yapıyor!",
+  "ftbessentials.chat.status.stop_record": "artık kayıt yapmıyor!",
+  "ftbessentials.chat.status.start_stream": "şimdi yayın yapıyor!",
+  "ftbessentials.chat.status.stop_stream": "artık yayın yapmıyor!",
+  "ftbessentials.messages.kick_self": "Kendini attın!",
+  "ftbessentials.feedback.limit_radius": "Yarıçap %s ile sınırlandırılıyor",
+  "ftbessentials.feedback.players_within": "%s oyuncu(lar) %sm içinde"
+}
