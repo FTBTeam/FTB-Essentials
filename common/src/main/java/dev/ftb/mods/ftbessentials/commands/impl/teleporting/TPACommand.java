@@ -63,8 +63,8 @@ public class TPACommand implements FTBCommand {
         }
 
         TeleportPos.TeleportResult result = here ?
-                dataTarget.tpaTeleporter.checkCooldown() :
-                dataSource.tpaTeleporter.checkCooldown();
+                dataTarget.tpaTeleporter.checkCooldown(target) :
+                dataSource.tpaTeleporter.checkCooldown(player);
 
         if (!result.isSuccess()) {
             return result.runCommand(player);
