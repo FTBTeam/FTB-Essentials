@@ -156,12 +156,13 @@ public class TeleportingCommands {
                         BlockState bs = world.getBlockState(newPos);
                         if (bs.blocksMotion() && !bs.is(IGNORE_RTP_BLOCKS) && world.isEmptyBlock(newPos.above(1))
                                 && world.isEmptyBlock(newPos.above(2)) && world.isEmptyBlock(newPos.above(3))) {
-                            goodPos = newPos;
+                            goodPos = newPos.immutable();
+                            break;
                         }
                     }
                 }
                 if (goodPos != null) {
-                    player.displayClientMessage(Component.literal(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, z %d]", attempt, goodPos.getX(), goodPos.getZ())), false);
+                    player.displayClientMessage(Component.literal(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, y %d, z %d]", attempt, goodPos.getX(), goodPos.getY(), goodPos.getZ())), false);
                     return new TeleportPos(world.dimension(), goodPos.above());
                 }
             }
