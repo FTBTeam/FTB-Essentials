@@ -20,7 +20,7 @@ public class WarmupCooldownTeleporter {
 	private final ToIntFunction<ServerPlayer> warmupConfig;
 	private final boolean popHistoryOnTeleport;
 
-	private long cooldown;
+	private long lastRun;  // time of the last run of the command (which wasn't on cooldown)
 
 	private static final Map<UUID, Warmup> WARMUPS = new HashMap<>();
 	private static final Map<UUID, Warmup> pendingAdditions = new HashMap<>();
@@ -35,14 +35,15 @@ public class WarmupCooldownTeleporter {
 		this.cooldownConfig = cooldownConfig;
 		this.warmupConfig = warmupConfig;
 		this.popHistoryOnTeleport = popHistoryOnTeleport;
-		this.cooldown = 0L;
+		this.lastRun = 0L;
 	}
 
-	public TeleportResult checkCooldown() {
+	public TeleportResult checkCooldown(ServerPlayer player) {
 		long now = System.currentTimeMillis();
+		long nextRun = lastRun + Math.max(0L, cooldownConfig.applyAsInt(player) * 1000L);
 
-		if (now < cooldown) {
-			return (TeleportPos.CooldownTeleportResult) () -> cooldown - now;
+		if (now < nextRun) {
+			return (TeleportPos.CooldownTeleportResult) () -> nextRun - now;
 		}
 
 		return TeleportResult.SUCCESS;
@@ -54,7 +55,7 @@ public class WarmupCooldownTeleporter {
 			return TeleportResult.failed(result.object());
 		}
 
-		TeleportResult cooldownResult = checkCooldown();
+		TeleportResult cooldownResult = checkCooldown(player);
 		if (!cooldownResult.isSuccess()) {
 			return cooldownResult;
 		}
@@ -72,7 +73,7 @@ public class WarmupCooldownTeleporter {
 	}
 
 	private TeleportResult teleportNow(ServerPlayer player, Function<ServerPlayer, TeleportPos> positionGetter) {
-		cooldown = System.currentTimeMillis() + Math.max(0L, cooldownConfig.applyAsInt(player) * 1000L);
+		lastRun = System.currentTimeMillis();
 
 		TeleportPos teleportPos = positionGetter.apply(player);
 		TeleportPos currentPos = new TeleportPos(player);

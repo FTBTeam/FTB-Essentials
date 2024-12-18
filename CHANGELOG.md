@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.1]
+
+### Added
+* Added fr_fr translation (thanks @Nogapra)
+* Added tr_tr translation (thanks @RuyaSavascisi)
+
+### Fixed
+* Fixed command cooldowns not being sufficiently dynamically calculated
+  * E.g. if a player runs a teleport command, and then adds a FTB Ranks node to reduce their cooldown
+  * Cooldowns are now recalculated on each command attempt rather than precalculated on a successful run
+* Fixed the `/rtp` command sometimes sending players to bad destinations
+  * Was particularly an issue in the Nether (and likely other roofed dimensions)
+
 ## [2101.1.0]
 
 ### Changed
