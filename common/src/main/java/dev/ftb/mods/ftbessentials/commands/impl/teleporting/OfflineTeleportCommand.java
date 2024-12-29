@@ -50,7 +50,7 @@ public class OfflineTeleportCommand implements FTBCommand {
                         )
                 );
 
-        var alias = literal("tpo").redirect(tpOffline.build());
+        var alias = literal("tpo").requires(FTBEConfig.TP_OFFLINE.enabledAndOp()).redirect(tpOffline.build());
 
         return List.of(tpOffline, alias);
     }
