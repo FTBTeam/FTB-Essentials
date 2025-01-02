@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Now fires an `EntityTeleportEvent.TeleportCommand` event on NeoForge when any teleportation is done
   * Note: There isn't a Fabric API equivalent for this event
 
+### Fixed
+* Fixed problem on SMP where player data (e.g. home location) wasn't always written for the player
+  * In particular if player disconnected before the server ran a scheduled level save
+
 ## [2101.1.2]
 
 ### Fixed
