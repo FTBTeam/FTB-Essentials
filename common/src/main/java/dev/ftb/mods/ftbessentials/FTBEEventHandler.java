@@ -108,7 +108,7 @@ public class FTBEEventHandler {
 	private static void playerLoggedOut(ServerPlayer serverPlayer) {
 		FTBEPlayerData.getOrCreate(serverPlayer).ifPresent(data -> {
 			data.setLastSeenPos(new TeleportPos(serverPlayer));
-			data.markDirty();
+			data.saveIfChanged();
 		});
 	}
 

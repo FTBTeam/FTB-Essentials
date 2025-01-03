@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbessentials.util;
 
 import dev.architectury.event.CompoundEventResult;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.TeleportPos.TeleportResult;
@@ -49,15 +50,25 @@ public class WarmupCooldownTeleporter {
 		return TeleportResult.SUCCESS;
 	}
 
+	@ExpectPlatform
+	private static boolean firePlatformTeleportEvent(ServerPlayer player, Vec3 pos) {
+		throw new AssertionError();
+	}
+
 	public TeleportResult teleport(ServerPlayer player, Function<ServerPlayer, TeleportPos> positionGetter) {
+		TeleportResult cooldownResult = checkCooldown(player);
+		if (!cooldownResult.isSuccess()) {
+			return cooldownResult;
+		}
+
 		CompoundEventResult<Component> result = TeleportEvent.TELEPORT.invoker().teleport(player);
 		if (result.isFalse()) {
 			return TeleportResult.failed(result.object());
 		}
 
-		TeleportResult cooldownResult = checkCooldown(player);
-		if (!cooldownResult.isSuccess()) {
-			return cooldownResult;
+		TeleportPos pos = positionGetter.apply(player);
+		if (!firePlatformTeleportEvent(player, Vec3.atBottomCenterOf(pos.getPos()))) {
+			return TeleportResult.failed(Component.translatable("ftbessentials.teleport_prevented"));
 		}
 
 		int warmupTime = warmupConfig.applyAsInt(player);
