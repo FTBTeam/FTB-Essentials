@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.3]
+
+### Added
+* Now fires an `EntityTeleportEvent.TeleportCommand` event on NeoForge when any teleportation is done
+  * Note: There isn't a Fabric API equivalent for this event
+
+### Fixed
+* Fixed problem on SMP where player data (e.g. home location) wasn't always written for the player
+  * In particular if player disconnected before the server ran a scheduled level save
+
 ## [2101.1.2]
 
 ### Fixed
