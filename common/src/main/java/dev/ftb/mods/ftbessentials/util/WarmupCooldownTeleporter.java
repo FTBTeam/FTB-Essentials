@@ -61,12 +61,18 @@ public class WarmupCooldownTeleporter {
 			return cooldownResult;
 		}
 
+		TeleportPos pos = positionGetter.apply(player);
+
+		TeleportResult blacklistedResult = pos.checkDimensionBlacklist(player);
+		if (!blacklistedResult.isSuccess()) {
+			return blacklistedResult;
+		}
+		
 		CompoundEventResult<Component> result = TeleportEvent.TELEPORT.invoker().teleport(player);
 		if (result.isFalse()) {
 			return TeleportResult.failed(result.object());
 		}
-
-		TeleportPos pos = positionGetter.apply(player);
+		
 		if (!firePlatformTeleportEvent(player, Vec3.atBottomCenterOf(pos.getPos()))) {
 			return TeleportResult.failed(Component.translatable("ftbessentials.teleport_prevented"));
 		}

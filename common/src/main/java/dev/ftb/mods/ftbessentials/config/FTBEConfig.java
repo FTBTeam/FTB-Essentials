@@ -71,6 +71,14 @@ public interface FTBEConfig {
 			.comment("Allows admins to teleport to dimension");
 	ToggleableConfig JUMP = new ToggleableConfig(TELEPORTATION, "jump")
 			.comment("Allows admins to jump (teleport) to the focused block");
+	
+	SNBTConfig TELEPORTATION_BLACKLISTS = TELEPORTATION.addGroup("blacklists")
+			.comment("Blacklists for all teleport commands",
+			"Wildcarded dimensions (e.g. 'somemod:*') are supported");
+	StringListValue TELEPORTATION_BLACKLIST_FROM = TELEPORTATION_BLACKLISTS.addStringList("from", List.of())
+			.comment("Dimensions players aren't permitted to run teleport commands in.");
+	StringListValue TELEPORTATION_BLACKLIST_TO = TELEPORTATION_BLACKLISTS.addStringList("to", List.of())
+			.comment("Dimensions players aren't permitted to teleport into.");
 
 	SNBTConfig ADMIN = CONFIG.addGroup("admin").comment("Admin commands for cheating and moderation");
 	ToggleableConfig HEAL = new ToggleableConfig(ADMIN, "heal")
