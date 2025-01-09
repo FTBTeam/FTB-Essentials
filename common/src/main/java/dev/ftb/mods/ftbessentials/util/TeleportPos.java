@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 public class TeleportPos {
@@ -45,6 +46,15 @@ public class TeleportPos {
 		this.yRot = (tag.getTagType("yRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("yRot") : null;
 		this.xRot = (tag.getTagType("xRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("xRot") : null;
 		time = tag.getLong("time");
+	}
+
+	public TeleportResult checkDimensionBlacklist(Player player) {
+		if (!DimensionFilter.isDimensionOKTo(this.dimension)) {
+			return TeleportResult.DIMENSION_NOT_ALLOWED_TO;
+		} else if(!DimensionFilter.isDimensionOKFrom(player.level().dimension())) {
+			return TeleportResult.DIMENSION_NOT_ALLOWED_FROM;
+		}
+		return TeleportResult.SUCCESS;
 	}
 
 	public TeleportResult teleport(ServerPlayer player) {
@@ -128,6 +138,10 @@ public class TeleportPos {
 		TeleportResult DIMENSION_NOT_FOUND = failed(Component.literal("Dimension not found!"));
 
 		TeleportResult UNKNOWN_DESTINATION = failed(Component.literal("Unknown destination!"));
+		
+		TeleportResult DIMENSION_NOT_ALLOWED_FROM = failed(Component.literal("Teleportation from your dimension is not allowed!"));
+		
+		TeleportResult DIMENSION_NOT_ALLOWED_TO = failed(Component.literal("Teleportation to this dimension is not allowed!"));
 
 		int runCommand(ServerPlayer player);
 

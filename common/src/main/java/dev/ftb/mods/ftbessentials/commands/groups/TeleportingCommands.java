@@ -110,7 +110,7 @@ public class TeleportingCommands {
 
     //#region RTP
     private static int rtp(ServerPlayer player) {
-        if (!player.hasPermissions(2) && !DimensionFilter.isDimensionOK(player.level().dimension())) {
+        if (!player.hasPermissions(2) && !DimensionFilter.isRtpDimensionOK(player.level().dimension())) {
             player.displayClientMessage(Component.literal("You may not use /rtp in this dimension!").withStyle(ChatFormatting.RED), false);
             return 0;
         }
