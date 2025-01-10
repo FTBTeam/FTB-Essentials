@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbessentials.commands.groups;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import dev.architectury.event.EventResult;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.FTBEssentialsEvents;
@@ -60,7 +61,17 @@ public class TeleportingCommands {
 
             // Random teleport command
             new SimpleConfigurableCommand(FTBEConfig.RTP, Commands.literal("rtp")
-                    .executes(context -> rtp(context.getSource().getPlayerOrException()))),
+                    .then(Commands.argument("maxDistance", IntegerArgumentType.integer(FTBEConfig.RTP_MIN_DISTANCE.get(), FTBEConfig.RTP_MAX_DISTANCE.get()))
+                            .requires(context -> FTBEConfig.RTP_MAX_DISTANCE_CUSTOM.get(context.getPlayer()))
+                            .executes(context -> rtp(context.getSource().getPlayerOrException(), FTBEConfig.RTP_MIN_DISTANCE.get(), IntegerArgumentType.getInteger(context, "maxDistance")))
+                    )
+                    .then(Commands.argument("minDistance", IntegerArgumentType.integer(0, FTBEConfig.RTP_MAX_DISTANCE.get()))
+                            .requires(context -> FTBEConfig.RTP_MIN_DISTANCE_CUSTOM.get(context.getPlayer()))
+                            .then(Commands.argument("maxDistance", IntegerArgumentType.integer(0, FTBEConfig.RTP_MAX_DISTANCE.get()))
+                                    .executes(context -> rtp(context.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(context, "minDistance"), IntegerArgumentType.getInteger(context, "maxDistance")))
+                            )
+                    )
+                    .executes(context -> rtp(context.getSource().getPlayerOrException(), FTBEConfig.RTP_MIN_DISTANCE.get(), FTBEConfig.RTP_MAX_DISTANCE.get()))),
 
             // Teleport to the last location of a player
             new SimpleConfigurableCommand(FTBEConfig.TPL, Commands.literal("teleport_last")
@@ -109,21 +120,25 @@ public class TeleportingCommands {
     }
 
     //#region RTP
-    private static int rtp(ServerPlayer player) {
+    private static int rtp(ServerPlayer player, int minDistance, int maxDistance) {
+        if (maxDistance < minDistance) {
+            player.displayClientMessage(Component.literal("Maximum teleport distance cannot be less than minimum!"), false);
+            return 0;
+        }
         if (!player.hasPermissions(2) && !DimensionFilter.isRtpDimensionOK(player.level().dimension())) {
             player.displayClientMessage(Component.literal("You may not use /rtp in this dimension!").withStyle(ChatFormatting.RED), false);
             return 0;
         }
         return FTBEPlayerData.getOrCreate(player).map(data -> data.rtpTeleporter.teleport(player, p -> {
                     p.displayClientMessage(Component.literal("Looking for random location..."), false);
-                    return findBlockPos((ServerLevel) player.level(), p);
+                    return findBlockPos((ServerLevel) player.level(), p, minDistance, maxDistance);
                 }).runCommand(player))
                 .orElse(0);
     }
 
-    private static TeleportPos findBlockPos(ServerLevel world, ServerPlayer player) {
+    private static TeleportPos findBlockPos(ServerLevel world, ServerPlayer player, int minDistance, int maxDistance) {
         for (int attempt = 0; attempt < FTBEConfig.RTP_MAX_TRIES.get(); attempt++) {
-            double dist = FTBEConfig.RTP_MIN_DISTANCE.get() + world.random.nextDouble() * (FTBEConfig.RTP_MAX_DISTANCE.get() - FTBEConfig.RTP_MIN_DISTANCE.get());
+            double dist = minDistance + world.random.nextDouble() * (maxDistance - minDistance);
             double angle = world.random.nextDouble() * Math.PI * 2D;
 
             int x = Mth.floor(Math.cos(angle) * dist);
