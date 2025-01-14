@@ -6,4 +6,8 @@ public interface PermissionsProvider {
     default int getInt(ServerPlayer player, int def, String node) {
         return def;
     }
+    
+    default boolean getBool(ServerPlayer player, boolean def, String node) {
+        return def;
+    }
 }

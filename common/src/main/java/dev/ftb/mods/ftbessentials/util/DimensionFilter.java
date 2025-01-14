@@ -11,31 +11,61 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public class DimensionFilter {
-    private static WildcardedRLMatcher dimensionMatcherB = null;
-    private static WildcardedRLMatcher dimensionMatcherW = null;
+    private static WildcardedRLMatcher rtpDimensionMatcherB = null;
+    private static WildcardedRLMatcher rtpDimensionMatcherW = null;
 
-    public static boolean isDimensionOK(ResourceKey<Level> levelKey) {
+    private static WildcardedRLMatcher allDimensionMatcherBTo = null;
+    private static WildcardedRLMatcher allDimensionMatcherBFrom = null;
+
+    public static boolean isRtpDimensionOK(ResourceKey<Level> levelKey) {
         ResourceLocation name = levelKey.location();
-        return !getDimensionBlacklist().test(name) && (getDimensionWhitelist().isEmpty() || getDimensionWhitelist().test(name));
+        return !getRtpDimensionBlacklist().test(name) && (getRtpDimensionWhitelist().isEmpty() || getRtpDimensionWhitelist().test(name));
+    }
+    
+    public static boolean isDimensionOKFrom(ResourceKey<Level> levelKey) {
+        ResourceLocation name = levelKey.location();
+        return !getAllCommandDimensionBlacklistFrom().test(name);
     }
 
-    private static WildcardedRLMatcher getDimensionWhitelist() {
-        if (dimensionMatcherW == null) {
-            dimensionMatcherW = new WildcardedRLMatcher(FTBEConfig.RTP_DIMENSION_WHITELIST.get());
+    public static boolean isDimensionOKTo(ResourceKey<Level> levelKey) {
+        ResourceLocation name = levelKey.location();
+        return !getAllCommandDimensionBlacklistTo().test(name);
+    }
+
+    private static WildcardedRLMatcher getRtpDimensionWhitelist() {
+        if (rtpDimensionMatcherW == null) {
+            rtpDimensionMatcherW = new WildcardedRLMatcher(FTBEConfig.RTP_DIMENSION_WHITELIST.get());
         }
-        return dimensionMatcherW;
+        return rtpDimensionMatcherW;
     }
 
-    private static WildcardedRLMatcher getDimensionBlacklist() {
-        if (dimensionMatcherB == null) {
-            dimensionMatcherB = new WildcardedRLMatcher(FTBEConfig.RTP_DIMENSION_BLACKLIST.get());
+    private static WildcardedRLMatcher getRtpDimensionBlacklist() {
+        if (rtpDimensionMatcherB == null) {
+            rtpDimensionMatcherB = new WildcardedRLMatcher(FTBEConfig.RTP_DIMENSION_BLACKLIST.get());
         }
-        return dimensionMatcherB;
+        return rtpDimensionMatcherB;
     }
-
+    
+    private static WildcardedRLMatcher getAllCommandDimensionBlacklistFrom() {
+        if (allDimensionMatcherBFrom == null) {
+            allDimensionMatcherBFrom = new WildcardedRLMatcher(FTBEConfig.TELEPORTATION_BLACKLIST_FROM.get());
+        }
+        return allDimensionMatcherBFrom;
+    }
+    
+    private static WildcardedRLMatcher getAllCommandDimensionBlacklistTo() {
+        if (allDimensionMatcherBTo == null) {
+            allDimensionMatcherBTo = new WildcardedRLMatcher(FTBEConfig.TELEPORTATION_BLACKLIST_TO.get());
+        }
+        return allDimensionMatcherBTo;
+    }
+    
     public static void clearMatcherCaches() {
-        dimensionMatcherB = null;
-        dimensionMatcherW = null;
+        rtpDimensionMatcherB = null;
+        rtpDimensionMatcherW = null;
+        
+        allDimensionMatcherBFrom = null;
+        allDimensionMatcherBTo = null;
     }
 
     private static class WildcardedRLMatcher implements Predicate<ResourceLocation> {

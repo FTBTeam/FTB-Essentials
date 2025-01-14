@@ -13,6 +13,10 @@ public class LuckPermsIntegration implements PermissionsProvider {
     public int getInt(ServerPlayer player, int def, String node) {
         return Math.max(getMetaData(player.getUUID(), node).map(Integer::parseInt).orElse(def), 0);
     }
+    
+    public boolean getBool(ServerPlayer player, boolean def, String node) {
+        return getMetaData(player.getUUID(), node).map(Boolean::parseBoolean).orElse(def);
+    }
 
     private static Optional<String> getMetaData(UUID uuid, String meta) {
         LuckPerms luckperms = LuckPermsProvider.get();

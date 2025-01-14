@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 * Now fires an `EntityTeleportEvent.TeleportCommand` event on NeoForge when any teleportation is done
   * Note: There isn't a Fabric API equivalent for this event
+* The `/rtp` command can now optionally take minimum and maximum distance arguments - thanks @CanadianBaconBoi
+  * Note that to use these arguments, players must either be admins (permission >= 2) or have the `ftbessentials.rtp.custom_min_max` and/or `ftbessentials.rtp.custom_max` ranks nodes
+* Added dimension blacklist for teleportation commands - thanks @CanadianBaconBoi
+  * This is in addition to the existing RTP blacklist config
+  * See new `blacklists` config section within the `teleportation` section of the config
+  * `from` can be used to prohibit teleportation by players who are _in_ the listed dimension IDs
+  * `to` can be used to prohibit teleportation by players _to_ any of the listed dimension IDs
+  * Dimensions can be wildcarded, e.g. `somemod:*` matches all dimensions registered by mod `somemod`
 
 ### Fixed
 * Fixed problem on SMP where player data (e.g. home location) wasn't always written for the player
