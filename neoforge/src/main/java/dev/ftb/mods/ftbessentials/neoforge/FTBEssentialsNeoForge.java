@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbessentials.neoforge;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
+import dev.ftb.mods.ftbessentials.util.neoforge.WarmupCooldownTeleporterImpl;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.EventPriority;
@@ -41,7 +42,8 @@ public class FTBEssentialsNeoForge {
 	}
 
 	public void vanillaTeleportCommand(EntityTeleportEvent.TeleportCommand event) {
-		if (event.getEntity() instanceof ServerPlayer sp && !FTBEConfig.BACK_ON_DEATH_ONLY.get()) {
+		// ignore teleport events that we ourselves fired
+		if (event.getEntity() instanceof ServerPlayer sp && !FTBEConfig.BACK_ON_DEATH_ONLY.get() && !(event instanceof WarmupCooldownTeleporterImpl.EssentialsTeleport)) {
 			FTBEPlayerData.addTeleportHistory(sp);
 		}
 	}
