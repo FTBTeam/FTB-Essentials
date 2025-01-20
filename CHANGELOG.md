@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2101.1.4]
 
 ### Fixed
-* Fix bug from last release causing teleport positions to be added twice, breaking the `/back` command
+* Fix bug from last release causing teleport positions to be added to the history twice, breaking the `/back` command
 
 ## [2101.1.3]
 
