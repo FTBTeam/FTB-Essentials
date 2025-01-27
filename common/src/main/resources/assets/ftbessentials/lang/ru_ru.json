@@ -1,0 +1,11 @@
+{
+  "sidebar_button.ftbessentials.trash_can": "Мусорка",
+  "ftbessentials.chat.status.start_record": "сейчас ведётся запись!",
+  "ftbessentials.chat.status.stop_record": "больше не записывается!",
+  "ftbessentials.chat.status.start_stream": "сейчас идёт трансляция!",
+  "ftbessentials.chat.status.stop_stream": "больше не транслируется!",
+  "ftbessentials.messages.kick_self": "Вы выгнали себя!",
+  "ftbessentials.feedback.limit_radius": "Ограничение радиуса до %s",
+  "ftbessentials.feedback.players_within": "%s игрок(а/ов) в пределах %sm",
+  "ftbessentials.teleport_prevented": "Телепортация была предотвращена!"
+}
