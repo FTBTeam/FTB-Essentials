@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.5]
+
+### Added
+* Added `admins_exempt_dimension_blacklists` config setting in the `teleportation` section of `ftbessentials.snbt`
+  * Default is true; controls whether players with permission level >=2 should be subject to teleporting dimension blacklists
+
+### Fixed
+* Fixed destination pos being unnecessarily recomputed when running teleporting commands
+  * Most important for `/rtp` behaviour which is non-deterministic
+  
 ## [2101.1.4]
 
 ### Fixed
