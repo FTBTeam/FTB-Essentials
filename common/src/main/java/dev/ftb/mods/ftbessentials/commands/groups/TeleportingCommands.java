@@ -125,7 +125,8 @@ public class TeleportingCommands {
             player.displayClientMessage(Component.literal("Maximum teleport distance cannot be less than minimum!"), false);
             return 0;
         }
-        if (!player.hasPermissions(2) && !DimensionFilter.isRtpDimensionOK(player.level().dimension())) {
+        if ((!player.hasPermissions(Commands.LEVEL_GAMEMASTERS) || !FTBEConfig.ADMINS_EXEMPT_DIMENSION_BLACKLISTS.get())
+                && !DimensionFilter.isRtpDimensionOK(player.level().dimension())) {
             player.displayClientMessage(Component.literal("You may not use /rtp in this dimension!").withStyle(ChatFormatting.RED), false);
             return 0;
         }
@@ -152,7 +153,7 @@ public class TeleportingCommands {
             if (world.getBiome(currentPos).is(IGNORE_RTP_BIOMES)) {
                 continue;
             }
-            // TODO: FTB Chunks will listen to RTPEvent and cancel it if position is inside a claimed chunk
+            // FTB Chunks (via FTB XMod Compat) listens to this.  Other mods can too.
             EventResult res = FTBEssentialsEvents.RTP_EVENT.invoker().teleport(world, player, currentPos, attempt);
             if (res.isFalse()) {
                 continue;
@@ -177,7 +178,7 @@ public class TeleportingCommands {
                     }
                 }
                 if (goodPos != null) {
-                    player.displayClientMessage(Component.literal(String.format("Found good location after %d " + (attempt == 1 ? "attempt" : "attempts") + " @ [x %d, y %d, z %d]", attempt, goodPos.getX(), goodPos.getY(), goodPos.getZ())), false);
+                    player.displayClientMessage(Component.literal(String.format("Found good location after %d " + (attempt + 1 == 1 ? "attempt" : "attempts") + " @ [x %d, y %d, z %d]", attempt + 1, goodPos.getX(), goodPos.getY(), goodPos.getZ())), false);
                     return new TeleportPos(world.dimension(), goodPos.above());
                 }
             }

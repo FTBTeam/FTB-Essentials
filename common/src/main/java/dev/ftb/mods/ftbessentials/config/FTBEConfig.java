@@ -21,6 +21,12 @@ public interface FTBEConfig {
 					"This setting has no effect if 'register_to_namespace' is false");
 
 	SNBTConfig TELEPORTATION = CONFIG.addGroup("teleportation").comment("Teleportation-related settings");
+
+	BooleanValue ADMINS_EXEMPT_DIMENSION_BLACKLISTS = TELEPORTATION.addBoolean("admins_exempt_dimension_blacklists", true)
+			.comment("If true, admin-level players (i.e. permission level >= 2) are exempt from",
+					"the dimension controls defined in teleportation -> blacklists and",
+					"in teleportation -> rtp -> dimension_blacklist/whitelist");
+
 	// back
 	TimedCommandConfig BACK = new TimedCommandConfig(TELEPORTATION, "back", 30, 0)
 			.comment("Allows users to return to their previous location after teleporting (or dying)");
@@ -69,7 +75,7 @@ public interface FTBEConfig {
 			"ftbessentials.rtp.custom_max",
 			"Allow player to specify (only) custom max distance in rtp command"
 	);
-	
+
 	PermissionBasedBooleanValue RTP_MIN_DISTANCE_CUSTOM = new PermissionBasedBooleanValue(
 			RTP.config.addBoolean("allow_custom_min_max_distance", false),
 			"ftbessentials.rtp.custom_min_max",
@@ -83,10 +89,10 @@ public interface FTBEConfig {
 			.comment("Allows admins to teleport to dimension");
 	ToggleableConfig JUMP = new ToggleableConfig(TELEPORTATION, "jump")
 			.comment("Allows admins to jump (teleport) to the focused block");
-	
+
 	SNBTConfig TELEPORTATION_BLACKLISTS = TELEPORTATION.addGroup("blacklists")
 			.comment("Blacklists for all teleport commands",
-			"Wildcarded dimensions (e.g. 'somemod:*') are supported");
+					"Wildcarded dimensions (e.g. 'somemod:*') are supported");
 	StringListValue TELEPORTATION_BLACKLIST_FROM = TELEPORTATION_BLACKLISTS.addStringList("from", List.of())
 			.comment("Dimensions players aren't permitted to run teleport commands in.");
 	StringListValue TELEPORTATION_BLACKLIST_TO = TELEPORTATION_BLACKLISTS.addStringList("to", List.of())
