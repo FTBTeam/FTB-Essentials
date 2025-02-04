@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbessentials.config;
 import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
 import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 
 import java.util.function.Predicate;
 
@@ -36,6 +37,6 @@ public class ToggleableConfig implements Predicate<CommandSourceStack> {
 	}
 
 	public Predicate<CommandSourceStack> enabledAndOp() {
-		return stack -> test(stack) && stack.hasPermission(2);
+		return stack -> test(stack) && stack.hasPermission(Commands.LEVEL_GAMEMASTERS);
 	}
 }
