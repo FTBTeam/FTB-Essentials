@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * Fixed destination pos being unnecessarily recomputed when running teleporting commands
   * Most important for `/rtp` behaviour which is non-deterministic
-  
+* Active flight is no longer immediately switched off by the `/fly` command if player is in creative/spectator mode
+
 ## [2101.1.4]
 
 ### Fixed
