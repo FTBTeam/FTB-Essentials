@@ -9,8 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 * Added `admins_exempt_dimension_blacklists` config setting in the `teleportation` section of `ftbessentials.snbt`
   * Default is true; controls whether players with permission level >=2 should be subject to teleporting dimension blacklists
+* Added new `/give_me_kit` command for better permission control
+  * `/give_me_kit <kit>` is equivalent to `/kit give @s <kit>` but is usable by non-op players by default
+  * In addition, the boolean permission node `ftbessentials.give_me_kit.<kit>` is now checked if the player using the command is not admin-level
+  * In this way, regular players can be given the ability via permission nodes to give themselves specific kits
 
 ### Fixed
+* Fixed itemstack serialization not working correctly when saving kits
 * Fixed destination pos being unnecessarily recomputed when running teleporting commands
   * Most important for `/rtp` behaviour which is non-deterministic
 * Active flight is no longer immediately switched off by the `/fly` command if player is in creative/spectator mode
