@@ -71,8 +71,10 @@ public class CheatCommands {
 
             if (data.canFly()) {
                 data.setCanFly(false);
-                abilities.mayfly = false;
-                abilities.flying = false;
+                if (player.gameMode.isSurvival()) {
+                    abilities.mayfly = false;
+                    abilities.flying = false;
+                }
                 player.displayClientMessage(Component.literal("Flight disabled"), true);
             } else {
                 data.setCanFly(true);
