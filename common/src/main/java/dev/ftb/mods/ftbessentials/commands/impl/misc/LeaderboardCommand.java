@@ -80,10 +80,13 @@ public class LeaderboardCommand implements FTBCommand {
             }
         }
 
-        source.sendSuccess(() -> Component.literal("== Leaderboard [" + leaderboard.formattedName() + "] ==").withStyle(ChatFormatting.DARK_GREEN), false);
+        source.sendSuccess(() -> Component.literal("== ")
+                .append(Component.translatable("ftbessentials.leaderboard", leaderboard.formattedName()))
+                .append(Component.literal(" ==").withStyle(ChatFormatting.DARK_GREEN)),
+                false);
 
         if (list.isEmpty()) {
-            source.sendSuccess(() -> Component.literal("No data!").withStyle(ChatFormatting.GRAY), false);
+            source.sendSuccess(() -> Component.translatable("ftbessentials.leaderboard.no_data").withStyle(ChatFormatting.GRAY), false);
             return 1;
         }
 

@@ -1,7 +1,8 @@
 package dev.ftb.mods.ftbessentials.commands.groups;
 
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.commands.impl.KitCommand;
+import dev.ftb.mods.ftbessentials.commands.impl.kit.GiveMeKitCommand;
+import dev.ftb.mods.ftbessentials.commands.impl.kit.KitCommand;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ import java.util.List;
  */
 public class FeatureCommands {
     public static final List<FTBCommand> COMMANDS = List.of(
-        new KitCommand()
+            new KitCommand(),
+            new GiveMeKitCommand()
     );
 }

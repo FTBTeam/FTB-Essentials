@@ -40,7 +40,7 @@ public class NicknameForCommand implements FTBCommand {
 
     public int nicknameFor(CommandSourceStack source, ServerPlayer player, String nick) {
         if (nick.length() > 30) {
-            player.displayClientMessage(Component.literal("Nickname too long!"), false);
+            player.displayClientMessage(Component.translatable("ftbessentials.nick.too_long"), false);
             return 0;
         }
 
@@ -50,9 +50,9 @@ public class NicknameForCommand implements FTBCommand {
             PlayerDisplayNameUtil.refreshDisplayName(player);
 
             if (data.getNick().isEmpty()) {
-                source.sendSuccess(() -> Component.literal("Nickname reset!"), true);
+                source.sendSuccess(() -> Component.translatable("ftbessentials.nick.reset"), true);
             } else {
-                source.sendSuccess(() -> Component.literal("Nickname changed to '" + data.getNick() + "'"), true);
+                source.sendSuccess(() -> Component.translatable("ftbessentials.nick.changed", data.getNick()), true);
             }
 
             data.sendTabName(source.getServer());

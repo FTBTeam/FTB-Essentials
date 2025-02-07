@@ -2,12 +2,14 @@ package dev.ftb.mods.ftbessentials.commands.groups;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.architectury.event.EventResult;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.FTBEssentialsEvents;
 import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.commands.SimpleConfigurableCommand;
+import dev.ftb.mods.ftbessentials.commands.impl.kit.KitCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.teleporting.HomeCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.teleporting.OfflineTeleportCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.teleporting.TPACommand;
@@ -89,7 +91,7 @@ public class TeleportingCommands {
 
             // Jump to command, allows you to jump to the top of the block you're looking at
             new SimpleConfigurableCommand(FTBEConfig.JUMP, Commands.literal("jump")
-					.requires(CommandUtils.isGamemaster())
+                    .requires(CommandUtils.isGamemaster())
                     .executes(ctx -> jump(ctx.getSource())))
     );
 
@@ -99,7 +101,7 @@ public class TeleportingCommands {
     private static int back(ServerPlayer player) {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             if (data.teleportHistory.isEmpty()) {
-                player.displayClientMessage(Component.literal("Teleportation history is empty!").withStyle(ChatFormatting.RED), false);
+                player.displayClientMessage(Component.translatable("ftbessentials.teleport.history_empty").withStyle(ChatFormatting.RED), false);
                 return 0;
             }
 
@@ -122,16 +124,16 @@ public class TeleportingCommands {
     //#region RTP
     private static int rtp(ServerPlayer player, int minDistance, int maxDistance) {
         if (maxDistance < minDistance) {
-            player.displayClientMessage(Component.literal("Maximum teleport distance cannot be less than minimum!"), false);
+            player.displayClientMessage(Component.translatable("ftbessentials.teleport.max_less_than_min"), false);
             return 0;
         }
         if ((!player.hasPermissions(Commands.LEVEL_GAMEMASTERS) || !FTBEConfig.ADMINS_EXEMPT_DIMENSION_BLACKLISTS.get())
                 && !DimensionFilter.isRtpDimensionOK(player.level().dimension())) {
-            player.displayClientMessage(Component.literal("You may not use /rtp in this dimension!").withStyle(ChatFormatting.RED), false);
+            player.displayClientMessage(Component.translatable("ftbessentials.rtp.not_here").withStyle(ChatFormatting.RED), false);
             return 0;
         }
         return FTBEPlayerData.getOrCreate(player).map(data -> data.rtpTeleporter.teleport(player, p -> {
-                    p.displayClientMessage(Component.literal("Looking for random location..."), false);
+                    p.displayClientMessage(Component.translatable("ftbessentials.rtp.looking"), false);
                     return findBlockPos((ServerLevel) player.level(), p, minDistance, maxDistance);
                 }).runCommand(player))
                 .orElse(0);
@@ -178,12 +180,13 @@ public class TeleportingCommands {
                     }
                 }
                 if (goodPos != null) {
-                    player.displayClientMessage(Component.literal(String.format("Found good location after %d " + (attempt + 1 == 1 ? "attempt" : "attempts") + " @ [x %d, y %d, z %d]", attempt + 1, goodPos.getX(), goodPos.getY(), goodPos.getZ())), false);
+                    String pos = String.format(" @ [x %d, y %d, z %d]", goodPos.getX(), goodPos.getY(), goodPos.getZ());
+                    player.displayClientMessage(Component.translatable("ftbessentials.rtp.found", attempt + 1, pos), false);
                     return new TeleportPos(world.dimension(), goodPos.above());
                 }
             }
         }
-        player.displayClientMessage(Component.literal("Could not find a valid location to teleport to!").withStyle(ChatFormatting.RED), false);
+        player.displayClientMessage(Component.translatable("ftbessentials.rtp.failed").withStyle(ChatFormatting.RED), false);
         return new TeleportPos(player);
     }
     //#endregion
@@ -211,25 +214,21 @@ public class TeleportingCommands {
         return 1;
     }
 
-    private static int jump(CommandSourceStack source) {
-        try {
-            ServerPlayer player = source.getPlayerOrException();
+    private static int jump(CommandSourceStack source) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
 
-            BlockHitResult res = BlockUtil.getFocusedBlock(player, player.getServer().getPlayerList().getViewDistance() * 16)
-                    .orElseThrow(() -> new IllegalArgumentException("Not looking at a block"));
-            // want to land the player on top of the focused block, so scan up as far as needed
-            BlockPos.MutableBlockPos mPos = res.getBlockPos().above().mutable();
-            while (true) {
-                Level level = player.level();
-                if (isEmptyShape(level, mPos.above()) && isEmptyShape(level, mPos.above(2)) || mPos.getY() >= level.getMaxBuildHeight())
-                    break;
-                mPos.move(Direction.UP, 2);
-            }
-            Vec3 vec = Vec3.atBottomCenterOf(mPos);
-            player.teleportTo(vec.x(), vec.y(), vec.z());
-        } catch (Exception e) {
-            source.sendFailure(Component.literal("Can't jump: " + e.getMessage()));
+        BlockHitResult res = BlockUtil.getFocusedBlock(player, player.getServer().getPlayerList().getViewDistance() * 16)
+                .orElseThrow(KitCommand.NOT_LOOKING_AT_BLOCK::create);
+        // want to land the player on top of the focused block, so scan up as far as needed
+        BlockPos.MutableBlockPos mPos = res.getBlockPos().above().mutable();
+        while (true) {
+            Level level = player.level();
+            if (isEmptyShape(level, mPos.above()) && isEmptyShape(level, mPos.above(2)) || mPos.getY() >= level.getMaxBuildHeight())
+                break;
+            mPos.move(Direction.UP, 2);
         }
+        Vec3 vec = Vec3.atBottomCenterOf(mPos);
+        player.teleportTo(vec.x(), vec.y(), vec.z());
         return 0;
     }
 

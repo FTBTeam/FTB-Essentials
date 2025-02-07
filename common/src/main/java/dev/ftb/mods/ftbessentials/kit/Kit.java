@@ -1,5 +1,7 @@
 package dev.ftb.mods.ftbessentials.kit;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.ftb.mods.ftbessentials.commands.impl.kit.KitCommand;
 import dev.ftb.mods.ftbessentials.integration.PermissionsHelper;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
@@ -83,7 +85,7 @@ public class Kit {
         return new Kit(kitName, items, tag.getLong("cooldown"), tag.getBoolean("auto_grant"));
     }
 
-    public void giveToPlayer(ServerPlayer player, FTBEPlayerData playerData, boolean throwOnCooldown) {
+    public void giveToPlayer(ServerPlayer player, FTBEPlayerData playerData, boolean throwOnCooldown) throws CommandSyntaxException {
         long now = System.currentTimeMillis();
 
         if (!checkForCooldown(player, playerData, now, throwOnCooldown)) {
@@ -104,12 +106,12 @@ public class Kit {
         }
     }
 
-    private boolean checkForCooldown(ServerPlayer player, FTBEPlayerData data, long now, boolean throwOnCooldown) {
+    private boolean checkForCooldown(ServerPlayer player, FTBEPlayerData data, long now, boolean throwOnCooldown) throws CommandSyntaxException {
         if (cooldown != 0) {
             long lastUsed = data.getLastKitUseTime(kitName);
             if (cooldown < 0L && lastUsed != 0L) {
                 if (throwOnCooldown) {
-                    throw new IllegalStateException("Kit " + kitName + " is a one-time use kit (already given to " + player.getGameProfile().getName() + ")");
+                    throw KitCommand.ONE_TIME_ONLY.create(kitName, player.getGameProfile().getName());
                 } else {
                     return true;
                 }
@@ -117,8 +119,7 @@ public class Kit {
             long delta = (now - lastUsed) / 1000L;
             if (delta < cooldown) {
                 if (throwOnCooldown) {
-                    long remaining = cooldown - delta;
-                    throw new IllegalStateException("Kit " + kitName + " is on cooldown - " + TimeUtils.prettyTimeString(remaining) + " remaining");
+                    throw KitCommand.ON_COOLDOWN.create(kitName, TimeUtils.prettyTimeString(cooldown - delta));
                 } else {
                     return true;
                 }

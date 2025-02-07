@@ -77,10 +77,10 @@ public class HomeCommand implements FTBCommand {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             try {
                 data.homeManager().addDestination(name, new TeleportPos(player), player);
-                player.displayClientMessage(Component.literal("Home set!"), false);
+                player.displayClientMessage(Component.translatable("ftbessentials.home.set"), false);
                 return 1;
             } catch (SavedTeleportManager.TooManyDestinationsException e) {
-                player.displayClientMessage(Component.literal("Can't add any more homes!"), false);
+                player.displayClientMessage(Component.translatable("ftbessentials.home.too_many"), false);
                 return 0;
             }
         }).orElse(0);
@@ -89,10 +89,10 @@ public class HomeCommand implements FTBCommand {
     public int delHome(ServerPlayer player, String name) {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             if (data.homeManager().deleteDestination(name.toLowerCase())) {
-                player.displayClientMessage(Component.literal("Home deleted!"), false);
+                player.displayClientMessage(Component.translatable("ftbessentials.home.deleted"), false);
                 return 1;
             } else {
-                player.displayClientMessage(Component.literal("Home not found!"), false);
+                player.displayClientMessage(Component.translatable("ftbessentials.home.not_found"), false);
                 return 0;
             }
         }).orElse(0);
@@ -102,21 +102,24 @@ public class HomeCommand implements FTBCommand {
         return FTBEPlayerData.getOrCreate(source.getServer(), of.getId())
                 .map(data -> {
                     if (data.homeManager().getNames().isEmpty()) {
-                        source.sendSuccess(() -> Component.literal("None"), false);
+                        source.sendSuccess(() -> Component.translatable("ftbessentials.none"), false);
                     } else {
-                        source.sendSuccess(() -> Component.literal("Homes for " + of.getName() + "\n---").withStyle(ChatFormatting.GOLD), false);
+                        source.sendSuccess(() -> Component.translatable("ftbessentials.home.for_player", of.getName()).withStyle(ChatFormatting.GOLD), false);
+                        source.sendSuccess(() -> Component.literal("---").withStyle(ChatFormatting.GOLD), false);
 
                         TeleportPos origin = new TeleportPos(source.getLevel().dimension(), BlockPos.containing(source.getPosition()));
                         data.homeManager().destinations().forEach(entry ->
                                 source.sendSuccess(() -> {
-                                    MutableComponent literal = Component.empty().append(Component.literal(entry.name()).withStyle(ChatFormatting.AQUA).withStyle(ChatFormatting.BOLD)).append(Component.literal( ": " + entry.destination().distanceString(origin) + " away"));
+                                    MutableComponent line = Component.translatable("ftbessentials.home.show_home",
+                                            Component.literal(entry.name()).withStyle(ChatFormatting.AQUA), entry.destination().distanceString(origin));
+
                                     if (source.hasPermission(Commands.LEVEL_GAMEMASTERS)) {
-                                        literal.withStyle(Style.EMPTY
+                                        line.withStyle(Style.EMPTY
                                                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp @s " + entry.destination().posAsString()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to teleport")))
+                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("ftbessentials.click_to_teleport")))
                                         );
                                     }
-                                    return literal;
+                                    return line;
                                 }, false));
                     }
 

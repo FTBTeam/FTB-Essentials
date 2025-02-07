@@ -136,11 +136,10 @@ public class WarmupCooldownTeleporter {
 					if (player.position().distanceToSqr(warmup.initialPos) > 0.25) {
 						// player has moved more than half a block
 						toRemove.add(playerId);
-						player.displayClientMessage(Component.literal("Teleportation interrupted!").withStyle(ChatFormatting.RED), true);
+						player.displayClientMessage(Component.translatable("ftbessentials.teleport.interrupted").withStyle(ChatFormatting.RED), true);
 					} else {
 						long seconds = (warmup.when() - now) / 1000L;
-						String secStr = seconds == 1 ? "second" : "seconds";
-						player.displayClientMessage(Component.literal(String.format("Teleporting in %d %s", seconds, secStr)).withStyle(ChatFormatting.YELLOW), true);
+						player.displayClientMessage(Component.translatable("ftbessentials.teleport.notify", seconds).withStyle(ChatFormatting.YELLOW), true);
 					}
 				}
 			} else {
@@ -155,7 +154,7 @@ public class WarmupCooldownTeleporter {
 	public static void cancelWarmup(ServerPlayer player) {
 		if (WARMUPS.containsKey(player.getUUID())) {
 			pendingRemovals.add(player.getUUID());
-			player.displayClientMessage(Component.literal("Teleportation interrupted!").withStyle(ChatFormatting.RED), true);
+			player.displayClientMessage(Component.translatable("ftbessentials.teleport.interrupted").withStyle(ChatFormatting.RED), true);
 		}
 	}
 
