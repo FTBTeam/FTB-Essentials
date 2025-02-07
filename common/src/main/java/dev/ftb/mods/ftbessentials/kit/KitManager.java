@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 public enum KitManager {
     INSTANCE;
 
-    private final Map<String,Kit> allKits = new HashMap<>();
+    private final Map<String, Kit> allKits = new HashMap<>();
 
     public static KitManager getInstance() {
         return INSTANCE;
