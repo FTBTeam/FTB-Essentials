@@ -63,10 +63,9 @@ public class Kit {
     }
 
     private SNBTCompoundTag saveStack(ItemStack stack, HolderLookup.Provider provider) {
-        SNBTCompoundTag tag = new SNBTCompoundTag();
-        tag.singleLine();
-        stack.save(provider, tag);
-        return tag;
+        var res = SNBTCompoundTag.of(stack.save(provider));
+        res.singleLine();
+        return res;
     }
 
     public static Kit fromNBT(String kitName, CompoundTag tag, HolderLookup.Provider provider) {
