@@ -63,6 +63,7 @@
   "ftbessentials.home.deleted": "Home deleted!",
   "ftbessentials.home.not_found": "Home not found!",
   "ftbessentials.home.show_home": "%s: %s away",
+  "ftbessentials.home.y_too_low": "Y-level too low! Homes must be set above Y=%s",
   "ftbessentials.none": "None",
   "ftbessentials.home.for_player": "Homes for %s",
   "ftbessentials.click_to_teleport": "Click to teleport",

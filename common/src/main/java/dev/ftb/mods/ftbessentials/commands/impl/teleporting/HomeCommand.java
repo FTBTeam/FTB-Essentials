@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
@@ -76,6 +77,10 @@ public class HomeCommand implements FTBCommand {
     public int setHome(ServerPlayer player, String name) {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             try {
+                if (player.blockPosition().getY() < FTBEConfig.HOME_MIN_Y.get()) {
+                    player.displayClientMessage(Component.translatable("ftbessentials.home.y_too_low", player.blockPosition().getY()), false);
+                    return 0;
+                }
                 data.homeManager().addDestination(name, new TeleportPos(player), player);
                 player.displayClientMessage(Component.translatable("ftbessentials.home.set"), false);
                 return 1;

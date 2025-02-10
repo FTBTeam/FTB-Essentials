@@ -52,6 +52,8 @@ public interface FTBEConfig {
 			"ftbessentials.home.max",
 			"Max amount of homes a user can have."
 	);
+	IntValue HOME_MIN_Y = HOME.config.addInt("home_min_y", Integer.MIN_VALUE)
+			.comment("The minimum Y value for homes, as set by the /sethome command");
 	// tpa
 	TimedCommandConfig TPA = new TimedCommandConfig(TELEPORTATION, "tpa", 10, 0)
 			.comment("Allows players to create requests to teleport to other users on the server,",
