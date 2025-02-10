@@ -78,7 +78,7 @@ public class HomeCommand implements FTBCommand {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             try {
                 if (player.blockPosition().getY() < FTBEConfig.HOME_MIN_Y.get()) {
-                    player.displayClientMessage(Component.translatable("ftbessentials.home.y_too_low", player.blockPosition().getY()), false);
+                    player.displayClientMessage(Component.translatable("ftbessentials.home.y_too_low", FTBEConfig.HOME_MIN_Y.get()), false);
                     return 0;
                 }
                 data.homeManager().addDestination(name, new TeleportPos(player), player);
