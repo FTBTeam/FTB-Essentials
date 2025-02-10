@@ -7,6 +7,7 @@ import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftblibrary.util.PlayerDisplayNameUtil;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,10 +29,10 @@ public class NicknameForCommand implements FTBCommand {
         return Collections.singletonList(literal("nicknamefor")
                 .requires(FTBEConfig.NICK.enabledAndOp())
                 .then(argument("player", EntityArgument.player())
-                        .requires(source -> source.hasPermission(2))
+                        .requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
                         .executes(context -> nicknameFor(context.getSource(), EntityArgument.getPlayer(context, "player"), ""))
                         .then(argument("nickname", StringArgumentType.greedyString())
-                                .requires(source -> source.hasPermission(2))
+                                .requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
                                 .executes(context -> nicknameFor(context.getSource(), EntityArgument.getPlayer(context, "player"), StringArgumentType.getString(context, "nickname")))
                         )
                 ));
@@ -39,7 +40,7 @@ public class NicknameForCommand implements FTBCommand {
 
     public int nicknameFor(CommandSourceStack source, ServerPlayer player, String nick) {
         if (nick.length() > 30) {
-            player.displayClientMessage(Component.literal("Nickname too long!"), false);
+            player.displayClientMessage(Component.translatable("ftbessentials.nick.too_long"), false);
             return 0;
         }
 
@@ -49,9 +50,9 @@ public class NicknameForCommand implements FTBCommand {
             PlayerDisplayNameUtil.refreshDisplayName(player);
 
             if (data.getNick().isEmpty()) {
-                source.sendSuccess(() -> Component.literal("Nickname reset!"), true);
+                source.sendSuccess(() -> Component.translatable("ftbessentials.nick.reset"), true);
             } else {
-                source.sendSuccess(() -> Component.literal("Nickname changed to '" + data.getNick() + "'"), true);
+                source.sendSuccess(() -> Component.translatable("ftbessentials.nick.changed", data.getNick()), true);
             }
 
             data.sendTabName(source.getServer());

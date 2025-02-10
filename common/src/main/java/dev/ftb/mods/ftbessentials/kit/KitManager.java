@@ -1,5 +1,7 @@
 package dev.ftb.mods.ftbessentials.kit;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.ftb.mods.ftbessentials.commands.impl.kit.KitCommand;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.InventoryUtil;
@@ -12,7 +14,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.apache.commons.lang3.Validate;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -20,7 +21,7 @@ import java.util.function.Supplier;
 public enum KitManager {
     INSTANCE;
 
-    private final Map<String,Kit> allKits = new HashMap<>();
+    private final Map<String, Kit> allKits = new HashMap<>();
 
     public static KitManager getInstance() {
         return INSTANCE;
@@ -43,16 +44,18 @@ public enum KitManager {
         return Collections.unmodifiableCollection(allKits.values());
     }
 
-    public void giveKitToPlayer(String kitName, ServerPlayer player) {
-        FTBEPlayerData.getOrCreate(player).ifPresent(playerData ->
-                get(kitName).ifPresentOrElse(kit -> kit.giveToPlayer(player, playerData, true), () -> {
-                    throw new IllegalArgumentException("Kit '" + kitName + "' does not exist");
-                })
-        );
+    public void giveKitToPlayer(String kitName, ServerPlayer player) throws CommandSyntaxException {
+        Kit kit = get(kitName).orElseThrow(() -> KitCommand.NO_SUCH_KIT.create(kitName));
+        var playerData = FTBEPlayerData.getOrCreate(player).orElse(null);
+        if (playerData != null) {
+            kit.giveToPlayer(player, playerData, true);
+        }
     }
 
-    public void deleteKit(String kitName) {
-        Validate.isTrue(allKits.containsKey(kitName), "Kit '" + kitName + "' does not exist");
+    public void deleteKit(String kitName) throws CommandSyntaxException {
+        if (!allKits.containsKey(kitName)) {
+            throw KitCommand.NO_SUCH_KIT.create(kitName);
+        }
 
         allKits.remove(kitName);
 
@@ -61,7 +64,7 @@ public enum KitManager {
         FTBEWorldData.instance.markDirty();
     }
 
-    public void createFromPlayerInv(String kitName, ServerPlayer player, long cooldownSecs, boolean hotbarOnly) {
+    public void createFromPlayerInv(String kitName, ServerPlayer player, long cooldownSecs, boolean hotbarOnly) throws CommandSyntaxException {
         if (hotbarOnly) {
             NonNullList<ItemStack> items = NonNullList.create();
             for (int i = 0; i < 9; i++) {
@@ -73,25 +76,25 @@ public enum KitManager {
         }
     }
 
-    public void createFromBlockInv(String kitName, Level level, BlockPos pos, Direction side, long cooldownSecs) {
+    public void createFromBlockInv(String kitName, Level level, BlockPos pos, Direction side, long cooldownSecs) throws CommandSyntaxException {
         createKit(kitName, cooldownSecs, () -> InventoryUtil.getItemsInInventory(level, pos, side));
     }
 
-    private void createKit(String kitName, long cooldownSecs, Supplier<NonNullList<ItemStack>> itemSupplier) {
+    private void createKit(String kitName, long cooldownSecs, Supplier<NonNullList<ItemStack>> itemSupplier) throws CommandSyntaxException {
         List<ItemStack> items = itemSupplier.get().stream()
                 .filter(stack -> !stack.isEmpty())
                 .map(ItemStack::copy)
                 .toList();
         if (items.isEmpty()) {
-            throw new IllegalArgumentException("No items found!");
+            throw KitCommand.NO_ITEMS_TO_ADD.create();
         }
 
         addKit(new Kit(kitName, items, cooldownSecs, false), false);
     }
 
-    public void addKit(Kit kit, boolean overwrite) {
-        if (!overwrite) {
-            Validate.isTrue(!allKits.containsKey(kit.getKitName()), "Kit '" + kit.getKitName() + "' already exists");
+    public void addKit(Kit kit, boolean overwrite) throws CommandSyntaxException {
+        if (!overwrite && allKits.containsKey(kit.getKitName())) {
+            throw KitCommand.ALREADY_EXISTS.create(kit.getKitName());
         }
 
         allKits.put(kit.getKitName(), kit);

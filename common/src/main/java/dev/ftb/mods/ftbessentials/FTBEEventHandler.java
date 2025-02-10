@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbessentials;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.*;
 import dev.ftb.mods.ftbessentials.api.records.TPARequest;
@@ -99,8 +100,11 @@ public class FTBEEventHandler {
 
 			KitManager.getInstance().allKits().forEach(kit -> {
 				if (kit.isAutoGrant()) {
-					kit.giveToPlayer(serverPlayer, data, false);
-				}
+                    try {
+                        kit.giveToPlayer(serverPlayer, data, false);
+                    } catch (CommandSyntaxException ignored) {
+                    }
+                }
 			});
 		});
 	}
@@ -143,11 +147,11 @@ public class FTBEEventHandler {
 				ServerPlayer target = server.getPlayerList().getPlayer(r.target().getUuid());
 
 				if (source != null) {
-					source.sendSystemMessage(Component.literal("TPA request expired!"));
+					source.sendSystemMessage(Component.translatable("ftbessentials.tpa.expired"));
 				}
 
 				if (target != null) {
-					target.sendSystemMessage(Component.literal("TPA request expired!"));
+					target.sendSystemMessage(Component.translatable("ftbessentials.tpa.expired"));
 				}
 
 				iterator.remove();
@@ -166,11 +170,11 @@ public class FTBEEventHandler {
 			if (data.isMuted()) {
 				// serverPlayer must be non-null if we got the player data
 				//noinspection DataFlowIssue
-				serverPlayer.displayClientMessage(Component.literal("You can't use chat, you've been muted by an admin!")
-						.withStyle(ChatFormatting.RED), false);
+				serverPlayer.displayClientMessage(Component.translatable("ftbessentials.muted").withStyle(ChatFormatting.RED), false);
 				FTBEWorldData.instance.getMuteTimeout(serverPlayer).ifPresent(expiry -> {
 					long left = (expiry - System.currentTimeMillis()) / 1000L;
-					serverPlayer.displayClientMessage(Component.literal("Mute expiry in: " + TimeUtils.prettyTimeString(left)).withStyle(ChatFormatting.RED), false);
+					serverPlayer.displayClientMessage(Component.translatable("ftbessentials.mute_expiry",
+							TimeUtils.prettyTimeString(left)).withStyle(ChatFormatting.RED), false);
 				});
 				return EventResult.interruptFalse();
 			}

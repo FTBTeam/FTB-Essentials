@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.UuidArgument;
@@ -59,7 +60,7 @@ public class OfflineTeleportCommand implements FTBCommand {
         source.getServer().getProfileCache().getAsync(playerName).whenComplete((profileOpt, throwable) -> {
             source.getServer().executeIfPossible(() ->
                     profileOpt.ifPresentOrElse(profile -> tpOffline(source, profile.getId(), level, dest),
-                            () -> source.sendFailure(Component.literal("Unknown player: " + playerName))
+                            () -> source.sendFailure(Component.translatable("ftbessentials.unknown_player", playerName))
                     )
             );
         });
@@ -74,7 +75,7 @@ public class OfflineTeleportCommand implements FTBCommand {
         Path datFile = playerDir.resolve(playerId + ".dat");
 
         if (server.getPlayerList().getPlayer(playerId) != null) {
-            source.sendFailure(Component.literal("Player is online! Use regular /tp command instead"));
+            source.sendFailure(Component.translatable("ftbessentials.tp_offline.player_is_online"));
             return 0;
         }
 
@@ -95,11 +96,11 @@ public class OfflineTeleportCommand implements FTBCommand {
             Path backupFile = playerDir.resolve(playerId + ".dat_old");
             Util.safeReplaceFile(datFile, tempFile, backupFile);
 
-            source.sendSuccess(() -> Component.literal(String.format("Offline player %s moved to [%.2f,%.2f,%.2f] in %s",
-                    playerId, vec.x, vec.y, vec.z, source.getLevel().dimension().location())), false);
+            String pos = String.format("[%.2f,%.2f,%.2f]", vec.x, vec.y, vec.z);
+            source.sendSuccess(() -> Component.translatable("ftbessentials.tp_offline.moved", playerId, pos, source.getLevel().dimension().location()), false);
             return 1;
         } catch (IOException e) {
-            source.sendFailure(Component.literal("Can't update dat file: " + e.getMessage()));
+            source.sendFailure(Component.translatable("ftbessentials.tp_offline.cant_update", e.getMessage()).withStyle(ChatFormatting.RED));
             return 0;
         }
     }

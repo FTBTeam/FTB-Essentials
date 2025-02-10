@@ -62,7 +62,7 @@ public class NearCommand implements FTBCommand {
                 .toList();
 
         final int r = radius;
-        source.sendSuccess(() -> Component.translatable("ftbessentials.feedback.players_within", l.size(), r).withStyle(ChatFormatting.YELLOW), false);
+        source.sendSuccess(() -> Component.translatable("ftbessentials.near.players_within", l.size(), r).withStyle(ChatFormatting.YELLOW), false);
         l.forEach(player ->
                 source.sendSuccess(() -> Component.literal("• ")
                                 .append(player.getDisplayName()).withStyle(ChatFormatting.AQUA)

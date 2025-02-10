@@ -333,7 +333,7 @@ public class FTBEPlayerData {
 					.filter(Objects::nonNull)
 					.toList();
 		} catch (Exception ex) {
-			LOGGER.error("Failed to get all known players: " + ex);
+            LOGGER.error("Failed to get all known players: {}", ex.getMessage());
 		}
 
 		return Collections.emptyList();

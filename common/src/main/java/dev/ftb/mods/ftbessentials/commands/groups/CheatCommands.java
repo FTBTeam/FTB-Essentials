@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbessentials.commands.groups;
 
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftbessentials.FTBEssentialsPlatform;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.commands.SimpleCommandPlayer;
@@ -15,7 +14,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 
 import java.util.List;
@@ -54,7 +52,7 @@ public class CheatCommands {
             title.append(" × ").append(player.getDisplayName());
             srcPlayer.openMenu(new SimpleMenuProvider((i, inv, p) -> ChestMenu.threeRows(i, inv, player.getEnderChestInventory()), title));
         } else {
-            ctx.getSource().sendFailure(Component.literal("Unable to open enderchest inventory!"));
+            ctx.getSource().sendFailure(Component.translatable("ftbessentials.enderchest.unable"));
         }
     }
 
@@ -71,13 +69,15 @@ public class CheatCommands {
 
             if (data.canFly()) {
                 data.setCanFly(false);
-                abilities.mayfly = false;
-                abilities.flying = false;
-                player.displayClientMessage(Component.literal("Flight disabled"), true);
+                if (player.gameMode.isSurvival()) {
+                    abilities.mayfly = false;
+                    abilities.flying = false;
+                }
+                player.displayClientMessage(Component.translatable("ftbessentials.flight.disabled"), true);
             } else {
                 data.setCanFly(true);
                 abilities.mayfly = true;
-                player.displayClientMessage(Component.literal("Flight enabled"), true);
+                player.displayClientMessage(Component.translatable("ftbessentials.flight.enabled"), true);
             }
 
             player.onUpdateAbilities();
@@ -91,11 +91,11 @@ public class CheatCommands {
             if (data.isGod()) {
                 data.setGod(false);
                 abilities.invulnerable = false;
-                player.displayClientMessage(Component.literal("God mode disabled"), true);
+                player.displayClientMessage(Component.translatable("ftbessentials.god_mode.disabled"), true);
             } else {
                 data.setGod(true);
                 abilities.invulnerable = true;
-                player.displayClientMessage(Component.literal("God mode enabled"), true);
+                player.displayClientMessage(Component.translatable("ftbessentials.god_mode.enabled"), true);
             }
 
             player.onUpdateAbilities();

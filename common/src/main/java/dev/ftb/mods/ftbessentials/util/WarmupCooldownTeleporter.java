@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.TeleportPos.TeleportResult;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -63,12 +64,14 @@ public class WarmupCooldownTeleporter {
 
 		TeleportPos pos = positionGetter.apply(player);
 
-		TeleportResult blacklistedResult = pos.checkDimensionBlacklist(player);
-		if (!blacklistedResult.isSuccess()) {
-			return blacklistedResult;
-		}
-		
-		CompoundEventResult<Component> result = TeleportEvent.TELEPORT.invoker().teleport(player);
+        if (!player.hasPermissions(Commands.LEVEL_GAMEMASTERS) || !FTBEConfig.ADMINS_EXEMPT_DIMENSION_BLACKLISTS.get()) {
+            TeleportResult blacklistedResult = pos.checkDimensionBlacklist(player);
+            if (!blacklistedResult.isSuccess()) {
+                return blacklistedResult;
+            }
+        }
+
+        CompoundEventResult<Component> result = TeleportEvent.TELEPORT.invoker().teleport(player);
 		if (result.isFalse()) {
 			return TeleportResult.failed(result.object());
 		}
@@ -81,18 +84,17 @@ public class WarmupCooldownTeleporter {
 
 		if (warmupTime == 0) {
 			// just port immediately
-			return teleportNow(player, positionGetter);
+			return teleportNow(player, pos);
 		} else {
 			// schedule the teleport
-			pendingAdditions.put(player.getUUID(), new Warmup(System.currentTimeMillis() + warmupTime * 1000L, this, player.position(), positionGetter));
+			pendingAdditions.put(player.getUUID(), new Warmup(System.currentTimeMillis() + warmupTime * 1000L, this, player.position(), pos));
 			return TeleportResult.SUCCESS;
 		}
 	}
 
-	private TeleportResult teleportNow(ServerPlayer player, Function<ServerPlayer, TeleportPos> positionGetter) {
+	private TeleportResult teleportNow(ServerPlayer player, TeleportPos teleportPos) {
 		lastRun = System.currentTimeMillis();
 
-		TeleportPos teleportPos = positionGetter.apply(player);
 		TeleportPos currentPos = new TeleportPos(player);
 
 		TeleportResult res = teleportPos.teleport(player);
@@ -127,18 +129,17 @@ public class WarmupCooldownTeleporter {
 			if (player != null) {
 				Warmup warmup = entry.getValue();
 				if (warmup.when() <= now) {
-					TeleportResult res = warmup.teleporter().teleportNow(player, warmup.positionGetter());
+					TeleportResult res = warmup.teleporter().teleportNow(player, warmup.teleportPos());
 					toRemove.add(playerId);
 					res.runCommand(player);
 				} else {
 					if (player.position().distanceToSqr(warmup.initialPos) > 0.25) {
 						// player has moved more than half a block
 						toRemove.add(playerId);
-						player.displayClientMessage(Component.literal("Teleportation interrupted!").withStyle(ChatFormatting.RED), true);
+						player.displayClientMessage(Component.translatable("ftbessentials.teleport.interrupted").withStyle(ChatFormatting.RED), true);
 					} else {
 						long seconds = (warmup.when() - now) / 1000L;
-						String secStr = seconds == 1 ? "second" : "seconds";
-						player.displayClientMessage(Component.literal(String.format("Teleporting in %d %s", seconds, secStr)).withStyle(ChatFormatting.YELLOW), true);
+						player.displayClientMessage(Component.translatable("ftbessentials.teleport.notify", seconds).withStyle(ChatFormatting.YELLOW), true);
 					}
 				}
 			} else {
@@ -153,7 +154,7 @@ public class WarmupCooldownTeleporter {
 	public static void cancelWarmup(ServerPlayer player) {
 		if (WARMUPS.containsKey(player.getUUID())) {
 			pendingRemovals.add(player.getUUID());
-			player.displayClientMessage(Component.literal("Teleportation interrupted!").withStyle(ChatFormatting.RED), true);
+			player.displayClientMessage(Component.translatable("ftbessentials.teleport.interrupted").withStyle(ChatFormatting.RED), true);
 		}
 	}
 
@@ -161,6 +162,6 @@ public class WarmupCooldownTeleporter {
 			long when,
 			WarmupCooldownTeleporter teleporter,
 			Vec3 initialPos,
-			Function<ServerPlayer,TeleportPos> positionGetter
+			TeleportPos teleportPos
 	) { }
 }

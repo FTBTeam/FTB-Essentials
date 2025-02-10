@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbessentials.commands.impl.chat;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
@@ -11,7 +12,6 @@ import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
@@ -46,25 +46,17 @@ public class MuteCommand implements FTBCommand {
         );
     }
 
-    private int mute(CommandSourceStack source, ServerPlayer player, String duration) {
+    private int mute(CommandSourceStack source, ServerPlayer player, String duration) throws CommandSyntaxException {
+        DurationInfo info = DurationInfo.fromString(duration);
+
         return FTBEPlayerData.getOrCreate(player).map(data -> {
-            try {
-                DurationInfo info = DurationInfo.fromString(duration);
-                data.setMuted(true);
-                FTBEWorldData.instance.setMuteTimeout(player, info.until());
+            data.setMuted(true);
+            FTBEWorldData.instance.setMuteTimeout(player, info.until());
 
-                MutableComponent msg = player.getDisplayName().copy()
-                        .append(" has been muted by ")
-                        .append(source.getDisplayName())
-                        .append(", ")
-                        .append(info.desc());
-                notifyMuting(source, player, msg);
+            Component msg = Component.translatable("ftbessentials.muted.muted", player.getDisplayName(), source.getDisplayName(), info.desc());
+            notifyMuting(source, player, msg);
 
-                return 1;
-            } catch (IllegalArgumentException e) {
-                source.sendFailure(Component.literal("Invalid duration syntax: '" + duration + "': " + e.getMessage()));
-                return 0;
-            }
+            return 1;
         }).orElse(0);
     }
 
@@ -73,10 +65,7 @@ public class MuteCommand implements FTBCommand {
             data.setMuted(false);
             FTBEWorldData.instance.setMuteTimeout(player, -1);
 
-            MutableComponent msg = player.getDisplayName().copy()
-                    .append(" has been unmuted by ")
-                    .append(source.getDisplayName());
-            notifyMuting(source, player, msg);
+            notifyMuting(source, player, Component.translatable("ftbessentials.muted.unmuted", player.getDisplayName(), source.getDisplayName()));
 
             return 1;
         }).orElse(0);

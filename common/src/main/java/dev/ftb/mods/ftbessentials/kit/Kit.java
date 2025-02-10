@@ -1,8 +1,12 @@
 package dev.ftb.mods.ftbessentials.kit;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.ftb.mods.ftbessentials.commands.impl.kit.KitCommand;
+import dev.ftb.mods.ftbessentials.integration.PermissionsHelper;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -10,6 +14,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,10 +69,9 @@ public class Kit {
     }
 
     private SNBTCompoundTag saveStack(ItemStack stack, HolderLookup.Provider provider) {
-        SNBTCompoundTag tag = new SNBTCompoundTag();
-        tag.singleLine();
-        stack.save(provider, tag);
-        return tag;
+        var res = SNBTCompoundTag.of(stack.save(provider));
+        res.singleLine();
+        return res;
     }
 
     public static Kit fromNBT(String kitName, CompoundTag tag, HolderLookup.Provider provider) {
@@ -80,7 +85,7 @@ public class Kit {
         return new Kit(kitName, items, tag.getLong("cooldown"), tag.getBoolean("auto_grant"));
     }
 
-    public void giveToPlayer(ServerPlayer player, FTBEPlayerData playerData, boolean throwOnCooldown) {
+    public void giveToPlayer(ServerPlayer player, FTBEPlayerData playerData, boolean throwOnCooldown) throws CommandSyntaxException {
         long now = System.currentTimeMillis();
 
         if (!checkForCooldown(player, playerData, now, throwOnCooldown)) {
@@ -101,12 +106,12 @@ public class Kit {
         }
     }
 
-    private boolean checkForCooldown(ServerPlayer player, FTBEPlayerData data, long now, boolean throwOnCooldown) {
+    private boolean checkForCooldown(ServerPlayer player, FTBEPlayerData data, long now, boolean throwOnCooldown) throws CommandSyntaxException {
         if (cooldown != 0) {
             long lastUsed = data.getLastKitUseTime(kitName);
             if (cooldown < 0L && lastUsed != 0L) {
                 if (throwOnCooldown) {
-                    throw new IllegalStateException("Kit " + kitName + " is a one-time use kit (already given to " + player.getGameProfile().getName() + ")");
+                    throw KitCommand.ONE_TIME_ONLY.create(kitName, player.getGameProfile().getName());
                 } else {
                     return true;
                 }
@@ -114,8 +119,7 @@ public class Kit {
             long delta = (now - lastUsed) / 1000L;
             if (delta < cooldown) {
                 if (throwOnCooldown) {
-                    long remaining = cooldown - delta;
-                    throw new IllegalStateException("Kit " + kitName + " is on cooldown - " + TimeUtils.prettyTimeString(remaining) + " remaining");
+                    throw KitCommand.ON_COOLDOWN.create(kitName, TimeUtils.prettyTimeString(cooldown - delta));
                 } else {
                     return true;
                 }
@@ -130,5 +134,15 @@ public class Kit {
 
     public Kit withAutoGrant(boolean newAutoGrant) {
         return new Kit(kitName, items, cooldown, newAutoGrant);
+    }
+
+    public boolean playerCanGetKit(@Nullable ServerPlayer player) {
+        return player == null
+                || player.hasPermissions(Commands.LEVEL_GAMEMASTERS)
+                || checkPermissionNode(player, kitName);
+    }
+
+    public static boolean checkPermissionNode(@NotNull ServerPlayer player, String kitName) {
+        return PermissionsHelper.getInstance().getBool(player, false, "ftbessentials.give_me_kit." + kitName);
     }
 }

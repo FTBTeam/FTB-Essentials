@@ -58,7 +58,7 @@ public class TPACommand implements FTBCommand {
         }
 
         if (REQUESTS.values().stream().anyMatch(r -> r.source() == dataSource && r.target() == dataTarget)) {
-            player.displayClientMessage(Component.literal("Request already sent!"), false);
+            player.displayClientMessage(Component.translatable("ftbessentials.tpa.already_sent"), false);
             return 0;
         }
 
@@ -72,56 +72,58 @@ public class TPACommand implements FTBCommand {
 
         TPARequest request = create(dataSource, dataTarget, here);
 
-        MutableComponent component = Component.literal("TPA request! [ ");
-        component.append((here ? target : player).getDisplayName().copy().withStyle(ChatFormatting.YELLOW));
-        component.append(" ➡ ");
-        component.append((here ? player : target).getDisplayName().copy().withStyle(ChatFormatting.YELLOW));
-        component.append(" ]");
+        Component line1 = Component.translatable("ftbessentials.tpa.notify",
+                (here ? target : player).getDisplayName().copy().withStyle(ChatFormatting.YELLOW),
+                (here ? player : target).getDisplayName().copy().withStyle(ChatFormatting.YELLOW)
+        );
 
-        MutableComponent component2 = Component.literal("Click one of these: ");
-        component2.append(Component.literal("Accept ✔").setStyle(Style.EMPTY
+        MutableComponent line2 = Component.translatable("ftbessentials.tpa.click_one");
+        line2.append(Component.translatable("ftbessentials.tpa.accept").setStyle(Style.EMPTY
                 .applyFormat(ChatFormatting.GREEN)
                 .withBold(true)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpaccept " + request.id()))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to Accept")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("ftbessentials.tpa.accept.tooltip")))
         ));
 
-        component2.append(" | ");
+        line2.append(" | ");
 
-        component2.append(Component.literal("Deny ❌").setStyle(Style.EMPTY
+        line2.append(Component.translatable("ftbessentials.tpa.deny").setStyle(Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
                 .withBold(true)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpdeny " + request.id()))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to Deny")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("ftbessentials.tpa.deny.tooltip")))
         ));
 
-        component2.append(" |");
+        line2.append(" |");
 
-        target.displayClientMessage(component, false);
-        target.displayClientMessage(component2, false);
+        target.displayClientMessage(line1, false);
+        target.displayClientMessage(line2, false);
 
-        player.displayClientMessage(Component.literal("Request sent!"), false);
+        player.displayClientMessage(Component.translatable("ftbessentials.tpa.request_sent"), false);
         return 1;
     }
 
+    private static final Component INVALID_REQUEST = Component.translatable("ftbessentials.tpa.invalid_request").withStyle(ChatFormatting.RED);
+
     public int tpaccept(ServerPlayer player, String id) {
+
         var uuid = attemptUuid(id);
         if (uuid == null) {
-            player.displayClientMessage(Component.literal("Invalid request!"), false);
+            player.displayClientMessage(INVALID_REQUEST, false);
             return 0;
         }
 
         TPARequest request = REQUESTS.get(uuid);
 
         if (request == null) {
-            player.displayClientMessage(Component.literal("Invalid request!"), false);
+            player.displayClientMessage(INVALID_REQUEST, false);
             return 0;
         }
 
         ServerPlayer sourcePlayer = player.server.getPlayerList().getPlayer(request.source().getUuid());
 
         if (sourcePlayer == null) {
-            player.displayClientMessage(Component.literal("Player has gone offline!"), false);
+            player.displayClientMessage(Component.translatable("ftbessentials.tpa.gone_offline").withStyle(ChatFormatting.GOLD), false);
             return 0;
         }
 
@@ -139,24 +141,24 @@ public class TPACommand implements FTBCommand {
     public int tpdeny(ServerPlayer player, String id) {
         var uuid = attemptUuid(id);
         if (uuid == null) {
-            player.displayClientMessage(Component.literal("Invalid request!"), false);
+            player.displayClientMessage(INVALID_REQUEST, false);
             return 0;
         }
 
         TPARequest request = REQUESTS.get(uuid);
         if (request == null) {
-            player.displayClientMessage(Component.literal("Invalid request!"), false);
+            player.displayClientMessage(INVALID_REQUEST, false);
             return 0;
         }
 
         REQUESTS.remove(request.id());
 
-        player.displayClientMessage(Component.literal("Request denied!"), false);
+        player.displayClientMessage(Component.translatable("ftbessentials.tpa.denied"), false);
 
         ServerPlayer player2 = player.server.getPlayerList().getPlayer(request.target().getUuid());
 
         if (player2 != null) {
-            player2.displayClientMessage(Component.literal("Request denied!"), false);
+            player2.displayClientMessage(Component.translatable("ftbessentials.tpa.denied"), false);
         }
 
         return 1;
