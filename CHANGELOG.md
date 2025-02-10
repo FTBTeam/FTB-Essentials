@@ -13,11 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * `/give_me_kit <kit>` is equivalent to `/kit give @s <kit>` but is usable by non-op players by default
   * In addition, the boolean permission node `ftbessentials.give_me_kit.<kit>` is now checked if the player using the command is not admin-level
   * In this way, regular players can be given the ability via permission nodes to give themselves specific kits
+* Added `home_min_y` config setting, which sets a minimum Y-value accepted by the `/sethome` command
+* All hardcoded player-visible messages in the mod are now translatable; many more translations are now in `en_us.json`
 
 ### Fixed
 * Fixed itemstack serialization not working correctly when saving kits
 * Fixed destination pos being unnecessarily recomputed when running teleporting commands
-  * Most important for `/rtp` behaviour which is non-deterministic
+  * Most important for `/rtp` behaviour, which is non-deterministic
 * Active flight is no longer immediately switched off by the `/fly` command if player is in creative/spectator mode
 
 ## [2101.1.4]
