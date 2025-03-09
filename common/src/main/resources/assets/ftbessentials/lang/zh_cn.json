@@ -39,13 +39,13 @@
     "ftbessentials.kit.cooldown": "冷却: %s",
     "ftbessentials.kit.cooldown.none": "无冷却",
     "ftbessentials.kit.one_time": "一次性使用",
-    "ftbessentials.kit.one_time_only": "套件\"%s\" 是一个一次性套件 (已被给予\"%s\")",
-    "ftbessentials.kit.on_cooldown": "套件\"%s\"正在冷却 - 剩余 %s",
+    "ftbessentials.kit.one_time_only": "套件 \"%s\" 是一个一次性套件 (已被给予\"%s\")",
+    "ftbessentials.kit.on_cooldown": "套件 \"%s\" 正在冷却 - 剩余 %s",
     "ftbessentials.kit.autogranted": "玩家登录时自动生成",
     "ftbessentials.kit.items": "物品:",
     "ftbessentials.kit.no_such_kit": "没有此种套件: '%s'",
     "ftbessentials.kit.already_exists": "套件 '%s' 已经存在",
-    "ftbessentials.kit.cooldown_reset": " %s的冷却已对UUID %s 重置",
+    "ftbessentials.kit.cooldown_reset": " %s 的冷却已对UUID %s 重置",
     "ftbessentials.kit.cooldown_reset_all": " %s 的冷却已对所有玩家重置",
     "ftbessentials.muted.muted": "玩家 %s 已被 %s 禁言 - 时限: %s",
     "ftbessentials.muted.unmuted": "玩家 %s 已被 %s 解除禁言",
@@ -94,4 +94,3 @@
     "ftbessentials.teleport.interrupted": "传送被打断!",
     "ftbessentials.teleport.notify": "在 %s 秒后传送"
   }
-  
