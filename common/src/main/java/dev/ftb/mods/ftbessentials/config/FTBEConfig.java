@@ -28,6 +28,7 @@ public interface FTBEConfig {
 			.comment("Should be the /back command only be used for returning to the last death point?");
 	// spawn
 	TimedCommandConfig SPAWN = new TimedCommandConfig(TELEPORTATION, "spawn", 10, 0);
+	TimedCommandConfig PLAYER_SPAWN = new TimedCommandConfig(TELEPORTATION, "playerspawn", 10, 0);
 	// warp
 	TimedCommandConfig WARP = new TimedCommandConfig(TELEPORTATION, "warp", 10, 0)
 			.comment("Allows admins to create 'warps', which are fixed points in the world that users may teleport to using /warp");

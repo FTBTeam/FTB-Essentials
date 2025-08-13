@@ -22,7 +22,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
@@ -54,6 +53,13 @@ public class TeleportCommands {
 			dispatcher.register(Commands.literal("spawn")
 					.requires(FTBEConfig.SPAWN)
 					.executes(context -> spawn(context.getSource().getPlayerOrException()))
+			);
+		}
+
+		if (FTBEConfig.PLAYER_SPAWN.isEnabled()) {
+			dispatcher.register(Commands.literal("playerspawn")
+					.requires(FTBEConfig.PLAYER_SPAWN)
+					.executes(context -> playerSpawn(context.getSource().getPlayerOrException()))
 			);
 		}
 
@@ -132,7 +138,7 @@ public class TeleportCommands {
 		}).orElse(0);
 	}
 
-	public static int spawn(ServerPlayer player) {
+	public static int playerSpawn(ServerPlayer player) {
 		return FTBEPlayerData.getOrCreate(player).map(data -> {
 			ServerLevel level = player.server.getLevel(player.getRespawnDimension());
 			if (level == null) {
@@ -140,6 +146,13 @@ public class TeleportCommands {
 			}
 			BlockPos pos = Objects.requireNonNullElse(player.getRespawnPosition(), level.getSharedSpawnPos());
 			return data.spawnTeleporter.teleport(player, p -> new TeleportPos(level, pos, player.getRespawnAngle(), 0F)).runCommand(player);
+		}).orElse(0);
+	}
+
+	public static int spawn(ServerPlayer player) {
+		return FTBEPlayerData.getOrCreate(player).map(data -> {
+			ServerLevel level = player.server.getLevel(Level.OVERWORLD);
+			return level == null ? 0 : data.spawnTeleporter.teleport(player, p -> new TeleportPos(level, level.getSharedSpawnPos(), level.getSharedSpawnAngle(), 0F)).runCommand(player);
 		}).orElse(0);
 	}
 
