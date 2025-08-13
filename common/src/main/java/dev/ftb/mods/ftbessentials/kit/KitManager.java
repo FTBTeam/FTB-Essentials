@@ -29,7 +29,7 @@ public enum KitManager {
 
     public void load(CompoundTag kits, HolderLookup.Provider provider) {
         allKits.clear();
-        kits.getAllKeys().forEach(key -> allKits.put(key, Kit.fromNBT(key, kits.getCompound(key), provider)));
+        kits.keySet().forEach(key -> allKits.put(key, Kit.fromNBT(key, kits.getCompoundOrEmpty(key), provider)));
     }
 
     public CompoundTag save(HolderLookup.Provider provider) {
@@ -68,11 +68,11 @@ public enum KitManager {
         if (hotbarOnly) {
             NonNullList<ItemStack> items = NonNullList.create();
             for (int i = 0; i < 9; i++) {
-                items.add(player.getInventory().items.get(i));
+                items.add(player.getInventory().getItem(i));
             }
             createKit(kitName, cooldownSecs, () -> items);
         } else {
-            createKit(kitName, cooldownSecs, () -> player.getInventory().items);
+            createKit(kitName, cooldownSecs, () -> player.getInventory().getNonEquipmentItems());
         }
     }
 

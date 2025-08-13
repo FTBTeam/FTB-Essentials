@@ -4,10 +4,12 @@ import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.kit.KitManager;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -57,20 +59,21 @@ public class FTBEWorldData {
 	}
 
 	public void saveIfChanged() {
-		if (needSave && SNBT.write(mkdirs("").resolve(DATA_FILE), toNBT())) {
-			needSave = false;
+		if (needSave) {
+            try {
+                SNBT.tryWrite(mkdirs("").resolve(DATA_FILE), toNBT());
+            } catch (IOException e) {
+				FTBEssentials.LOGGER.error("can't write {} : {} / {}", DATA_FILE, e.getClass().getName(), e.getMessage());
+            }
+            needSave = false;
 		}
 	}
 
 	public void load() {
 		try {
-			SNBTCompoundTag tag = SNBT.read(mkdirs("").resolve(DATA_FILE));
-			if (tag != null) {
-				loadNBT(tag);
-			}
+			loadNBT(SNBT.tryRead(mkdirs("").resolve(DATA_FILE)));
 		} catch (Exception ex) {
-			FTBEssentials.LOGGER.error("Failed to load world data: {}", ex);
-			ex.printStackTrace();
+			FTBEssentials.LOGGER.error("Failed to load world data from {}: {} / {}", DATA_FILE, ex.getClass().getName(), ex.getMessage());
 		}
 	}
 
@@ -88,16 +91,16 @@ public class FTBEWorldData {
 		return tag;
 	}
 
-	public void loadNBT(SNBTCompoundTag tag) {
-		warpManager.readNBT(tag.getCompound("warps"));
+	public void loadNBT(CompoundTag tag) {
+		warpManager.readNBT(tag.getCompoundOrEmpty("warps"));
 
 		muteTimeouts.clear();
-		SNBTCompoundTag mutesTag = tag.getCompound("mute_timeouts");
-		for (String key : mutesTag.getAllKeys()) {
-			muteTimeouts.put(UUID.fromString(key), mutesTag.getLong(key));
+		CompoundTag mutesTag = tag.getCompoundOrEmpty("mute_timeouts");
+		for (String key : mutesTag.keySet()) {
+			mutesTag.getLong(key).ifPresent(l -> muteTimeouts.put(UUID.fromString(key), l));
 		}
 
-		KitManager.getInstance().load(tag.getCompound("kits"), server.registryAccess());
+		KitManager.getInstance().load(tag.getCompoundOrEmpty("kits"), server.registryAccess());
 	}
 
 	public void tickMuteTimeouts(MinecraftServer server) {

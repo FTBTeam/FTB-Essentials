@@ -120,8 +120,8 @@ public class HomeCommand implements FTBCommand {
 
                                     if (source.hasPermission(Commands.LEVEL_GAMEMASTERS)) {
                                         line.withStyle(Style.EMPTY
-                                                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp @s " + entry.destination().posAsString()))
-                                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("ftbessentials.click_to_teleport")))
+                                                .withClickEvent(new ClickEvent.RunCommand("/tp @s " + entry.destination().posAsString()))
+                                                .withHoverEvent(new HoverEvent.ShowText(Component.translatable("ftbessentials.click_to_teleport")))
                                         );
                                     }
                                     return line;

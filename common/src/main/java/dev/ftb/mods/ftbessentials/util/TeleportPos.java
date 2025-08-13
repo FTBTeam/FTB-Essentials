@@ -1,10 +1,14 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.ftb.mods.ftblibrary.util.NBTUtils;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -14,42 +18,71 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
+import java.util.Optional;
+import java.util.Set;
+
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class TeleportPos {
-	private final ResourceKey<Level> dimension;
+	public static final Codec<TeleportPos> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+			ResourceKey.codec(Registries.DIMENSION).fieldOf("dim").forGetter(p -> p.dimensionId),
+			BlockPos.CODEC.fieldOf("pos").forGetter(TeleportPos::getPos),
+			Codec.FLOAT.optionalFieldOf("yRot").forGetter(p -> p.yRot),
+			Codec.FLOAT.optionalFieldOf("xRot").forGetter(p -> p.xRot),
+			Codec.LONG.fieldOf("time").forGetter(p -> p.time)
+	).apply(builder, TeleportPos::new));
+
+	private final ResourceKey<Level> dimensionId;
 	private final BlockPos pos;
-	public final Float yRot, xRot;
+	public final Optional<Float> yRot;
+	public final Optional<Float> xRot;
 	private final long time;
 
-	public TeleportPos(ResourceKey<Level> d, BlockPos p) {
-		this(d, p, null, null);
-	}
+    private TeleportPos(ResourceKey<Level> dimensionId, BlockPos pos, Optional<Float> yRot, Optional<Float> xRot, long time) {
+        this.dimensionId = dimensionId;
+        this.pos = pos;
+        this.yRot = yRot;
+        this.xRot = xRot;
+        this.time = time;
+    }
 
-	public TeleportPos(ResourceKey<Level> d, BlockPos p, Float yRot, Float xRot) {
-		dimension = d;
-		pos = p;
-		this.yRot = yRot;
-		this.xRot = xRot;
-		time = System.currentTimeMillis();
+	public TeleportPos(ResourceKey<Level> dimensionId, BlockPos pos) {
+		this(dimensionId, pos, null, null);
 	}
 
 	public TeleportPos(Level world, BlockPos p, Float yRot, Float xRot) {
 		this(world.dimension(), p, yRot, xRot);
 	}
 
+	public TeleportPos(ResourceKey<Level> dimensionId, BlockPos pos, Float yRot, Float xRot) {
+		this.dimensionId = dimensionId;
+		this.pos = pos;
+		this.yRot = Optional.ofNullable(yRot);
+		this.xRot = Optional.ofNullable(xRot);
+		this.time = System.currentTimeMillis();
+	}
+
 	public TeleportPos(Entity entity) {
 		this(entity.level(), entity.blockPosition(), entity.getYRot(), entity.getXRot());
 	}
 
-	public TeleportPos(CompoundTag tag) {
-		dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(tag.getString("dim")));
-		pos = new BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"));
-		this.yRot = (tag.getTagType("yRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("yRot") : null;
-		this.xRot = (tag.getTagType("xRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("xRot") : null;
-		time = tag.getLong("time");
+	public static TeleportPos fromNBT(CompoundTag tag) {
+		return CODEC.parse(NbtOps.INSTANCE, tag).getOrThrow();
 	}
 
+	public Tag toNBT() {
+		return CODEC.encodeStart(NbtOps.INSTANCE, this).getOrThrow();
+	}
+
+//	public TeleportPos(CompoundTag tag) {
+//		dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(tag.getString("dim")));
+//		pos = new BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"));
+//		this.yRot = (tag.getTagType("yRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("yRot") : null;
+//		this.xRot = (tag.getTagType("xRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("xRot") : null;
+//		time = tag.getLong("time");
+//	}
+
 	public TeleportResult checkDimensionBlacklist(Player player) {
-		if (!DimensionFilter.isDimensionOKTo(this.dimension)) {
+		if (!DimensionFilter.isDimensionOKTo(dimensionId)) {
 			return TeleportResult.DIMENSION_NOT_ALLOWED_TO;
 		} else if(!DimensionFilter.isDimensionOKFrom(player.level().dimension())) {
 			return TeleportResult.DIMENSION_NOT_ALLOWED_FROM;
@@ -58,39 +91,39 @@ public class TeleportPos {
 	}
 
 	public TeleportResult teleport(ServerPlayer player) {
-		ServerLevel level = player.server.getLevel(dimension);
+		ServerLevel level = player.getServer().getLevel(dimensionId);
 		if (level == null) {
 			return TeleportResult.DIMENSION_NOT_FOUND;
 		}
 
 		int xpLevel = player.experienceLevel;
-		float xrot = (this.xRot == null) ? player.getXRot() : this.xRot;
-		float yrot = (this.yRot == null) ? player.getYRot() : this.yRot;
-		player.teleportTo(level, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, yrot, xrot);
+		float xrot = xRot.orElse(player.getXRot());
+		float yrot = yRot.orElse(player.getYRot());
+		player.teleportTo(level, pos.getX() + 0.5D, pos.getY() + 0.1D, pos.getZ() + 0.5D, Set.of(), yrot, xrot, false);
 		player.setExperienceLevels(xpLevel);
 		return TeleportResult.SUCCESS;
 	}
 
-	public CompoundTag write() {
-		SNBTCompoundTag tag = new SNBTCompoundTag();
-		tag.singleLine();
-		tag.putString("dim", dimension.location().toString());
-		tag.putInt("x", pos.getX());
-		tag.putInt("y", pos.getY());
-		tag.putInt("z", pos.getZ());
-		tag.putLong("time", time);
-		if (this.xRot != null) tag.putFloat("xRot", this.xRot);
-		if (this.yRot != null) tag.putFloat("yRot", this.yRot);
-		return tag;
-	}
+//	public CompoundTag write() {
+//		SNBTCompoundTag tag = new SNBTCompoundTag();
+//		tag.singleLine();
+//		tag.putString("dim", dimension.location().toString());
+//		tag.putInt("x", pos.getX());
+//		tag.putInt("y", pos.getY());
+//		tag.putInt("z", pos.getZ());
+//		tag.putLong("time", time);
+//		if (this.xRot != null) tag.putFloat("xRot", this.xRot);
+//		if (this.yRot != null) tag.putFloat("yRot", this.yRot);
+//		return tag;
+//	}
 
 	public String distanceString(TeleportPos origin) {
-		if (origin.dimension == dimension) {
+		if (origin.dimensionId == dimensionId) {
 			double dx = pos.getX() - origin.pos.getX();
 			double dz = pos.getZ() - origin.pos.getZ();
 			return (int) Math.sqrt(dx * dx + dz * dz) + "m";
 		} else {
-			ResourceLocation s = dimension.location();
+			ResourceLocation s = dimensionId.location();
 
 			if (s.getNamespace().equals("minecraft")) {
 				return switch (s.getPath()) {
@@ -138,9 +171,9 @@ public class TeleportPos {
 		TeleportResult DIMENSION_NOT_FOUND = failed(Component.translatable("ftbessentials.dimension_not_found"));
 
 		TeleportResult UNKNOWN_DESTINATION = failed(Component.translatable("ftbessentials.unknown_dest"));
-		
+
 		TeleportResult DIMENSION_NOT_ALLOWED_FROM = failed(Component.translatable("ftbessentials.teleport.not_from_here"));
-		
+
 		TeleportResult DIMENSION_NOT_ALLOWED_TO = failed(Component.translatable("ftbessentials.teleport.not_to_here"));
 
 		int runCommand(ServerPlayer player);

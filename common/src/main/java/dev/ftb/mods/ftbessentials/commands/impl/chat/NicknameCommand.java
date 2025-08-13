@@ -48,7 +48,7 @@ public class NicknameCommand implements FTBCommand {
                 player.displayClientMessage(Component.translatable("ftbessentials.nick.changed", data.getNick()), false);
             }
 
-            data.sendTabName(player.server);
+            data.sendTabName(player.getServer());
             return 1;
         }).orElse(0);
     }

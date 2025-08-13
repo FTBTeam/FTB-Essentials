@@ -10,7 +10,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -69,20 +69,20 @@ public class Kit {
     }
 
     private SNBTCompoundTag saveStack(ItemStack stack, HolderLookup.Provider provider) {
-        var res = SNBTCompoundTag.of(stack.save(provider));
+        var res = SNBTCompoundTag.of(ItemStack.OPTIONAL_CODEC.encodeStart(NbtOps.INSTANCE, stack).getOrThrow());
         res.singleLine();
         return res;
     }
 
     public static Kit fromNBT(String kitName, CompoundTag tag, HolderLookup.Provider provider) {
         List<ItemStack> items = new ArrayList<>();
-        ListTag list = tag.getList("items", Tag.TAG_COMPOUND);
+        ListTag list = tag.getListOrEmpty("items");
         list.forEach(el -> {
             if (el instanceof CompoundTag c) {
-                ItemStack.parse(provider, c).ifPresent(items::add);
+                ItemStack.CODEC.parse(NbtOps.INSTANCE, c).result().ifPresent(items::add);
             }
         });
-        return new Kit(kitName, items, tag.getLong("cooldown"), tag.getBoolean("auto_grant"));
+        return new Kit(kitName, items, tag.getLongOr("cooldown", 0L), tag.getBooleanOr("auto_grant", false));
     }
 
     public void giveToPlayer(ServerPlayer player, FTBEPlayerData playerData, boolean throwOnCooldown) throws CommandSyntaxException {

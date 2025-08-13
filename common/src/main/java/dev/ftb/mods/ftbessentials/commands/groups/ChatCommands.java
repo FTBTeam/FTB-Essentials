@@ -32,12 +32,12 @@ public class ChatCommands {
             PlayerDisplayNameUtil.refreshDisplayName(player);
 
             if (data.getRecording() == FTBEPlayerData.RecordingStatus.RECORDING) {
-                player.server.getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" ").append(Component.translatable("ftbessentials.chat.status.start_record")), false);
+                player.getServer().getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" ").append(Component.translatable("ftbessentials.chat.status.start_record")), false);
             } else {
-                player.server.getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" ").append(Component.translatable("ftbessentials.chat.status.stop_record")), false);
+                player.getServer().getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" ").append(Component.translatable("ftbessentials.chat.status.stop_record")), false);
             }
 
-            data.sendTabName(player.server);
+            data.sendTabName(player.getServer());
             return 1;
         }).orElse(0);
     }
@@ -48,12 +48,12 @@ public class ChatCommands {
             PlayerDisplayNameUtil.refreshDisplayName(player);
 
             if (data.getRecording() == FTBEPlayerData.RecordingStatus.STREAMING) {
-                player.server.getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" ").append(Component.translatable("ftbessentials.chat.status.start_stream")), false);
+                player.getServer().getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" ").append(Component.translatable("ftbessentials.chat.status.start_stream")), false);
             } else {
-                player.server.getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" ").append(Component.translatable("ftbessentials.chat.status.stop_stream")), false);
+                player.getServer().getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" ").append(Component.translatable("ftbessentials.chat.status.stop_stream")), false);
             }
 
-            data.sendTabName(player.server);
+            data.sendTabName(player.getServer());
             return 1;
         }).orElse(0);
     }

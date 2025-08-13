@@ -42,6 +42,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public class TeleportingCommands {
     public static final TagKey<Block> IGNORE_RTP_BLOCKS = TagKey.create(Registries.BLOCK, FTBEssentials.essentialsId("ignore_rtp"));
@@ -121,18 +122,22 @@ public class TeleportingCommands {
 
     public static int playerSpawn(ServerPlayer player) {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
-            ServerLevel level = player.server.getLevel(player.getRespawnDimension());
-            if (level == null) {
-                return 0;
+            var respawnConfig = player.getRespawnConfig();
+            if (respawnConfig != null) {
+                ServerLevel level = player.getServer().getLevel(respawnConfig.dimension());
+                if (level == null) {
+                    return 0;
+                }
+                BlockPos pos = Objects.requireNonNullElse(respawnConfig.pos(), level.getSharedSpawnPos());
+                return data.spawnTeleporter.teleport(player, p -> new TeleportPos(level, pos, respawnConfig.angle(), 0F)).runCommand(player);
             }
-            BlockPos pos = Objects.requireNonNullElse(player.getRespawnPosition(), level.getSharedSpawnPos());
-            return data.spawnTeleporter.teleport(player, p -> new TeleportPos(level, pos, player.getRespawnAngle(), 0F)).runCommand(player);
+            return 0;
         }).orElse(0);
     }
 
     private static int spawn(ServerPlayer player) {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
-            ServerLevel level = player.server.getLevel(Level.OVERWORLD);
+            ServerLevel level = player.getServer().getLevel(Level.OVERWORLD);
             return level == null ? 0 : data.spawnTeleporter.teleport(player, p -> new TeleportPos(level, level.getSharedSpawnPos(), level.getSharedSpawnAngle(), 0F)).runCommand(player);
         }).orElse(0);
     }
@@ -208,7 +213,7 @@ public class TeleportingCommands {
     //#endregion
 
     private static int tpLast(ServerPlayer player, GameProfile to) {
-        ServerPlayer toPlayer = player.server.getPlayerList().getPlayer(to.getId());
+        ServerPlayer toPlayer = player.getServer().getPlayerList().getPlayer(to.getId());
         if (toPlayer != null) {
             FTBEPlayerData.addTeleportHistory(player);
             new TeleportPos(toPlayer).teleport(player);
@@ -226,7 +231,7 @@ public class TeleportingCommands {
     }
 
     private static int tpx(ServerPlayer player, ServerLevel to) {
-        player.teleportTo(to, player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
+        player.teleportTo(to, player.getX(), player.getY(), player.getZ(), Set.of(), player.getYRot(), player.getXRot(), false);
         return 1;
     }
 
@@ -239,7 +244,7 @@ public class TeleportingCommands {
         BlockPos.MutableBlockPos mPos = res.getBlockPos().above().mutable();
         while (true) {
             Level level = player.level();
-            if (isEmptyShape(level, mPos.above()) && isEmptyShape(level, mPos.above(2)) || mPos.getY() >= level.getMaxBuildHeight())
+            if (isEmptyShape(level, mPos.above()) && isEmptyShape(level, mPos.above(2)) || mPos.getY() >= level.getMaxY())
                 break;
             mPos.move(Direction.UP, 2);
         }

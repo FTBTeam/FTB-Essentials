@@ -27,7 +27,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.ClickEvent.Action;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
@@ -223,7 +222,7 @@ public class KitCommand implements FTBCommand {
         kits.stream().sorted(Comparator.comparing(Kit::getKitName))
                 .forEach(kit -> source.sendSuccess(() -> Component.literal("• " + kit.getKitName()).withStyle(Style.EMPTY
                         .withColor(ChatFormatting.YELLOW)
-                        .withClickEvent(new ClickEvent(Action.RUN_COMMAND, "/kit show " + kit.getKitName()))
+                        .withClickEvent(new ClickEvent.RunCommand("/kit show " + kit.getKitName()))
                 ), false));
         return 1;
     }
