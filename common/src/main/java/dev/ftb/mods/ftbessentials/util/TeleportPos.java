@@ -113,6 +113,9 @@ public class TeleportPos {
 		// Normal shortString would be 1, 2, 3 so we remove the commas
 		return pos.toShortString().replaceAll(",", "");
 	}
+	public ResourceKey<Level> getDimension() {
+		return dimension;
+	}
 
 	@FunctionalInterface
 	public interface TeleportResult {

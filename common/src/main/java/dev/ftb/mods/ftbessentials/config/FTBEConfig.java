@@ -65,7 +65,7 @@ public interface FTBEConfig {
 			.comment("Allows players to create requests to teleport to other users on the server,",
 					"as well as requesting other players to teleport to them");
 	// rtp
-	TimedCommandConfig RTP = new TimedCommandConfig(TELEPORTATION, "rtp", 600, 0)
+	TimedCommandConfig RTP = new TimedCommandConfig(TELEPORTATION, "rtp", 420, 0)
 			.comment("Allows players to teleport to a random point in the Wilderness",
 					"Note: This currently does not respect Claimed Chunks yet!");
 	IntValue RTP_MAX_TRIES = RTP.config.addInt("max_tries", 100).range(1, 1000).comment("Number of tries before /rtp gives up");

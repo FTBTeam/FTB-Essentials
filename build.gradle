@@ -46,6 +46,10 @@ allprojects {
         mavenLocal()
 
         maven {
+            name "ftbMavenReleases"
+            url "https://maven.ftb.dev/releases"
+        }
+        maven {
             url "https://maven.architectury.dev/"
             content {
                 includeGroup "dev.architectury"
@@ -105,7 +109,7 @@ publishMods {
 
     def createOptions = (String projectName) -> {
         publishOptions {
-            file = project.provider { project(":$projectName").tasks.remapJar }.flatMap { it.archiveFile }
+            file = project.provider { project(":$projectName").tasks.remapJar }.flatMap { it.archiveFile } as Provider<? extends RegularFile>
             displayName = "[${projectName.toUpperCase()}][${minecraft_version}] ${readable_name} ${mod_version}"
             modLoaders.add(projectName.toLowerCase())
         }

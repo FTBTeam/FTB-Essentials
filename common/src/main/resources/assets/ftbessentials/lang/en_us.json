@@ -92,5 +92,6 @@
   "ftbessentials.teleport.not_to_here": "Teleportation to this dimension is not allowed!",
   "ftbessentials.teleport.on_cooldown": "Can't teleport yet! Cooldown: %s",
   "ftbessentials.teleport.interrupted": "Teleportation interrupted!",
-  "ftbessentials.teleport.notify": "Teleporting in %ss"
+  "ftbessentials.teleport.notify": "Teleporting in %ss",
+  "ftbessentials.teleport.no_safe_position": "No safe position found!"
 }
