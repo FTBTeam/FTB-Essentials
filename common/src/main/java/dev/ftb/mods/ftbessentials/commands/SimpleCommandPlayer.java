@@ -16,36 +16,28 @@ import java.util.List;
 public record SimpleCommandPlayer(
         String name,
         int permissionLevel,
+        int targetedPermissionLevel,  // when using the command with a "target" player
         ToggleableConfig config,
         EntitySelectorAction action
 ) implements FTBCommand {
     public static SimpleCommandPlayer create(String name, int permissionLevel, ToggleableConfig config, EntitySelectorAction action) {
-        return new SimpleCommandPlayer(name, permissionLevel, config, action);
+        return new SimpleCommandPlayer(name, permissionLevel, permissionLevel, config, action);
     }
 
     public static SimpleCommandPlayer create(String name, ToggleableConfig config, EntitySelectorAction action) {
-        return new SimpleCommandPlayer(name,0, config, action);
+        return create(name, Commands.LEVEL_ALL, config, action);
     }
 
     @Override
     public List<LiteralArgumentBuilder<CommandSourceStack>> register() {
-        var command = Commands.literal(name);
-
-        if (this.permissionLevel > 0) {
-            command.requires(cs -> cs.hasPermission(this.permissionLevel));
-        }
-
-        command.executes(context -> {
-                var player = context.getSource().getPlayerOrException();
-                action.accept(context, player);
-                return 1;
-            }).then(Commands.argument("target", EntityArgument.player()).executes(context -> {
-                var entities = EntityArgument.getPlayer(context, "target");
-                action.accept(context, entities);
-                return 1;
-            }));
-
-        return List.of(command);
+        return List.of(
+                Commands.literal(name).requires(cs -> cs.hasPermission(this.permissionLevel))
+                        .executes(context -> action.accept(context, context.getSource().getPlayerOrException()))
+                        .then(Commands.argument("target", EntityArgument.player())
+                                .requires(cs -> cs.hasPermission(targetedPermissionLevel))
+                                .executes(context -> action.accept(context, EntityArgument.getPlayer(context, "target")))
+                        )
+        );
     }
 
     @Override
@@ -55,6 +47,6 @@ public record SimpleCommandPlayer(
 
     @FunctionalInterface
     public interface EntitySelectorAction {
-        void accept(CommandContext<CommandSourceStack> context, ServerPlayer players);
+        int accept(CommandContext<CommandSourceStack> context, ServerPlayer targetPlayer);
     }
 }

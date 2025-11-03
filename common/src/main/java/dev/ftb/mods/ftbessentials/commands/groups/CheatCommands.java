@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbessentials.commands.groups;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import dev.ftb.mods.ftbessentials.FTBEssentialsPlatform;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
@@ -20,85 +21,87 @@ import java.util.List;
 
 public class CheatCommands {
     public static final List<FTBCommand> COMMANDS = List.of(
-            // Heal command
             SimpleCommandPlayer.create("heal", Commands.LEVEL_GAMEMASTERS, FTBEConfig.HEAL, (ctx, player) -> heal(player)),
-
-            // Feed command
-            SimpleCommandPlayer.create("feed", Commands.LEVEL_GAMEMASTERS, FTBEConfig.FEED, (ctx, player) -> player.getFoodData().eat(40, 40F)),
-
-            // Extinguish command
-            SimpleCommandPlayer.create("extinguish", Commands.LEVEL_GAMEMASTERS, FTBEConfig.EXTINGUISH, (ctx, player) -> player.clearFire()),
-
-            // Fly command
+            SimpleCommandPlayer.create("feed", Commands.LEVEL_GAMEMASTERS, FTBEConfig.FEED, (ctx, player) -> feed(player)),
+            SimpleCommandPlayer.create("extinguish", Commands.LEVEL_GAMEMASTERS, FTBEConfig.EXTINGUISH, (ctx, player) -> clearFire(player)),
             SimpleCommandPlayer.create("fly", Commands.LEVEL_GAMEMASTERS, FTBEConfig.FLY, (ctx, player) -> fly(player)),
-
-            // God command
             SimpleCommandPlayer.create("god", Commands.LEVEL_GAMEMASTERS, FTBEConfig.GOD, (ctx, player) -> god(player)),
-
-            // Speed command
             new SpeedCommand(),
-
-            // Virtual inventory's
             new VirtualInventoryCommand(),
-
-            // Enderchest
-            new SimpleCommandPlayer("enderchest", Commands.LEVEL_GAMEMASTERS, FTBEConfig.ENDER_CHEST, CheatCommands::enderChest)
+            new SimpleCommandPlayer("enderchest", Commands.LEVEL_ALL, Commands.LEVEL_GAMEMASTERS, FTBEConfig.ENDER_CHEST, CheatCommands::enderChest)
     );
 
-    private static void enderChest(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
+    private static int enderChest(CommandContext<CommandSourceStack> ctx, ServerPlayer targetPlayer) {
         MutableComponent title = Component.translatable("container.enderchest");
         ServerPlayer srcPlayer = ctx.getSource().getPlayer();
-        if (player != null && srcPlayer != null) {
-            title.append(" × ").append(player.getDisplayName());
-            srcPlayer.openMenu(new SimpleMenuProvider((i, inv, p) -> ChestMenu.threeRows(i, inv, player.getEnderChestInventory()), title));
+        if (targetPlayer != null && srcPlayer != null) {
+            if (!targetPlayer.getUUID().equals(srcPlayer.getUUID())) {
+                title.append(" × ").append(targetPlayer.getDisplayName());
+            }
+            srcPlayer.openMenu(new SimpleMenuProvider((i, inv, p) -> ChestMenu.threeRows(i, inv, targetPlayer.getEnderChestInventory()), title));
+            return Command.SINGLE_SUCCESS;
         } else {
             ctx.getSource().sendFailure(Component.translatable("ftbessentials.enderchest.unable"));
+            return 0;
         }
     }
 
-    public static void heal(ServerPlayer player) {
-        player.setHealth(player.getMaxHealth());
-        player.getFoodData().eat(40, 40F);
+    private static int clearFire(ServerPlayer player) {
         player.clearFire();
-        FTBEssentialsPlatform.curePotionEffects(player);
+        return Command.SINGLE_SUCCESS;
     }
 
-    private static void fly(ServerPlayer player) {
-        FTBEPlayerData.getOrCreate(player).ifPresent(data -> {
-            var abilities = player.getAbilities();
+    private static int feed(ServerPlayer player) {
+        player.getFoodData().eat(40, 40F);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    public static int heal(ServerPlayer targetPlayer) {
+        targetPlayer.setHealth(targetPlayer.getMaxHealth());
+        targetPlayer.getFoodData().eat(40, 40F);
+        targetPlayer.clearFire();
+        FTBEssentialsPlatform.curePotionEffects(targetPlayer);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int fly(ServerPlayer targetPlayer) {
+        return FTBEPlayerData.getOrCreate(targetPlayer).map(data -> {
+            var abilities = targetPlayer.getAbilities();
 
             if (data.canFly()) {
                 data.setCanFly(false);
-                if (player.gameMode.isSurvival()) {
+                if (targetPlayer.gameMode.isSurvival()) {
                     abilities.mayfly = false;
                     abilities.flying = false;
                 }
-                player.displayClientMessage(Component.translatable("ftbessentials.flight.disabled"), true);
+                targetPlayer.displayClientMessage(Component.translatable("ftbessentials.flight.disabled"), true);
             } else {
                 data.setCanFly(true);
                 abilities.mayfly = true;
-                player.displayClientMessage(Component.translatable("ftbessentials.flight.enabled"), true);
+                targetPlayer.displayClientMessage(Component.translatable("ftbessentials.flight.enabled"), true);
             }
 
-            player.onUpdateAbilities();
-        });
+            targetPlayer.onUpdateAbilities();
+            return Command.SINGLE_SUCCESS;
+        }).orElse(0);
     }
 
-    private static void god(ServerPlayer player) {
-        FTBEPlayerData.getOrCreate(player).ifPresent(data -> {
-            var abilities = player.getAbilities();
+    private static int god(ServerPlayer targetPlayer) {
+        return FTBEPlayerData.getOrCreate(targetPlayer).map(data -> {
+            var abilities = targetPlayer.getAbilities();
 
             if (data.isGod()) {
                 data.setGod(false);
                 abilities.invulnerable = false;
-                player.displayClientMessage(Component.translatable("ftbessentials.god_mode.disabled"), true);
+                targetPlayer.displayClientMessage(Component.translatable("ftbessentials.god_mode.disabled"), true);
             } else {
                 data.setGod(true);
                 abilities.invulnerable = true;
-                player.displayClientMessage(Component.translatable("ftbessentials.god_mode.enabled"), true);
+                targetPlayer.displayClientMessage(Component.translatable("ftbessentials.god_mode.enabled"), true);
             }
 
-            player.onUpdateAbilities();
-        });
+            targetPlayer.onUpdateAbilities();
+            return Command.SINGLE_SUCCESS;
+        }).orElse(0);
     }
 }
