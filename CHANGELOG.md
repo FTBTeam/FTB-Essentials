@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2101.1.8]
 
+### Changed
+* An attempt is made to find a safe nearby spot when using the `/back` command
+  * Intended for if the player has died due to suffocation, and returning to that spot would just kill them again
+
 ### Fixed
 * Fixed `/enderchest` command not working for non-admin players
   * This a regression fix, since this was the functionality in older versions of the mod
