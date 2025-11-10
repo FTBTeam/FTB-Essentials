@@ -2,9 +2,9 @@ package dev.ftb.mods.ftbessentials.util;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.ftb.mods.ftblibrary.util.NBTUtils;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -73,13 +73,27 @@ public class TeleportPos {
 		return CODEC.encodeStart(NbtOps.INSTANCE, this).getOrThrow();
 	}
 
-//	public TeleportPos(CompoundTag tag) {
-//		dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(tag.getString("dim")));
-//		pos = new BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"));
-//		this.yRot = (tag.getTagType("yRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("yRot") : null;
-//		this.xRot = (tag.getTagType("xRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("xRot") : null;
-//		time = tag.getLong("time");
-//	}
+	public TeleportPos safeForPlayer(ServerPlayer player) {
+		ServerLevel level = player.getServer().getLevel(dimensionId);
+		if (level == null) return this;  // shouldn't happen
+
+		return tryFindSafePos(level, Direction.NORTH, Direction.WEST)
+				.or(() -> tryFindSafePos(level, Direction.SOUTH, Direction.EAST))
+				.orElse(this);
+	}
+
+	private Optional<TeleportPos> tryFindSafePos(ServerLevel level, Direction dir1, Direction dir2) {
+		for (BlockPos p0 : BlockPos.spiralAround(pos, 16, dir1, dir2)) {
+			for (int yOff = -3; yOff <= 3; yOff++) {
+				BlockPos p1 = p0.relative(Direction.Axis.Y, yOff);
+				BlockPos p2 = p1.above();
+				if (!level.getBlockState(p1).isSuffocating(level, p1) && !level.getBlockState(p2).isSuffocating(level, p2)) {
+					return Optional.of(new TeleportPos(dimensionId, p1.immutable(), yRot, xRot, time));
+				}
+			}
+		}
+		return Optional.empty();
+	}
 
 	public TeleportResult checkDimensionBlacklist(Player player) {
 		if (!DimensionFilter.isDimensionOKTo(dimensionId)) {
@@ -103,19 +117,6 @@ public class TeleportPos {
 		player.setExperienceLevels(xpLevel);
 		return TeleportResult.SUCCESS;
 	}
-
-//	public CompoundTag write() {
-//		SNBTCompoundTag tag = new SNBTCompoundTag();
-//		tag.singleLine();
-//		tag.putString("dim", dimension.location().toString());
-//		tag.putInt("x", pos.getX());
-//		tag.putInt("y", pos.getY());
-//		tag.putInt("z", pos.getZ());
-//		tag.putLong("time", time);
-//		if (this.xRot != null) tag.putFloat("xRot", this.xRot);
-//		if (this.yRot != null) tag.putFloat("yRot", this.yRot);
-//		return tag;
-//	}
 
 	public String distanceString(TeleportPos origin) {
 		if (origin.dimensionId == dimensionId) {

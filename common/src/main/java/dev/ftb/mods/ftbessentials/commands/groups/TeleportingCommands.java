@@ -111,7 +111,7 @@ public class TeleportingCommands {
                 return 0;
             }
 
-            if (data.backTeleporter.teleport(player, serverPlayerEntity -> data.teleportHistory.getLast()).runCommand(player) != 0) {
+            if (data.backTeleporter.teleport(player, serverPlayerEntity -> data.teleportHistory.getLast().safeForPlayer(player)).runCommand(player) != 0) {
                 data.markDirty();
                 return 1;
             }
