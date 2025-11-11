@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbessentials.util;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -13,6 +14,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+
+import java.util.Optional;
 
 public class TeleportPos {
 	private final ResourceKey<Level> dimension;
@@ -46,6 +49,28 @@ public class TeleportPos {
 		this.yRot = (tag.getTagType("yRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("yRot") : null;
 		this.xRot = (tag.getTagType("xRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("xRot") : null;
 		time = tag.getLong("time");
+	}
+
+	public TeleportPos safeForPlayer(ServerPlayer player) {
+		ServerLevel level = player.getServer().getLevel(dimension);
+		if (level == null) return this;  // shouldn't happen
+
+		return tryFindSafePos(level, Direction.NORTH, Direction.WEST)
+				.or(() -> tryFindSafePos(level, Direction.SOUTH, Direction.EAST))
+				.orElse(this);
+	}
+
+	private Optional<TeleportPos> tryFindSafePos(ServerLevel level, Direction dir1, Direction dir2) {
+		for (BlockPos p0 : BlockPos.spiralAround(pos, 16, dir1, dir2)) {
+			for (int yOff = -3; yOff <= 3; yOff++) {
+				BlockPos p1 = p0.relative(Direction.Axis.Y, yOff);
+				BlockPos p2 = p1.above();
+				if (!level.getBlockState(p1).isSuffocating(level, p1) && !level.getBlockState(p2).isSuffocating(level, p2)) {
+					return Optional.of(new TeleportPos(dimension, p1.immutable(), yRot, xRot));
+				}
+			}
+		}
+		return Optional.empty();
 	}
 
 	public TeleportResult checkDimensionBlacklist(Player player) {
