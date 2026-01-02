@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.9]
+
+### Fixed
+* Fixed issue introduced in 2101.1.8 with safe-spot finding
+  * Prioritise looking for space _above_ the intended block to avoid spawning player _below_ it (and potentially dropping them into thin air or void...)
+
 ## [2101.1.8]
 
 ### Changed
