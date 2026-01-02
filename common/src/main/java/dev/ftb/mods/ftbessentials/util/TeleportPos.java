@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -62,16 +63,26 @@ public class TeleportPos {
 
 	private Optional<TeleportPos> tryFindSafePos(ServerLevel level, Direction dir1, Direction dir2) {
 		for (BlockPos p0 : BlockPos.spiralAround(pos, 16, dir1, dir2)) {
-			for (int yOff = -3; yOff <= 3; yOff++) {
-				BlockPos p1 = p0.relative(Direction.Axis.Y, yOff);
-				BlockPos p2 = p1.above();
-				if (!level.getBlockState(p1).isSuffocating(level, p1) && !level.getBlockState(p2).isSuffocating(level, p2)) {
-					return Optional.of(new TeleportPos(dimension, p1.immutable(), yRot, xRot));
-				}
+			for (int yOff = 0; yOff <= 3; yOff++) {
+				TeleportPos res = checkForPos(level, p0, yOff);
+				if (res != null) return Optional.of(res);
+			}
+			for (int yOff = -1; yOff >= -3; yOff--) {
+				TeleportPos res = checkForPos(level, p0, yOff);
+				if (res != null) return Optional.of(res);
 			}
 		}
 		return Optional.empty();
 	}
+
+	@Nullable
+	private TeleportPos checkForPos(ServerLevel level, BlockPos basePos, int yOff) {
+		BlockPos p1 = basePos.relative(Direction.Axis.Y, yOff);
+		BlockPos p2 = p1.above();
+        return !level.getBlockState(p1).isSuffocating(level, p1) && !level.getBlockState(p2).isSuffocating(level, p2) ?
+				new TeleportPos(dimension, p1.immutable(), yRot, xRot) :
+				null;
+    }
 
 	public TeleportResult checkDimensionBlacklist(Player player) {
 		if (!DimensionFilter.isDimensionOKTo(this.dimension)) {
@@ -163,9 +174,9 @@ public class TeleportPos {
 		TeleportResult DIMENSION_NOT_FOUND = failed(Component.translatable("ftbessentials.dimension_not_found"));
 
 		TeleportResult UNKNOWN_DESTINATION = failed(Component.translatable("ftbessentials.unknown_dest"));
-		
+
 		TeleportResult DIMENSION_NOT_ALLOWED_FROM = failed(Component.translatable("ftbessentials.teleport.not_from_here"));
-		
+
 		TeleportResult DIMENSION_NOT_ALLOWED_TO = failed(Component.translatable("ftbessentials.teleport.not_to_here"));
 
 		int runCommand(ServerPlayer player);
