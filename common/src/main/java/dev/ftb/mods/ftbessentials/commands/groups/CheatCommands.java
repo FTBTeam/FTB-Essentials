@@ -64,25 +64,25 @@ public class CheatCommands {
     }
 
     private static void fly(ServerPlayer player) {
-        FTBEPlayerData.getOrCreate(player).ifPresent(data -> {
-            var abilities = player.getAbilities();
+    FTBEPlayerData.getOrCreate(player).ifPresent(data -> {
+        var abilities = player.getAbilities();
 
-            if (data.canFly()) {
-                data.setCanFly(false);
-                if (player.gameMode.isSurvival()) {
-                    abilities.mayfly = false;
-                    abilities.flying = false;
-                }
-                player.displayClientMessage(Component.translatable("ftbessentials.flight.disabled"), true);
-            } else {
-                data.setCanFly(true);
-                abilities.mayfly = true;
-                player.displayClientMessage(Component.translatable("ftbessentials.flight.enabled"), true);
-            }
+        if (data.canFly()) {
 
-            player.onUpdateAbilities();
-        });
-    }
+            data.setCanFly(false);
+            player.displayClientMessage(Component.translatable("ftbessentials.flight.disabled"), true);
+            
+ 
+        } else {
+          
+            data.setCanFly(true);
+            abilities.mayfly = true;
+            player.displayClientMessage(Component.translatable("ftbessentials.flight.enabled"), true);
+        }
+
+        player.onUpdateAbilities();
+    });
+}
 
     private static void god(ServerPlayer player) {
         FTBEPlayerData.getOrCreate(player).ifPresent(data -> {
