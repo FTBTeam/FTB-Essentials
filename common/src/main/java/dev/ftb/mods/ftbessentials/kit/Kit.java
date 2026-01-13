@@ -2,16 +2,16 @@ package dev.ftb.mods.ftbessentials.kit;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftbessentials.commands.impl.kit.KitCommand;
-import dev.ftb.mods.ftbessentials.integration.PermissionsHelper;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
+import dev.ftb.mods.ftblibrary.integration.permissions.PermissionHelper;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -111,7 +111,7 @@ public class Kit {
             long lastUsed = data.getLastKitUseTime(kitName);
             if (cooldown < 0L && lastUsed != 0L) {
                 if (throwOnCooldown) {
-                    throw KitCommand.ONE_TIME_ONLY.create(kitName, player.getGameProfile().getName());
+                    throw KitCommand.ONE_TIME_ONLY.create(kitName, player.getGameProfile().name());
                 } else {
                     return true;
                 }
@@ -138,11 +138,11 @@ public class Kit {
 
     public boolean playerCanGetKit(@Nullable ServerPlayer player) {
         return player == null
-                || player.hasPermissions(Commands.LEVEL_GAMEMASTERS)
+                || player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)
                 || checkPermissionNode(player, kitName);
     }
 
     public static boolean checkPermissionNode(@NotNull ServerPlayer player, String kitName) {
-        return PermissionsHelper.getInstance().getBool(player, false, "ftbessentials.give_me_kit." + kitName);
+        return PermissionHelper.getProvider().getBooleanPermission(player, "ftbessentials.give_me_kit." + kitName, false);
     }
 }

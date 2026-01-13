@@ -1,22 +1,22 @@
 package dev.ftb.mods.ftbessentials.config;
 
-import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
-import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
+import dev.ftb.mods.ftblibrary.config.value.BooleanValue;
+import dev.ftb.mods.ftblibrary.config.value.Config;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
+import net.minecraft.server.permissions.Permissions;
 
 import java.util.function.Predicate;
 
 public class ToggleableConfig implements Predicate<CommandSourceStack> {
 	public final String name;
-	public final SNBTConfig config;
+	public final Config config;
 	public final BooleanValue enabled;
 
-	public ToggleableConfig(SNBTConfig parent, String name) {
+	public ToggleableConfig(Config parent, String name) {
 		this(parent, name, true);
 	}
 
-	public ToggleableConfig(SNBTConfig parent, String name, boolean def) {
+	public ToggleableConfig(Config parent, String name, boolean def) {
 		this.name = name;
 		config = parent.addGroup(name);
 		enabled = config.addBoolean("enabled", def);
@@ -37,6 +37,6 @@ public class ToggleableConfig implements Predicate<CommandSourceStack> {
 	}
 
 	public Predicate<CommandSourceStack> enabledAndOp() {
-		return stack -> test(stack) && stack.hasPermission(Commands.LEVEL_GAMEMASTERS);
+		return stack -> test(stack) && stack.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
 	}
 }

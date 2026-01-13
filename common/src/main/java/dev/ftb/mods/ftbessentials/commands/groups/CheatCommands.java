@@ -10,10 +10,10 @@ import dev.ftb.mods.ftbessentials.commands.impl.cheat.VirtualInventoryCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.inventory.ChestMenu;
 
@@ -21,14 +21,14 @@ import java.util.List;
 
 public class CheatCommands {
     public static final List<FTBCommand> COMMANDS = List.of(
-            SimpleCommandPlayer.create("heal", Commands.LEVEL_GAMEMASTERS, FTBEConfig.HEAL, (ctx, player) -> heal(player)),
-            SimpleCommandPlayer.create("feed", Commands.LEVEL_GAMEMASTERS, FTBEConfig.FEED, (ctx, player) -> feed(player)),
-            SimpleCommandPlayer.create("extinguish", Commands.LEVEL_GAMEMASTERS, FTBEConfig.EXTINGUISH, (ctx, player) -> clearFire(player)),
-            SimpleCommandPlayer.create("fly", Commands.LEVEL_GAMEMASTERS, FTBEConfig.FLY, (ctx, player) -> fly(player)),
-            SimpleCommandPlayer.create("god", Commands.LEVEL_GAMEMASTERS, FTBEConfig.GOD, (ctx, player) -> god(player)),
+            SimpleCommandPlayer.create("heal", Permissions.COMMANDS_GAMEMASTER, FTBEConfig.HEAL, (ctx, player) -> heal(player)),
+            SimpleCommandPlayer.create("feed", Permissions.COMMANDS_GAMEMASTER, FTBEConfig.FEED, (ctx, player) -> feed(player)),
+            SimpleCommandPlayer.create("extinguish", Permissions.COMMANDS_GAMEMASTER, FTBEConfig.EXTINGUISH, (ctx, player) -> clearFire(player)),
+            SimpleCommandPlayer.create("fly", Permissions.COMMANDS_GAMEMASTER, FTBEConfig.FLY, (ctx, player) -> fly(player)),
+            SimpleCommandPlayer.create("god", Permissions.COMMANDS_GAMEMASTER, FTBEConfig.GOD, (ctx, player) -> god(player)),
             new SpeedCommand(),
             new VirtualInventoryCommand(),
-            new SimpleCommandPlayer("enderchest", Commands.LEVEL_ALL, Commands.LEVEL_GAMEMASTERS, FTBEConfig.ENDER_CHEST, CheatCommands::enderChest)
+            new SimpleCommandPlayer("enderchest", null, Permissions.COMMANDS_GAMEMASTER, FTBEConfig.ENDER_CHEST, CheatCommands::enderChest)
     );
 
     private static int enderChest(CommandContext<CommandSourceStack> ctx, ServerPlayer targetPlayer) {

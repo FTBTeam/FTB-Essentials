@@ -15,6 +15,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 import java.util.List;
 import java.util.Set;
@@ -84,7 +85,7 @@ public class WarpCommand implements FTBCommand {
             FTBEWorldData.instance.warpManager().destinations().forEach(entry -> {
                 MutableComponent line = Component.translatable("ftbessentials.home.show_home",
                         Component.literal(entry.name()).withStyle(ChatFormatting.AQUA), entry.destination().distanceString(origin));
-                if (source.hasPermission(Commands.LEVEL_GAMEMASTERS)) {
+                if (source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
                     line.withStyle(Style.EMPTY
                             .withClickEvent(new ClickEvent.RunCommand("/tp @s " + entry.destination().posAsString()))
                             .withHoverEvent(new HoverEvent.ShowText(Component.translatable("ftbessentials.click_to_teleport")))

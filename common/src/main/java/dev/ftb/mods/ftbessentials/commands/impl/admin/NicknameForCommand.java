@@ -2,12 +2,12 @@ package dev.ftb.mods.ftbessentials.commands.impl.admin;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftblibrary.util.PlayerDisplayNameUtil;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,10 +29,9 @@ public class NicknameForCommand implements FTBCommand {
         return Collections.singletonList(literal("nicknamefor")
                 .requires(FTBEConfig.NICK.enabledAndOp())
                 .then(argument("player", EntityArgument.player())
-                        .requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                        .requires(CommandUtils.isGamemaster())
                         .executes(context -> nicknameFor(context.getSource(), EntityArgument.getPlayer(context, "player"), ""))
                         .then(argument("nickname", StringArgumentType.greedyString())
-                                .requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
                                 .executes(context -> nicknameFor(context.getSource(), EntityArgument.getPlayer(context, "player"), StringArgumentType.getString(context, "nickname")))
                         )
                 ));

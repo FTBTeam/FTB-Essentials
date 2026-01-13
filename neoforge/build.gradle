@@ -37,7 +37,6 @@ dependencies {
 
     modImplementation("dev.ftb.mods:ftb-library-neoforge:${rootProject.ftb_library_version}") {
         exclude module: 'me.shedaniel:RoughlyEnoughItems-neoforge'
-        transitive false
     }
 
     modImplementation "dev.ftb.mods:ftb-ranks-neoforge:${rootProject.ftb_ranks_version}"

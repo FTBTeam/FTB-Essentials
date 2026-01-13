@@ -2,8 +2,8 @@ package dev.ftb.mods.ftbessentials.util;
 
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 import java.util.Collection;
@@ -18,17 +18,17 @@ public class DimensionFilter {
     private static WildcardedRLMatcher allDimensionMatcherBFrom = null;
 
     public static boolean isRtpDimensionOK(ResourceKey<Level> levelKey) {
-        ResourceLocation name = levelKey.location();
+        Identifier name = levelKey.identifier();
         return !getRtpDimensionBlacklist().test(name) && (getRtpDimensionWhitelist().isEmpty() || getRtpDimensionWhitelist().test(name));
     }
     
     public static boolean isDimensionOKFrom(ResourceKey<Level> levelKey) {
-        ResourceLocation name = levelKey.location();
+        Identifier name = levelKey.identifier();
         return !getAllCommandDimensionBlacklistFrom().test(name);
     }
 
     public static boolean isDimensionOKTo(ResourceKey<Level> levelKey) {
-        ResourceLocation name = levelKey.location();
+        Identifier name = levelKey.identifier();
         return !getAllCommandDimensionBlacklistTo().test(name);
     }
 
@@ -68,17 +68,17 @@ public class DimensionFilter {
         allDimensionMatcherBTo = null;
     }
 
-    private static class WildcardedRLMatcher implements Predicate<ResourceLocation> {
+    private static class WildcardedRLMatcher implements Predicate<Identifier> {
         private final Set<String> namespaces = new ObjectOpenHashSet<>();
-        private final Set<ResourceLocation> reslocs = new ObjectOpenHashSet<>();
+        private final Set<Identifier> reslocs = new ObjectOpenHashSet<>();
 
         public WildcardedRLMatcher(Collection<String> toMatch) {
-            ResourceLocation location;
+            Identifier location;
 
             for (String s : toMatch) {
                 if (s.endsWith(":*")) {
                     namespaces.add(s.split(":")[0]);
-                } else if ((location = ResourceLocation.tryParse(s)) != null) {
+                } else if ((location = Identifier.tryParse(s)) != null) {
                     reslocs.add(location);
                 }
             }
@@ -89,8 +89,8 @@ public class DimensionFilter {
         }
 
         @Override
-        public boolean test(ResourceLocation resourceLocation) {
-            return reslocs.contains(resourceLocation) || namespaces.contains(resourceLocation.getNamespace());
+        public boolean test(Identifier Identifier) {
+            return reslocs.contains(Identifier) || namespaces.contains(Identifier.getNamespace());
         }
     }
 }

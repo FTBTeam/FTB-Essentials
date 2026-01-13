@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbessentials.config;
 
-import dev.ftb.mods.ftbessentials.integration.PermissionsHelper;
-import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
+import dev.ftb.mods.ftblibrary.config.value.BooleanValue;
+import dev.ftb.mods.ftblibrary.integration.permissions.PermissionHelper;
 import net.minecraft.server.level.ServerPlayer;
 
 public class PermissionBasedBooleanValue {
@@ -16,7 +16,7 @@ public class PermissionBasedBooleanValue {
 	}
 
 	public boolean get(ServerPlayer player) {
-		return PermissionsHelper.getInstance().getBool(player, value.get(), permission);
+		return PermissionHelper.getProvider().getBooleanPermission(player, permission, value.get());
 	}
 
 }

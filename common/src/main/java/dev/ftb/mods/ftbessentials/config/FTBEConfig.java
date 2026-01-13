@@ -1,15 +1,16 @@
 package dev.ftb.mods.ftbessentials.config;
 
 import dev.ftb.mods.ftbessentials.FTBEssentials;
-import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
-import dev.ftb.mods.ftblibrary.snbt.config.IntValue;
-import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
-import dev.ftb.mods.ftblibrary.snbt.config.StringListValue;
+import dev.ftb.mods.ftbessentials.util.DimensionFilter;
+import dev.ftb.mods.ftblibrary.config.value.BooleanValue;
+import dev.ftb.mods.ftblibrary.config.value.Config;
+import dev.ftb.mods.ftblibrary.config.value.IntValue;
+import dev.ftb.mods.ftblibrary.config.value.StringListValue;
 
 import java.util.List;
 
 public interface FTBEConfig {
-	SNBTConfig CONFIG = SNBTConfig.create(FTBEssentials.MOD_ID).comment("FTB Essentials config file", "If you're a modpack maker, edit defaultconfigs/ftbessentials-server.snbt instead");
+	Config CONFIG = Config.create(FTBEssentials.MOD_ID).comment("FTB Essentials config file", "If you're a modpack maker, edit defaultconfigs/ftbessentials-server.snbt instead");
 
 	BooleanValue REGISTER_TO_NAMESPACE = CONFIG.addBoolean("register_to_namespace", false)
 			.comment("If true, the mod will register its commands to the 'ftbessentials' namespace,",
@@ -20,7 +21,7 @@ public interface FTBEConfig {
 					"otherwise it will only register to the root namespace",
 					"This setting has no effect if 'register_to_namespace' is false");
 
-	SNBTConfig TELEPORTATION = CONFIG.addGroup("teleportation").comment("Teleportation-related settings");
+	Config TELEPORTATION = CONFIG.addGroup("teleportation").comment("Teleportation-related settings");
 
 	BooleanValue ADMINS_EXEMPT_DIMENSION_BLACKLISTS = TELEPORTATION.addBoolean("admins_exempt_dimension_blacklists", true)
 			.comment("If true, admin-level players (i.e. permission level >= 2) are exempt from",
@@ -93,7 +94,7 @@ public interface FTBEConfig {
 	ToggleableConfig JUMP = new ToggleableConfig(TELEPORTATION, "jump")
 			.comment("Allows admins to jump (teleport) to the focused block");
 
-	SNBTConfig TELEPORTATION_BLACKLISTS = TELEPORTATION.addGroup("blacklists")
+	Config TELEPORTATION_BLACKLISTS = TELEPORTATION.addGroup("blacklists")
 			.comment("Blacklists for all teleport commands",
 					"Wildcarded dimensions (e.g. 'somemod:*') are supported");
 	StringListValue TELEPORTATION_BLACKLIST_FROM = TELEPORTATION_BLACKLISTS.addStringList("from", List.of())
@@ -101,7 +102,7 @@ public interface FTBEConfig {
 	StringListValue TELEPORTATION_BLACKLIST_TO = TELEPORTATION_BLACKLISTS.addStringList("to", List.of())
 			.comment("Dimensions players aren't permitted to teleport into.");
 
-	SNBTConfig ADMIN = CONFIG.addGroup("admin").comment("Admin commands for cheating and moderation");
+	Config ADMIN = CONFIG.addGroup("admin").comment("Admin commands for cheating and moderation");
 	ToggleableConfig HEAL = new ToggleableConfig(ADMIN, "heal")
 			.comment("Allows admins to fully heal (health, food, fire, potion effects) themselves or a player using a command");
 	ToggleableConfig FEED = new ToggleableConfig(ADMIN, "feed")
@@ -123,7 +124,7 @@ public interface FTBEConfig {
 	ToggleableConfig TP_OFFLINE = new ToggleableConfig(ADMIN, "tp_offline")
 			.comment("Allows admins to change the location of offline players.");
 
-	SNBTConfig MISC = CONFIG.addGroup("misc").comment("Miscellaneous features and utilities");
+	Config MISC = CONFIG.addGroup("misc").comment("Miscellaneous features and utilities");
 	ToggleableConfig KICKME = new ToggleableConfig(MISC, "kickme")
 			.comment("Allows users to kick themselves from the server, for example if they are stuck or desynced");
 	ToggleableConfig TRASHCAN = new ToggleableConfig(MISC, "trashcan")
@@ -148,5 +149,9 @@ public interface FTBEConfig {
 			.comment("Allows users to view leaderboard stats about everyone on the server.");
 	ToggleableConfig NEAR = new ToggleableConfig(MISC, "near")
 			.comment("Allows users to list nearby players, sorted by distance");
+
+	static void onChanged(boolean ignored) {
+		DimensionFilter.clearMatcherCaches();
+	}
 }
 

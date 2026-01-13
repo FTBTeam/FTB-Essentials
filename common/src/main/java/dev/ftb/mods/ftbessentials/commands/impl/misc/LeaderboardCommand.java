@@ -18,17 +18,12 @@ import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.LevelResource;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
 public class LeaderboardCommand implements FTBCommand {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LeaderboardCommand.class);
-
     @Override
     public boolean enabled() {
         return FTBEConfig.LEADERBOARD.isEnabled();
@@ -53,7 +48,7 @@ public class LeaderboardCommand implements FTBCommand {
 
         Path worldPath = source.getServer().getWorldPath(LevelResource.PLAYER_STATS_DIR);
         if (!Files.exists(worldPath)) {
-            return 1;
+            return 0;
         }
 
         playerData.forEach(pd -> {
@@ -87,7 +82,7 @@ public class LeaderboardCommand implements FTBCommand {
 
         if (list.isEmpty()) {
             source.sendSuccess(() -> Component.translatable("ftbessentials.leaderboard.no_data").withStyle(ChatFormatting.GRAY), false);
-            return 1;
+            return 0;
         }
 
         for (int i = 0; i < Math.min(20, list.size()); i++) {
@@ -107,15 +102,13 @@ public class LeaderboardCommand implements FTBCommand {
                 component.append(Component.literal("#" + num + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(0xB4B4B4))));
             }
 
-            var color = TextColor.fromRgb(0xCD7F32);
-
             component.append(Component.literal(pair.getLeft().getName()).withStyle(i == self ? ChatFormatting.GREEN : ChatFormatting.YELLOW));
             component.append(Component.literal(": "));
             component.append(Component.literal(leaderboard.asString(pair.getRight())).withStyle(ChatFormatting.WHITE));
             source.sendSuccess(() -> component, false);
         }
 
-        return 1;
+        return list.size();
     }
 
     /**
@@ -127,9 +120,8 @@ public class LeaderboardCommand implements FTBCommand {
     private static ServerStatsCounter getPlayerStats(MinecraftServer server, UUID playerId) {
         Map<UUID, ServerStatsCounter> stats = ((PlayerListAccess) server.getPlayerList()).getStats();
         return stats.computeIfAbsent(playerId, k -> {
-            File file1 = server.getWorldPath(LevelResource.PLAYER_STATS_DIR).toFile();
-            File file2 = new File(file1, playerId + ".json");
-            return new ServerStatsCounter(server, file2);
+            Path path = server.getWorldPath(LevelResource.PLAYER_STATS_DIR).resolve(playerId + ".json");
+            return new ServerStatsCounter(server, path);
         });
     }
 }

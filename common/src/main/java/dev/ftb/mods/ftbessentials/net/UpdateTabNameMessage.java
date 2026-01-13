@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbessentials.net;
 
 import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
+import dev.ftb.mods.ftbessentials.client.FTBEssentialsClient;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData.RecordingStatus;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import net.minecraft.core.UUIDUtil;
@@ -25,7 +26,7 @@ public record UpdateTabNameMessage(UUID uuid, String name, String nickname, Reco
 	);
 
 	public static void handle(UpdateTabNameMessage message, NetworkManager.PacketContext packetContext) {
-		packetContext.queue(() -> FTBEssentials.PROXY.updateTabName(message));
+		packetContext.queue(() -> FTBEssentialsClient.updateTabName(message));
 	}
 
 	@Override

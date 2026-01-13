@@ -5,7 +5,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
@@ -14,6 +13,7 @@ import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
 
@@ -57,13 +57,19 @@ public class OfflineTeleportCommand implements FTBCommand {
     }
 
     private int tpOffline(CommandSourceStack source, String playerName, ServerLevel level, Coordinates dest) {
-        source.getServer().getProfileCache().getAsync(playerName).whenComplete((profileOpt, throwable) -> {
-            source.getServer().executeIfPossible(() ->
-                    profileOpt.ifPresentOrElse(profile -> tpOffline(source, profile.getId(), level, dest),
-                            () -> source.sendFailure(Component.translatable("ftbessentials.unknown_player", playerName))
-                    )
-            );
-        });
+        // TODO check this
+        source.getServer().services().profileResolver().fetchByName(playerName).ifPresentOrElse(
+                profile -> tpOffline(source, profile.id(), level, dest),
+                () -> source.sendFailure(Component.translatable("ftbessentials.unknown_player", playerName))
+        );
+
+//        source.getServer().services().profileResolver().getAsync(playerName).whenComplete((profileOpt, throwable) -> {
+//            source.getServer().executeIfPossible(() ->
+//                    profileOpt.ifPresentOrElse(profile -> tpOffline(source, profile.getId(), level, dest),
+//                            () -> source.sendFailure(Component.translatable("ftbessentials.unknown_player", playerName))
+//                    )
+//            );
+//        });
 
         return 1;
     }
@@ -89,7 +95,7 @@ public class OfflineTeleportCommand implements FTBCommand {
             newPos.add(DoubleTag.valueOf(vec.z));
             tag.put("Pos", newPos);
 
-            tag.putString("Dimension", level.dimension().location().toString());
+            tag.putString("Dimension", level.dimension().identifier().toString());
 
             Path tempFile = File.createTempFile(playerId + "-", ".dat", playerDir.toFile()).toPath();
             NbtIo.writeCompressed(tag, tempFile);
@@ -97,7 +103,7 @@ public class OfflineTeleportCommand implements FTBCommand {
             Util.safeReplaceFile(datFile, tempFile, backupFile);
 
             String pos = String.format("[%.2f,%.2f,%.2f]", vec.x, vec.y, vec.z);
-            source.sendSuccess(() -> Component.translatable("ftbessentials.tp_offline.moved", playerId, pos, source.getLevel().dimension().location()), false);
+            source.sendSuccess(() -> Component.translatable("ftbessentials.tp_offline.moved", playerId, pos, source.getLevel().dimension().identifier()), false);
             return 1;
         } catch (IOException e) {
             source.sendFailure(Component.translatable("ftbessentials.tp_offline.cant_update", e.getMessage()).withStyle(ChatFormatting.RED));

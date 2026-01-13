@@ -36,16 +36,16 @@ public class AdminCommands {
         )
     );
 
-    public static int viewInventory(ServerPlayer source, ServerPlayer player) {
+    public static int viewInventory(ServerPlayer source, ServerPlayer otherPlayer) {
         source.openMenu(new MenuProvider() {
             @Override
             public Component getDisplayName() {
-                return player.getDisplayName();
+                return otherPlayer.getDisplayName();
             }
 
             @Override
             public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player p) {
-                return new ChestMenu(MenuType.GENERIC_9x5, id, playerInventory, new OtherPlayerInventory(player), 5);
+                return new ChestMenu(MenuType.GENERIC_9x5, id, playerInventory, new OtherPlayerInventory(otherPlayer), 5);
             }
         });
 

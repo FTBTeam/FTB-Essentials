@@ -26,12 +26,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Iterator;
 
 public class FTBEEventHandler {
@@ -57,24 +53,12 @@ public class FTBEEventHandler {
 	}
 
 	private static void serverAboutToStart(MinecraftServer minecraftServer) {
-		FTBEPlayerData.clear();
 		FTBEWorldData.instance = new FTBEWorldData(minecraftServer);
 		FTBEWorldData.instance.load();
-
-		Path oldConfigPath = minecraftServer.getWorldPath(LevelResource.ROOT)
-				.resolve("serverconfig")
-				.resolve(FTBEssentials.CONFIG_FILE);
-		if (!Files.exists(oldConfigPath)) {
-			// create a placeholder file for where config used to be
-			try {
-				Files.writeString(oldConfigPath, "# File has moved!\n# FTB Essentials configuration is now in <instance-folder>/config/ftbessentials.snbt\n");
-			} catch (IOException e) {
-				FTBEssentials.LOGGER.error("can't write {}: {}", oldConfigPath, e.getMessage());
-			}
-		}
 	}
 
 	private static void serverStopped(MinecraftServer minecraftServer) {
+		FTBEPlayerData.clear();
 		FTBEWorldData.instance = null;
 		TPACommand.clearRequests();
 	}
@@ -117,7 +101,7 @@ public class FTBEEventHandler {
 	}
 
 	private static void playerTickPost(Player player) {
-		if (!player.level().isClientSide) {
+		if (!player.level().isClientSide()) {
 			FTBEPlayerData.getOrCreate(player).ifPresent(data -> {
 				var abilities = player.getAbilities();
 

@@ -10,8 +10,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -74,7 +74,7 @@ public class TeleportPos {
 	}
 
 	public TeleportPos safeForPlayer(ServerPlayer player) {
-		ServerLevel level = player.getServer().getLevel(dimensionId);
+		ServerLevel level = player.level().getServer().getLevel(dimensionId);
 		if (level == null) return this;  // shouldn't happen
 
 		return tryFindSafePos(level, Direction.NORTH, Direction.WEST)
@@ -105,7 +105,7 @@ public class TeleportPos {
 	}
 
 	public TeleportResult teleport(ServerPlayer player) {
-		ServerLevel level = player.getServer().getLevel(dimensionId);
+		ServerLevel level = player.level().getServer().getLevel(dimensionId);
 		if (level == null) {
 			return TeleportResult.DIMENSION_NOT_FOUND;
 		}
@@ -124,7 +124,7 @@ public class TeleportPos {
 			double dz = pos.getZ() - origin.pos.getZ();
 			return (int) Math.sqrt(dx * dx + dz * dz) + "m";
 		} else {
-			ResourceLocation s = dimensionId.location();
+			Identifier s = dimensionId.identifier();
 
 			if (s.getNamespace().equals("minecraft")) {
 				return switch (s.getPath()) {

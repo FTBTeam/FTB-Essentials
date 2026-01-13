@@ -4,11 +4,10 @@ import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
-import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.util.NameMap;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -16,6 +15,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
@@ -169,12 +169,8 @@ public class FTBEPlayerData {
 		}
 
 		// Check if the player file exists
-		if (server.getProfileCache() == null) {
-			return Optional.empty();
-		}
-
-        return server.getProfileCache().get(playerId)
-				.map(profile -> MAP.computeIfAbsent(playerId, k -> new FTBEPlayerData(playerId, profile.getName())));
+        return server.services().profileResolver().fetchById(playerId)
+				.map(profile -> MAP.computeIfAbsent(playerId, k -> new FTBEPlayerData(playerId, profile.name())));
     }
 
 	public static Optional<FTBEPlayerData> getOrCreate(Player player) {
@@ -182,7 +178,7 @@ public class FTBEPlayerData {
 			return Optional.empty();
 		}
 
-		return Optional.of(MAP.computeIfAbsent(player.getUUID(), k -> new FTBEPlayerData(player.getUUID(), player.getGameProfile().getName())));
+		return Optional.of(MAP.computeIfAbsent(player.getUUID(), k -> new FTBEPlayerData(player.getUUID(), player.getGameProfile().name())));
 	}
 
 	public static boolean playerExists(UUID playerId) {

@@ -120,7 +120,7 @@ public class TPACommand implements FTBCommand {
             return 0;
         }
 
-        ServerPlayer sourcePlayer = player.getServer().getPlayerList().getPlayer(request.source().getUuid());
+        ServerPlayer sourcePlayer = player.level().getServer().getPlayerList().getPlayer(request.source().getUuid());
 
         if (sourcePlayer == null) {
             player.displayClientMessage(Component.translatable("ftbessentials.tpa.gone_offline").withStyle(ChatFormatting.GOLD), false);
@@ -155,7 +155,7 @@ public class TPACommand implements FTBCommand {
 
         player.displayClientMessage(Component.translatable("ftbessentials.tpa.denied"), false);
 
-        ServerPlayer player2 = player.getServer().getPlayerList().getPlayer(request.target().getUuid());
+        ServerPlayer player2 = player.level().getServer().getPlayerList().getPlayer(request.target().getUuid());
 
         if (player2 != null) {
             player2.displayClientMessage(Component.translatable("ftbessentials.tpa.denied"), false);

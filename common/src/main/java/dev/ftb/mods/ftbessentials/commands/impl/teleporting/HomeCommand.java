@@ -1,11 +1,9 @@
 package dev.ftb.mods.ftbessentials.commands.impl.teleporting;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
@@ -19,6 +17,8 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
+import net.minecraft.server.players.NameAndId;
 
 import java.util.List;
 import java.util.Set;
@@ -54,9 +54,9 @@ public class HomeCommand implements FTBCommand {
                         ),
                 Commands.literal("listhomes")
                         .requires(FTBEConfig.HOME)
-                        .executes(context -> listHomes(context.getSource(), context.getSource().getPlayerOrException().getGameProfile()))
+                        .executes(context -> listHomes(context.getSource(), context.getSource().getPlayerOrException().nameAndId()))
                         .then(Commands.argument("player", GameProfileArgument.gameProfile())
-                                .requires(source -> source.getServer().isSingleplayer() || source.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                                .requires(source -> source.getServer().isSingleplayer() || source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                                 .executes(context -> listHomes(context.getSource(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
                         )
         );
@@ -103,13 +103,13 @@ public class HomeCommand implements FTBCommand {
         }).orElse(0);
     }
 
-    public static int listHomes(CommandSourceStack source, GameProfile of) {
-        return FTBEPlayerData.getOrCreate(source.getServer(), of.getId())
+    public static int listHomes(CommandSourceStack source, NameAndId nameAndId) {
+        return FTBEPlayerData.getOrCreate(source.getServer(), nameAndId.id())
                 .map(data -> {
                     if (data.homeManager().getNames().isEmpty()) {
                         source.sendSuccess(() -> Component.translatable("ftbessentials.none"), false);
                     } else {
-                        source.sendSuccess(() -> Component.translatable("ftbessentials.home.for_player", of.getName()).withStyle(ChatFormatting.GOLD), false);
+                        source.sendSuccess(() -> Component.translatable("ftbessentials.home.for_player", nameAndId.name()).withStyle(ChatFormatting.GOLD), false);
                         source.sendSuccess(() -> Component.literal("---").withStyle(ChatFormatting.GOLD), false);
 
                         TeleportPos origin = new TeleportPos(source.getLevel().dimension(), BlockPos.containing(source.getPosition()));
@@ -118,7 +118,7 @@ public class HomeCommand implements FTBCommand {
                                     MutableComponent line = Component.translatable("ftbessentials.home.show_home",
                                             Component.literal(entry.name()).withStyle(ChatFormatting.AQUA), entry.destination().distanceString(origin));
 
-                                    if (source.hasPermission(Commands.LEVEL_GAMEMASTERS)) {
+                                    if (source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
                                         line.withStyle(Style.EMPTY
                                                 .withClickEvent(new ClickEvent.RunCommand("/tp @s " + entry.destination().posAsString()))
                                                 .withHoverEvent(new HoverEvent.ShowText(Component.translatable("ftbessentials.click_to_teleport")))
