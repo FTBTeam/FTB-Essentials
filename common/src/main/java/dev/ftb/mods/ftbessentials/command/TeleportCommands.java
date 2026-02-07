@@ -100,6 +100,11 @@ public class TeleportCommands {
 		try {
 			ServerPlayer player = source.getPlayerOrException();
 
+			TeleportPos.TeleportResult blacklistResult = new TeleportPos(player).checkDimensionBlacklist(player);
+			if (!blacklistResult.isSuccess()) {
+				return blacklistResult.runCommand(player);
+			}
+
 			BlockHitResult res = BlockUtil.getFocusedBlock(player, player.getServer().getPlayerList().getViewDistance() * 16)
 					.orElseThrow(() -> new IllegalArgumentException("Not looking at a block"));
 			// want to land the player on top of the focused block, so scan up as far as needed
@@ -157,9 +162,15 @@ public class TeleportCommands {
 	}
 
 	public static int rtp(ServerPlayer player) {
-		if (!player.hasPermissions(2) && !DimensionFilter.isDimensionOK(player.level().dimension())) {
-			player.displayClientMessage(Component.literal("You may not use /rtp in this dimension!").withStyle(ChatFormatting.RED), false);
-			return 0;
+		if (!player.hasPermissions(2)) {
+			TeleportPos.TeleportResult blacklistResult = new TeleportPos(player).checkDimensionBlacklist(player);
+			if (!blacklistResult.isSuccess()) {
+				return blacklistResult.runCommand(player);
+			}
+			if (!DimensionFilter.isRtpDimensionOK(player.level().dimension())) {
+				player.displayClientMessage(Component.literal("You may not use /rtp in this dimension!").withStyle(ChatFormatting.RED), false);
+				return 0;
+			}
 		}
 		return FTBEPlayerData.getOrCreate(player).map(data -> data.rtpTeleporter.teleport(player, p -> {
 					p.displayClientMessage(Component.literal("Looking for random location..."), false);
@@ -220,19 +231,29 @@ public class TeleportCommands {
 	public static int tpLast(ServerPlayer player, GameProfile to) {
 		ServerPlayer toPlayer = player.server.getPlayerList().getPlayer(to.getId());
 		if (toPlayer != null) {
-			FTBEPlayerData.addTeleportHistory(player);
-			new TeleportPos(toPlayer).teleport(player);
-			return 1;
+			TeleportPos.TeleportResult result = new TeleportPos(toPlayer).teleport(player);
+			if (result.isSuccess()) {
+				FTBEPlayerData.addTeleportHistory(player);
+				return 1;
+			}
+			return result.runCommand(player);
 		}
 		// dest player not online; teleport to where they were last seen
 		return FTBEPlayerData.getOrCreate(to).map(dataTo -> {
-			FTBEPlayerData.addTeleportHistory(player);
-			dataTo.getLastSeenPos().teleport(player);
-			return 1;
+			TeleportPos.TeleportResult result = dataTo.getLastSeenPos().teleport(player);
+			if (result.isSuccess()) {
+				FTBEPlayerData.addTeleportHistory(player);
+				return 1;
+			}
+			return result.runCommand(player);
 		}).orElse(0);
 	}
 
 	public static int tpx(ServerPlayer player, ServerLevel to) {
+		TeleportPos.TeleportResult blacklistResult = new TeleportPos(to, player.blockPosition(), player.getYRot(), player.getXRot()).checkDimensionBlacklist(player);
+		if (!blacklistResult.isSuccess()) {
+			return blacklistResult.runCommand(player);
+		}
 		player.teleportTo(to, player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
 		return 1;
 	}
