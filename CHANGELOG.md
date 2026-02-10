@@ -6,12 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2001.2.3]
 
+### Added
+* Added `TeleportPos#getDimension` and `TeleportPos#getPos` (mainly for benefit of KubeJS scripting)
+* Backported dimension filtering for teleport commands from 1.21.1
+  * See `teleportation` -> `blacklists` section in config file
+
 ### Fixed
 * Fixed `/rtp` command always landing at a Z=112 coordinate in the Nether (and potentially other dimensions with nether-like heightmaps)
 * The `/spawn` command now sends players to their own spawnpoint (e.g. as set by the vanilla `/spawnpoint` command, or by other mods) instead of assuming the default overworld spawn position
-
-### Added
-* Added `TeleportPos#getDimension` and `TeleportPos#getPos` (mainly for benefit of KubeJS scripting)
 
 ## [2001.2.2]
 
