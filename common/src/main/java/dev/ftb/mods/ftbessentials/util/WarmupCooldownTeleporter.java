@@ -61,6 +61,12 @@ public class WarmupCooldownTeleporter {
 		if (!cooldownResult.isSuccess()) {
 			return cooldownResult;
 		}
+		TeleportPos pos = positionGetter.apply(player);
+
+		TeleportResult blacklistedResult = pos.checkDimensionBlacklist(player);
+		if (!blacklistedResult.isSuccess()) {
+			return blacklistedResult;
+		}
 
 		int warmupTime = warmupConfig.applyAsInt(player);
 
