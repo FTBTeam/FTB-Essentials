@@ -28,6 +28,7 @@ public interface FTBEConfig {
 			.comment("Should be the /back command only be used for returning to the last death point?");
 	// spawn
 	TimedCommandConfig SPAWN = new TimedCommandConfig(TELEPORTATION, "spawn", 10, 0);
+	TimedCommandConfig PLAYER_SPAWN = new TimedCommandConfig(TELEPORTATION, "playerspawn", 10, 0);
 	// warp
 	TimedCommandConfig WARP = new TimedCommandConfig(TELEPORTATION, "warp", 10, 0)
 			.comment("Allows admins to create 'warps', which are fixed points in the world that users may teleport to using /warp");
@@ -65,7 +66,13 @@ public interface FTBEConfig {
 			.comment("Allows admins to teleport to dimension");
 	ToggleableConfig JUMP = new ToggleableConfig(TELEPORTATION, "jump")
 			.comment("Allows admins to jump (teleport) to the focused block");
-
+	SNBTConfig TELEPORTATION_BLACKLISTS = TELEPORTATION.addGroup("blacklists")
+			.comment("Blacklists for all teleport commands",
+					"Wildcarded dimensions (e.g. 'somemod:*') are supported");
+	StringListValue TELEPORTATION_BLACKLIST_FROM = TELEPORTATION_BLACKLISTS.addStringList("from", List.of())
+			.comment("Dimensions players aren't permitted to run teleport commands in.");
+	StringListValue TELEPORTATION_BLACKLIST_TO = TELEPORTATION_BLACKLISTS.addStringList("to", List.of())
+			.comment("Dimensions players aren't permitted to teleport into.");
 	SNBTConfig ADMIN = CONFIG.addGroup("admin").comment("Admin commands for cheating and moderation");
 	ToggleableConfig HEAL = new ToggleableConfig(ADMIN, "heal")
 			.comment("Allows admins to fully heal (health, food, fire, potion effects) themselves or a player using a command");

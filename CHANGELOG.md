@@ -4,14 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2001.2.4]
+
+## Added
+* Backported dimension blacklist feature from 1.21.1
+  * See new `blacklists` config section within the `teleportation` section of the config
+
+## Fixed
+* Reverted `/spawn` change added 2001.2.3
+  * The `/spawn` command now sends players to the overworld spawn again
+  * Added new `/playerspawn` command to send players to their own spawnpoint
+
 ## [2001.2.3]
+
+### Added
+* Added `TeleportPos#getDimension` and `TeleportPos#getPos` (mainly for benefit of KubeJS scripting)
 
 ### Fixed
 * Fixed `/rtp` command always landing at a Z=112 coordinate in the Nether (and potentially other dimensions with nether-like heightmaps)
 * The `/spawn` command now sends players to their own spawnpoint (e.g. as set by the vanilla `/spawnpoint` command, or by other mods) instead of assuming the default overworld spawn position
-
-### Added
-* Added `TeleportPos#getDimension` and `TeleportPos#getPos` (mainly for benefit of KubeJS scripting)
 
 ## [2001.2.2]
 
