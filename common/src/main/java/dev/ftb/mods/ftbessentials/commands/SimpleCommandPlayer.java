@@ -24,7 +24,7 @@ public record SimpleCommandPlayer(
         ToggleableConfig config,
         EntitySelectorAction action
 ) implements FTBCommand {
-    public static SimpleCommandPlayer create(String name, Permission permissionLevel, ToggleableConfig config, EntitySelectorAction action) {
+    public static SimpleCommandPlayer create(String name, @Nullable Permission permissionLevel, ToggleableConfig config, EntitySelectorAction action) {
         return new SimpleCommandPlayer(name, permissionLevel, permissionLevel, config, action);
     }
 

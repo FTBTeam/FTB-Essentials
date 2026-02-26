@@ -16,6 +16,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -66,7 +67,7 @@ public class SpeedCommand implements FTBCommand {
         return 1;
     }
 
-    private static void showSpeed(CommandSourceStack source, ServerPlayer target, AttributeInstance attrInstance) {
+    private static void showSpeed(CommandSourceStack source, ServerPlayer target, @Nullable AttributeInstance attrInstance) {
         Component msg;
         if (attrInstance != null && attrInstance.getModifier(ESSENTIALS_SPEED_ID) != null) {
             AttributeModifier modifier = attrInstance.getModifier(ESSENTIALS_SPEED_ID);

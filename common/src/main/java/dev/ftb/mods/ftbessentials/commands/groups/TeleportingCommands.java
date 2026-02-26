@@ -156,7 +156,7 @@ public class TeleportingCommands {
         }
         return FTBEPlayerData.getOrCreate(player).map(data -> data.rtpTeleporter.teleport(player, p -> {
                     p.displayClientMessage(Component.translatable("ftbessentials.rtp.looking"), false);
-                    return findBlockPos((ServerLevel) player.level(), p, minDistance, maxDistance);
+                    return findBlockPos(player.level(), p, minDistance, maxDistance);
                 }).runCommand(player))
                 .orElse(0);
     }
@@ -223,12 +223,12 @@ public class TeleportingCommands {
 
         // dest player not online; teleport to where they were last seen
         return FTBEPlayerData.getOrCreate(player.level().getServer(), to.id())
-                .map(data -> {
+                .map(data -> data.getLastSeenPos().map(pos -> {
                     FTBEPlayerData.addTeleportHistory(player);
-                    data.getLastSeenPos().teleport(player);
-
+                    pos.teleport(player);
                     return 1;
-                }).orElse(0);
+                }).orElse(0))
+                .orElse(0);
     }
 
     private static int tpx(ServerPlayer player, ServerLevel to) {

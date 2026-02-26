@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbessentials.config;
 import dev.ftb.mods.ftblibrary.config.value.BooleanValue;
 import dev.ftb.mods.ftblibrary.integration.permissions.PermissionHelper;
 import net.minecraft.server.level.ServerPlayer;
+import org.jspecify.annotations.Nullable;
 
 public class PermissionBasedBooleanValue {
 	public final BooleanValue value;
@@ -15,8 +16,8 @@ public class PermissionBasedBooleanValue {
 		this.permission = permission;
 	}
 
-	public boolean get(ServerPlayer player) {
-		return PermissionHelper.getProvider().getBooleanPermission(player, permission, value.get());
+	public boolean get(@Nullable ServerPlayer player) {
+		return player != null && PermissionHelper.getProvider().getBooleanPermission(player, permission, value.get());
 	}
 
 }

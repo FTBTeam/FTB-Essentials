@@ -53,13 +53,12 @@ public class FTBEEventHandler {
 	}
 
 	private static void serverAboutToStart(MinecraftServer minecraftServer) {
-		FTBEWorldData.instance = new FTBEWorldData(minecraftServer);
-		FTBEWorldData.instance.load();
+		FTBEWorldData.startup(minecraftServer);
 	}
 
 	private static void serverStopped(MinecraftServer minecraftServer) {
 		FTBEPlayerData.clear();
-		FTBEWorldData.instance = null;
+		FTBEWorldData.shutdown();
 		TPACommand.clearRequests();
 	}
 
@@ -68,10 +67,10 @@ public class FTBEEventHandler {
 	}
 
 	private static void levelSave(ServerLevel serverLevel) {
-		if (FTBEWorldData.instance != null) {
-			FTBEWorldData.instance.saveIfChanged();
+		FTBEWorldData.ifAvailable(worldData -> {
+			worldData.saveIfChanged();
 			FTBEPlayerData.saveAll();
-		}
+		});
 	}
 
 	private static void playerLoggedIn(ServerPlayer serverPlayer) {
@@ -144,7 +143,7 @@ public class FTBEEventHandler {
 
 		if (server.getTickCount() % 20 == 0) {
 			WarmupCooldownTeleporter.tickWarmups(server);
-			FTBEWorldData.instance.tickMuteTimeouts(server);
+			FTBEWorldData.getInstance().tickMuteTimeouts(server);
 		}
 	}
 
@@ -155,7 +154,7 @@ public class FTBEEventHandler {
 				// serverPlayer must be non-null if we got the player data
 				//noinspection DataFlowIssue
 				serverPlayer.displayClientMessage(Component.translatable("ftbessentials.muted").withStyle(ChatFormatting.RED), false);
-				FTBEWorldData.instance.getMuteTimeout(serverPlayer).ifPresent(expiry -> {
+				FTBEWorldData.getInstance().getMuteTimeout(serverPlayer).ifPresent(expiry -> {
 					long left = (expiry - System.currentTimeMillis()) / 1000L;
 					serverPlayer.displayClientMessage(Component.translatable("ftbessentials.mute_expiry",
 							TimeUtils.prettyTimeString(left)).withStyle(ChatFormatting.RED), false);

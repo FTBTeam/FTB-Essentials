@@ -52,23 +52,23 @@ public class WarpCommand implements FTBCommand {
     }
 
     private Set<String> getWarpSuggestions() {
-        return FTBEWorldData.instance.warpManager().getNames();
+        return FTBEWorldData.getInstance().warpManager().getNames();
     }
 
     private int warp(ServerPlayer player, String name) {
         return FTBEPlayerData.getOrCreate(player)
-                .map(data -> FTBEWorldData.instance.warpManager().teleportTo(name, player, data.warpTeleporter).runCommand(player))
+                .map(data -> FTBEWorldData.getInstance().warpManager().teleportTo(name, player, data.warpTeleporter).runCommand(player))
                 .orElse(0);
     }
 
     private int setWarp(ServerPlayer player, String name) {
-        FTBEWorldData.instance.warpManager().addDestination(name, new TeleportPos(player), player);
+        FTBEWorldData.getInstance().warpManager().addDestination(name, new TeleportPos(player), player);
         player.displayClientMessage(Component.translatable("ftbessentials.warp.set"), false);
         return 1;
     }
 
     private int deleteWarp(ServerPlayer player, String name) {
-        if (FTBEWorldData.instance.warpManager().deleteDestination(name.toLowerCase())) {
+        if (FTBEWorldData.getInstance().warpManager().deleteDestination(name.toLowerCase())) {
             player.displayClientMessage(Component.translatable("ftbessentials.warp.deleted"), false);
             return 1;
         } else {
@@ -78,11 +78,11 @@ public class WarpCommand implements FTBCommand {
     }
 
     private int listWarps(CommandSourceStack source) {
-        if (FTBEWorldData.instance.warpManager().getNames().isEmpty()) {
+        if (FTBEWorldData.getInstance().warpManager().getNames().isEmpty()) {
             source.sendSuccess(() -> Component.translatable("ftbessentials.none"), false);
         } else {
             TeleportPos origin = new TeleportPos(source.getLevel().dimension(), BlockPos.containing(source.getPosition()));
-            FTBEWorldData.instance.warpManager().destinations().forEach(entry -> {
+            FTBEWorldData.getInstance().warpManager().destinations().forEach(entry -> {
                 MutableComponent line = Component.translatable("ftbessentials.home.show_home",
                         Component.literal(entry.name()).withStyle(ChatFormatting.AQUA), entry.destination().distanceString(origin));
                 if (source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {

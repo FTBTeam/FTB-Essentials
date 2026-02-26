@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
@@ -53,7 +54,7 @@ public class TeleportPos {
 		this(world.dimension(), p, yRot, xRot);
 	}
 
-	public TeleportPos(ResourceKey<Level> dimensionId, BlockPos pos, Float yRot, Float xRot) {
+	public TeleportPos(ResourceKey<Level> dimensionId, BlockPos pos, @Nullable Float yRot, @Nullable Float xRot) {
 		this.dimensionId = dimensionId;
 		this.pos = pos;
 		this.yRot = Optional.ofNullable(yRot);

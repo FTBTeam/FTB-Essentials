@@ -52,7 +52,7 @@ public class MuteCommand implements FTBCommand {
 
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             data.setMuted(true);
-            FTBEWorldData.instance.setMuteTimeout(player, info.until());
+            FTBEWorldData.getInstance().setMuteTimeout(player, info.until());
 
             Component msg = Component.translatable("ftbessentials.muted.muted", player.getDisplayName(), source.getDisplayName(), info.desc());
             notifyMuting(source, player, msg);
@@ -64,7 +64,7 @@ public class MuteCommand implements FTBCommand {
     private int unmute(CommandSourceStack source, ServerPlayer player) {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             data.setMuted(false);
-            FTBEWorldData.instance.setMuteTimeout(player, -1);
+            FTBEWorldData.getInstance().setMuteTimeout(player, -1);
 
             notifyMuting(source, player, Component.translatable("ftbessentials.muted.unmuted", player.getDisplayName(), source.getDisplayName()));
 

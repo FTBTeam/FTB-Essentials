@@ -34,7 +34,7 @@ public class CheatCommands {
     private static int enderChest(CommandContext<CommandSourceStack> ctx, ServerPlayer targetPlayer) {
         MutableComponent title = Component.translatable("container.enderchest");
         ServerPlayer srcPlayer = ctx.getSource().getPlayer();
-        if (targetPlayer != null && srcPlayer != null) {
+        if (srcPlayer != null) {
             if (!targetPlayer.getUUID().equals(srcPlayer.getUUID())) {
                 title.append(" × ").append(targetPlayer.getDisplayName());
             }

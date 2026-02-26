@@ -61,7 +61,7 @@ public enum KitManager {
 
         FTBEPlayerData.cleanupKitCooldowns(kitName);
 
-        FTBEWorldData.instance.markDirty();
+        FTBEWorldData.getInstance().markDirty();
     }
 
     public void createFromPlayerInv(String kitName, ServerPlayer player, long cooldownSecs, boolean hotbarOnly) throws CommandSyntaxException {
@@ -99,6 +99,6 @@ public enum KitManager {
 
         allKits.put(kit.getKitName(), kit);
 
-        FTBEWorldData.instance.markDirty();
+        FTBEWorldData.getInstance().markDirty();
     }
 }

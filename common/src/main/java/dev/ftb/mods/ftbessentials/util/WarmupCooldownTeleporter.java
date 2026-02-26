@@ -51,7 +51,8 @@ public class WarmupCooldownTeleporter {
 		return TeleportResult.SUCCESS;
 	}
 
-	@ExpectPlatform
+	@SuppressWarnings("unused")
+    @ExpectPlatform
 	private static boolean firePlatformTeleportEvent(ServerPlayer player, Vec3 pos) {
 		throw new AssertionError();
 	}

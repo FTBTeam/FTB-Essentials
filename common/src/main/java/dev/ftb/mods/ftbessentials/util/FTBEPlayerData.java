@@ -18,7 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +44,7 @@ public class FTBEPlayerData {
 	private boolean canFly;
 	private boolean god;
 	private String nick;
+	@Nullable
 	private TeleportPos lastSeenPos;
 	private final SavedTeleportManager.HomeManager homes;
 	private RecordingStatus recording;
@@ -68,7 +69,7 @@ public class FTBEPlayerData {
 		canFly = false;
 		god = false;
 		nick = "";
-		lastSeenPos = new TeleportPos(Level.OVERWORLD, BlockPos.ZERO);
+		lastSeenPos = null;
 		recording = RecordingStatus.NONE;
 
 		kitUseTimes = new HashMap<>();
@@ -139,8 +140,8 @@ public class FTBEPlayerData {
 		}
 	}
 
-	public TeleportPos getLastSeenPos() {
-		return lastSeenPos;
+	public Optional<TeleportPos> getLastSeenPos() {
+		return Optional.ofNullable(lastSeenPos);
 	}
 
 	public void setLastSeenPos(TeleportPos lastSeenPos) {
@@ -163,7 +164,7 @@ public class FTBEPlayerData {
 		return homes;
 	}
 
-	public static Optional<FTBEPlayerData> getOrCreate(MinecraftServer server, UUID playerId) {;
+	public static Optional<FTBEPlayerData> getOrCreate(MinecraftServer server, UUID playerId) {
 		if (MAP.containsKey(playerId)) {
 			return Optional.of(MAP.get(playerId));
 		}
@@ -173,7 +174,7 @@ public class FTBEPlayerData {
 				.map(profile -> MAP.computeIfAbsent(playerId, k -> new FTBEPlayerData(playerId, profile.name())));
     }
 
-	public static Optional<FTBEPlayerData> getOrCreate(Player player) {
+	public static Optional<FTBEPlayerData> getOrCreate(@Nullable Player player) {
 		if (player == null || PlayerHooks.isFake(player)) {
 			return Optional.empty();
 		}
@@ -219,7 +220,7 @@ public class FTBEPlayerData {
 		nbt.putBoolean("fly", canFly);
 		nbt.putBoolean("god", god);
 		nbt.putString("nick", nick);
-		nbt.put("last_seen", lastSeenPos.toNBT());
+		if (lastSeenPos != null) nbt.put("last_seen", lastSeenPos.toNBT());
 		nbt.putString("recording", recording.getId());
 
 		ListTag tph = new ListTag();
@@ -281,7 +282,7 @@ public class FTBEPlayerData {
 	}
 
 	public void load() {
-		Path path = FTBEWorldData.instance.mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".snbt");
+		Path path = FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".snbt");
 		try {
 			read(SNBT.tryRead(path));
 		} catch (IOException e) {
@@ -291,7 +292,7 @@ public class FTBEPlayerData {
 
 	public void saveIfChanged() {
 		if (needSave) {
-			Path path = FTBEWorldData.instance.mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".snbt");
+			Path path = FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".snbt");
 			try {
 				SNBT.tryWrite(path, write());
             } catch (IOException e) {
@@ -329,7 +330,7 @@ public class FTBEPlayerData {
 	 * @return a list of all the known players UUID's
 	 */
 	public static List<UUID> getAllKnownPlayers() {
-		try (Stream<Path> files = Files.list(FTBEWorldData.instance.mkdirs(PLAYER_DATA_PATH))) {
+		try (Stream<Path> files = Files.list(FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH))) {
 			return files.filter(path -> path.toString().endsWith(".snbt"))
 					.map(path -> tryParseUUID(path.getFileName().toString().replace(".snbt", "")))
 					.filter(Objects::nonNull)

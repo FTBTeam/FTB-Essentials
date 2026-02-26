@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbessentials.util;
 
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftblibrary.util.Lazy;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -11,11 +12,15 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public class DimensionFilter {
-    private static WildcardedRLMatcher rtpDimensionMatcherB = null;
-    private static WildcardedRLMatcher rtpDimensionMatcherW = null;
+    private static final Lazy<WildcardedRLMatcher> RTP_DIMENSION_MATCHER_B
+            = Lazy.of(() -> new WildcardedRLMatcher(FTBEConfig.RTP_DIMENSION_BLACKLIST.get()));
+    private static final Lazy<WildcardedRLMatcher> RTP_DIMENSION_MATCHER_W
+            = Lazy.of(() -> new WildcardedRLMatcher(FTBEConfig.RTP_DIMENSION_WHITELIST.get()));
 
-    private static WildcardedRLMatcher allDimensionMatcherBTo = null;
-    private static WildcardedRLMatcher allDimensionMatcherBFrom = null;
+    private static final Lazy<WildcardedRLMatcher> ALL_DIMENSION_MATCHER_B_TO
+            = Lazy.of(() -> new WildcardedRLMatcher(FTBEConfig.TELEPORTATION_BLACKLIST_TO.get()));
+    private static final Lazy<WildcardedRLMatcher> ALL_DIMENSION_MATCHER_B_FROM
+            = Lazy.of(() -> new WildcardedRLMatcher(FTBEConfig.TELEPORTATION_BLACKLIST_FROM.get()));
 
     public static boolean isRtpDimensionOK(ResourceKey<Level> levelKey) {
         Identifier name = levelKey.identifier();
@@ -33,39 +38,27 @@ public class DimensionFilter {
     }
 
     private static WildcardedRLMatcher getRtpDimensionWhitelist() {
-        if (rtpDimensionMatcherW == null) {
-            rtpDimensionMatcherW = new WildcardedRLMatcher(FTBEConfig.RTP_DIMENSION_WHITELIST.get());
-        }
-        return rtpDimensionMatcherW;
+        return RTP_DIMENSION_MATCHER_W.get();
     }
 
     private static WildcardedRLMatcher getRtpDimensionBlacklist() {
-        if (rtpDimensionMatcherB == null) {
-            rtpDimensionMatcherB = new WildcardedRLMatcher(FTBEConfig.RTP_DIMENSION_BLACKLIST.get());
-        }
-        return rtpDimensionMatcherB;
+        return RTP_DIMENSION_MATCHER_B.get();
     }
     
     private static WildcardedRLMatcher getAllCommandDimensionBlacklistFrom() {
-        if (allDimensionMatcherBFrom == null) {
-            allDimensionMatcherBFrom = new WildcardedRLMatcher(FTBEConfig.TELEPORTATION_BLACKLIST_FROM.get());
-        }
-        return allDimensionMatcherBFrom;
+        return ALL_DIMENSION_MATCHER_B_FROM.get();
     }
     
     private static WildcardedRLMatcher getAllCommandDimensionBlacklistTo() {
-        if (allDimensionMatcherBTo == null) {
-            allDimensionMatcherBTo = new WildcardedRLMatcher(FTBEConfig.TELEPORTATION_BLACKLIST_TO.get());
-        }
-        return allDimensionMatcherBTo;
+        return ALL_DIMENSION_MATCHER_B_TO.get();
     }
     
     public static void clearMatcherCaches() {
-        rtpDimensionMatcherB = null;
-        rtpDimensionMatcherW = null;
+        RTP_DIMENSION_MATCHER_B.invalidate();
+        RTP_DIMENSION_MATCHER_W.invalidate();
         
-        allDimensionMatcherBFrom = null;
-        allDimensionMatcherBTo = null;
+        ALL_DIMENSION_MATCHER_B_FROM.invalidate();
+        ALL_DIMENSION_MATCHER_B_TO.invalidate();
     }
 
     private static class WildcardedRLMatcher implements Predicate<Identifier> {

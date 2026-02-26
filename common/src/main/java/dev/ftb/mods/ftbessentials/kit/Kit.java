@@ -10,6 +10,8 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -69,7 +71,8 @@ public class Kit {
     }
 
     private SNBTCompoundTag saveStack(ItemStack stack, HolderLookup.Provider provider) {
-        var res = SNBTCompoundTag.of(ItemStack.OPTIONAL_CODEC.encodeStart(NbtOps.INSTANCE, stack).getOrThrow());
+        RegistryOps<Tag> nbtOps = provider.createSerializationContext(NbtOps.INSTANCE);
+        var res = SNBTCompoundTag.of(ItemStack.OPTIONAL_CODEC.encodeStart(nbtOps, stack).getOrThrow());
         res.singleLine();
         return res;
     }
@@ -79,7 +82,8 @@ public class Kit {
         ListTag list = tag.getListOrEmpty("items");
         list.forEach(el -> {
             if (el instanceof CompoundTag c) {
-                ItemStack.CODEC.parse(NbtOps.INSTANCE, c).result().ifPresent(items::add);
+                ItemStack.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), c).result()
+                        .ifPresent(items::add);
             }
         });
         return new Kit(kitName, items, tag.getLongOr("cooldown", 0L), tag.getBooleanOr("auto_grant", false));

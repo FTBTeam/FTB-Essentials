@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class InventoryUtil {
     @ExpectPlatform
     public static NonNullList<ItemStack> getItemsInInventory(Level level, BlockPos pos, Direction side) {

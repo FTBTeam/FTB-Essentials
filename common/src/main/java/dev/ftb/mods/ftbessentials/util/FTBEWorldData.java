@@ -8,17 +8,20 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class FTBEWorldData {
 	private static final LevelResource FTBESSENTIALS_DIRECTORY = new LevelResource("ftbessentials");
 	private static final String DATA_FILE = "data.snbt";
 
-	public static FTBEWorldData instance;
+	@Nullable
+	private static FTBEWorldData instance;
 
 	private final MinecraftServer server;
 	private boolean needSave;
@@ -30,6 +33,23 @@ public class FTBEWorldData {
 		server = s;
 		warpManager = new SavedTeleportManager.WarpManager(this);
 		muteTimeouts = new HashMap<>();
+	}
+
+	public static FTBEWorldData getInstance() {
+		return Objects.requireNonNull(instance);
+	}
+
+	public static void ifAvailable(Consumer<FTBEWorldData> consumer) {
+		if (instance != null) consumer.accept(instance);
+	}
+
+	public static void startup(MinecraftServer server) {
+		instance = new FTBEWorldData(server);
+		instance.load();
+	}
+
+	public static void shutdown() {
+		instance = null;
 	}
 
 	public SavedTeleportManager.WarpManager warpManager() {
