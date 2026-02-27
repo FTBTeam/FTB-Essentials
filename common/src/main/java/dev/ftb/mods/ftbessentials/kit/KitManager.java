@@ -5,13 +5,13 @@ import dev.ftb.mods.ftbessentials.commands.impl.kit.KitCommand;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.InventoryUtil;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -29,7 +29,7 @@ public enum KitManager {
 
     public void load(CompoundTag kits, HolderLookup.Provider provider) {
         allKits.clear();
-        kits.getAllKeys().forEach(key -> allKits.put(key, Kit.fromNBT(key, kits.getCompound(key), provider)));
+        kits.keySet().forEach(key -> allKits.put(key, Kit.fromNBT(key, kits.getCompoundOrEmpty(key), provider)));
     }
 
     public CompoundTag save(HolderLookup.Provider provider) {
@@ -61,18 +61,18 @@ public enum KitManager {
 
         FTBEPlayerData.cleanupKitCooldowns(kitName);
 
-        FTBEWorldData.instance.markDirty();
+        FTBEWorldData.getInstance().markDirty();
     }
 
     public void createFromPlayerInv(String kitName, ServerPlayer player, long cooldownSecs, boolean hotbarOnly) throws CommandSyntaxException {
         if (hotbarOnly) {
             NonNullList<ItemStack> items = NonNullList.create();
             for (int i = 0; i < 9; i++) {
-                items.add(player.getInventory().items.get(i));
+                items.add(player.getInventory().getItem(i));
             }
             createKit(kitName, cooldownSecs, () -> items);
         } else {
-            createKit(kitName, cooldownSecs, () -> player.getInventory().items);
+            createKit(kitName, cooldownSecs, () -> player.getInventory().getNonEquipmentItems());
         }
     }
 
@@ -99,6 +99,6 @@ public enum KitManager {
 
         allKits.put(kit.getKitName(), kit);
 
-        FTBEWorldData.instance.markDirty();
+        FTBEWorldData.getInstance().markDirty();
     }
 }

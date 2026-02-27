@@ -7,7 +7,6 @@ import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 public record DurationInfo(Component desc, long until) {
     private static final DurationInfo INDEFINITE = new DurationInfo(Component.translatable("ftbessentials.duration.indefinite"), -1L);

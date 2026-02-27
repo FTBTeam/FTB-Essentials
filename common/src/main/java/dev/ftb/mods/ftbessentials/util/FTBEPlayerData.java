@@ -4,25 +4,25 @@ import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
-import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.snbt.SNBT;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.util.NameMap;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -44,6 +44,7 @@ public class FTBEPlayerData {
 	private boolean canFly;
 	private boolean god;
 	private String nick;
+	@Nullable
 	private TeleportPos lastSeenPos;
 	private final SavedTeleportManager.HomeManager homes;
 	private RecordingStatus recording;
@@ -68,7 +69,7 @@ public class FTBEPlayerData {
 		canFly = false;
 		god = false;
 		nick = "";
-		lastSeenPos = new TeleportPos(Level.OVERWORLD, BlockPos.ZERO);
+		lastSeenPos = null;
 		recording = RecordingStatus.NONE;
 
 		kitUseTimes = new HashMap<>();
@@ -139,8 +140,8 @@ public class FTBEPlayerData {
 		}
 	}
 
-	public TeleportPos getLastSeenPos() {
-		return lastSeenPos;
+	public Optional<TeleportPos> getLastSeenPos() {
+		return Optional.ofNullable(lastSeenPos);
 	}
 
 	public void setLastSeenPos(TeleportPos lastSeenPos) {
@@ -163,26 +164,22 @@ public class FTBEPlayerData {
 		return homes;
 	}
 
-	public static Optional<FTBEPlayerData> getOrCreate(MinecraftServer server, UUID playerId) {;
+	public static Optional<FTBEPlayerData> getOrCreate(MinecraftServer server, UUID playerId) {
 		if (MAP.containsKey(playerId)) {
 			return Optional.of(MAP.get(playerId));
 		}
 
 		// Check if the player file exists
-		if (server.getProfileCache() == null) {
-			return Optional.empty();
-		}
-
-        return server.getProfileCache().get(playerId)
-				.map(profile -> MAP.computeIfAbsent(playerId, k -> new FTBEPlayerData(playerId, profile.getName())));
+        return server.services().profileResolver().fetchById(playerId)
+				.map(profile -> MAP.computeIfAbsent(playerId, k -> new FTBEPlayerData(playerId, profile.name())));
     }
 
-	public static Optional<FTBEPlayerData> getOrCreate(Player player) {
+	public static Optional<FTBEPlayerData> getOrCreate(@Nullable Player player) {
 		if (player == null || PlayerHooks.isFake(player)) {
 			return Optional.empty();
 		}
 
-		return Optional.of(MAP.computeIfAbsent(player.getUUID(), k -> new FTBEPlayerData(player.getUUID(), player.getGameProfile().getName())));
+		return Optional.of(MAP.computeIfAbsent(player.getUUID(), k -> new FTBEPlayerData(player.getUUID(), player.getGameProfile().name())));
 	}
 
 	public static boolean playerExists(UUID playerId) {
@@ -223,15 +220,13 @@ public class FTBEPlayerData {
 		nbt.putBoolean("fly", canFly);
 		nbt.putBoolean("god", god);
 		nbt.putString("nick", nick);
-		nbt.put("last_seen", lastSeenPos.write());
+		if (lastSeenPos != null) nbt.put("last_seen", lastSeenPos.toNBT());
 		nbt.putString("recording", recording.getId());
 
 		ListTag tph = new ListTag();
-
 		for (TeleportPos pos : teleportHistory) {
-			tph.add(pos.write());
+			tph.add(pos.toNBT());
 		}
-
 		nbt.put("teleport_history", tph);
 
 		nbt.put("homes", homes.writeNBT());
@@ -242,28 +237,29 @@ public class FTBEPlayerData {
 	}
 
 	public void read(CompoundTag tag) {
-		muted = tag.getBoolean("muted");
-		canFly = tag.getBoolean("fly");
-		god = tag.getBoolean("god");
-		nick = tag.getString("nick");
-		recording = RecordingStatus.NAME_MAP.map.getOrDefault(tag.getString("recording"), RecordingStatus.NONE);
-		lastSeenPos = tag.contains("last_seen") ? new TeleportPos(tag.getCompound("last_seen")) : null;
+		// TODO codec
+		muted = tag.getBooleanOr("muted", false);
+		canFly = tag.getBooleanOr("fly", false);
+		god = tag.getBooleanOr("god", false);
+		nick = tag.getStringOr("nick", "");
+		recording = tag.getString("recording").map(rec -> RecordingStatus.NAME_MAP.map.getOrDefault(rec, RecordingStatus.NONE)).orElse(RecordingStatus.NONE);
+		lastSeenPos = tag.getCompound("last_seen").map(TeleportPos::fromNBT).orElse(null);
 
 		teleportHistory.clear();
-
-		ListTag th = tag.getList("teleport_history", Tag.TAG_COMPOUND);
-
-		for (int i = 0; i < th.size(); i++) {
-			teleportHistory.add(new TeleportPos(th.getCompound(i)));
-		}
+		tag.getList("teleport_history").ifPresent(th -> {
+			for (int i = 0; i < th.size(); i++) {
+				th.getCompound(i).ifPresent(c -> teleportHistory.add(TeleportPos.fromNBT(c)));
+			}
+		});
 
 		kitUseTimes.clear();
-		CompoundTag kitTag = tag.getCompound("kit_use_times");
-		for (String name : kitTag.getAllKeys()) {
-			kitUseTimes.put(name, kitTag.getLong(name));
-		}
+		tag.getCompound("kit_use_times").ifPresent(kitTag -> {
+			for (String name : kitTag.keySet()) {
+				kitTag.getLong(name).ifPresent(l -> kitUseTimes.put(name, l));
+			}
+		});
 
-		homes.readNBT(tag.getCompound("homes"));
+		homes.readNBT(tag.getCompoundOrEmpty("homes"));
 	}
 
 	public void addTeleportHistory(ServerPlayer player, TeleportPos pos) {
@@ -286,16 +282,23 @@ public class FTBEPlayerData {
 	}
 
 	public void load() {
-		CompoundTag tag = SNBT.read(FTBEWorldData.instance.mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".snbt"));
-
-		if (tag != null) {
-			read(tag);
+		Path path = FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".snbt");
+		try {
+			read(SNBT.tryRead(path));
+		} catch (IOException e) {
+			FTBEssentials.LOGGER.error("can't read {} : {} / {}", path, e.getClass().getName(), e.getMessage());
 		}
 	}
 
 	public void saveIfChanged() {
-		if (needSave && SNBT.write(FTBEWorldData.instance.mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".snbt"), write())) {
-			needSave = false;
+		if (needSave) {
+			Path path = FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".snbt");
+			try {
+				SNBT.tryWrite(path, write());
+            } catch (IOException e) {
+				FTBEssentials.LOGGER.error("can't write {} : {} / {}", path, e.getClass().getName(), e.getMessage());
+            }
+            needSave = false;
 		}
 	}
 
@@ -327,7 +330,7 @@ public class FTBEPlayerData {
 	 * @return a list of all the known players UUID's
 	 */
 	public static List<UUID> getAllKnownPlayers() {
-		try (Stream<Path> files = Files.list(FTBEWorldData.instance.mkdirs(PLAYER_DATA_PATH))) {
+		try (Stream<Path> files = Files.list(FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH))) {
 			return files.filter(path -> path.toString().endsWith(".snbt"))
 					.map(path -> tryParseUUID(path.getFileName().toString().replace(".snbt", "")))
 					.filter(Objects::nonNull)

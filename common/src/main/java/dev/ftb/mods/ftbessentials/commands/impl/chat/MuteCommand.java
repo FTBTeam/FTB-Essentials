@@ -13,6 +13,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.List;
@@ -51,7 +52,7 @@ public class MuteCommand implements FTBCommand {
 
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             data.setMuted(true);
-            FTBEWorldData.instance.setMuteTimeout(player, info.until());
+            FTBEWorldData.getInstance().setMuteTimeout(player, info.until());
 
             Component msg = Component.translatable("ftbessentials.muted.muted", player.getDisplayName(), source.getDisplayName(), info.desc());
             notifyMuting(source, player, msg);
@@ -63,7 +64,7 @@ public class MuteCommand implements FTBCommand {
     private int unmute(CommandSourceStack source, ServerPlayer player) {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             data.setMuted(false);
-            FTBEWorldData.instance.setMuteTimeout(player, -1);
+            FTBEWorldData.getInstance().setMuteTimeout(player, -1);
 
             notifyMuting(source, player, Component.translatable("ftbessentials.muted.unmuted", player.getDisplayName(), source.getDisplayName()));
 
@@ -74,7 +75,7 @@ public class MuteCommand implements FTBCommand {
     private void notifyMuting(CommandSourceStack source, Player target, Component msg) {
         // notify any online ops, plus the player being (un)muted
         source.getServer().getPlayerList().getPlayers().forEach(p -> {
-            if (p.hasPermissions(2) || p == target) {
+            if (p.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || p == target) {
                 p.displayClientMessage(msg, false);
             }
         });

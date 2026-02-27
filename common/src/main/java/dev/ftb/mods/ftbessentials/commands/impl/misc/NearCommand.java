@@ -5,13 +5,13 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
-import dev.ftb.mods.ftbessentials.integration.PermissionsHelper;
+import dev.ftb.mods.ftblibrary.integration.permissions.PermissionHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,8 +46,8 @@ public class NearCommand implements FTBCommand {
     }
 
     private static int showNear(CommandSourceStack source, ServerPlayer target, int radius) {
-        if (!source.hasPermission(Commands.LEVEL_GAMEMASTERS) && source.isPlayer()) {
-            int max = PermissionsHelper.getInstance().getInt(source.getPlayer(), MAX_PLAYER_RADIUS, "ftbessentials.near.max_radius");
+        if (!source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) && source.isPlayer()) {
+            int max = PermissionHelper.getProvider().getIntegerPermission(source.getPlayer(),"ftbessentials.near.max_radius", MAX_PLAYER_RADIUS);
             if (radius > max) {
                 source.sendSuccess(() -> Component.translatable("ftbessentials.feedback.limit_radius", max).withStyle(ChatFormatting.GOLD), false);
                 radius = max;
@@ -55,7 +55,7 @@ public class NearCommand implements FTBCommand {
         }
 
         int radius2 = radius * radius;
-        List<ServerPlayer> l = target.getServer().getPlayerList().getPlayers().stream()
+        List<ServerPlayer> l = target.level().getServer().getPlayerList().getPlayers().stream()
                 .filter(other -> other != target)
                 .filter(other -> other.distanceToSqr(target) < radius2)
                 .sorted(Comparator.comparingDouble(o -> o.distanceToSqr(target)))

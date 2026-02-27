@@ -3,19 +3,20 @@ package dev.ftb.mods.ftbessentials.commands.impl.cheat;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
+import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -23,7 +24,7 @@ import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
 public class SpeedCommand implements FTBCommand {
-    private static final ResourceLocation ESSENTIALS_SPEED_ID = FTBEssentials.essentialsId("speed_boost");
+    private static final Identifier ESSENTIALS_SPEED_ID = FTBEssentials.essentialsId("speed_boost");
 
     @Override
     public boolean enabled() {
@@ -35,7 +36,7 @@ public class SpeedCommand implements FTBCommand {
         return List.of(literal("speed")
                 .executes(context -> speed(context.getSource(), Attributes.MOVEMENT_SPEED, context.getSource().getPlayerOrException()))
                 .then(argument("boost_percent", IntegerArgumentType.integer(-100, 2000))
-                        .requires(cs -> cs.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                        .requires(CommandUtils.isGamemaster())
                         .executes(context -> speed(context.getSource(), Attributes.MOVEMENT_SPEED, context.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(context, "boost_percent")))
                         .then(argument("player", EntityArgument.player())
                                 .executes(context -> speed(context.getSource(), Attributes.MOVEMENT_SPEED, EntityArgument.getPlayer(context, "player"), IntegerArgumentType.getInteger(context, "boost_percent")))
@@ -45,9 +46,7 @@ public class SpeedCommand implements FTBCommand {
     }
 
     private static int speed(CommandSourceStack source, Holder<Attribute> attr, ServerPlayer player) {
-        AttributeInstance attrInstance = player.getAttribute(attr);
-
-        showSpeed(source, player, attrInstance);
+        showSpeed(source, player, player.getAttribute(attr));
 
         return 1;
     }
@@ -68,7 +67,7 @@ public class SpeedCommand implements FTBCommand {
         return 1;
     }
 
-    private static void showSpeed(CommandSourceStack source, ServerPlayer target, AttributeInstance attrInstance) {
+    private static void showSpeed(CommandSourceStack source, ServerPlayer target, @Nullable AttributeInstance attrInstance) {
         Component msg;
         if (attrInstance != null && attrInstance.getModifier(ESSENTIALS_SPEED_ID) != null) {
             AttributeModifier modifier = attrInstance.getModifier(ESSENTIALS_SPEED_ID);

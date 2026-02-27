@@ -26,15 +26,15 @@ public class OtherPlayerInventory implements Container {
 		return index >= 4 && index < 8;
 	}
 
-	public int getSlot(int index) {
+	public int getMappedSlotIndex(int index) {
 		if (index == 8) {
-			return 40;
+			return 40;  // offhand item
 		} else if (index >= 0 && index <= 3) {
-			return 39 - index;
+			return 39 - index;  // armor items
 		} else if (index >= 9 && index <= 35) {
-			return index;
+			return index; // main inventory
 		} else if (index >= 36 && index <= 44) {
-			return index - 36;
+			return index - 36;  // hotbar
 		}
 
 		return -1;
@@ -46,7 +46,7 @@ public class OtherPlayerInventory implements Container {
 			return ItemStack.EMPTY;
 		}
 
-		int slot = getSlot(index);
+		int slot = getMappedSlotIndex(index);
 		return slot == -1 ? ItemStack.EMPTY : player.getInventory().getItem(slot);
 	}
 
@@ -56,7 +56,7 @@ public class OtherPlayerInventory implements Container {
 			return ItemStack.EMPTY;
 		}
 
-		int slot = getSlot(index);
+		int slot = getMappedSlotIndex(index);
 		return slot == -1 ? ItemStack.EMPTY : player.getInventory().removeItem(slot, count);
 	}
 
@@ -66,7 +66,7 @@ public class OtherPlayerInventory implements Container {
 			return ItemStack.EMPTY;
 		}
 
-		int slot = getSlot(index);
+		int slot = getMappedSlotIndex(index);
 		return slot == -1 ? ItemStack.EMPTY : player.getInventory().removeItemNoUpdate(slot);
 	}
 
@@ -76,7 +76,7 @@ public class OtherPlayerInventory implements Container {
 			return;
 		}
 
-		int slot = getSlot(index);
+		int slot = getMappedSlotIndex(index);
 
 		if (slot != -1) {
 			player.getInventory().setItem(slot, is);
@@ -106,7 +106,7 @@ public class OtherPlayerInventory implements Container {
 			return false;
 		}
 
-		int slot = getSlot(index);
+		int slot = getMappedSlotIndex(index);
 		return slot != -1 && player.getInventory().canPlaceItem(slot, stack);
 	}
 

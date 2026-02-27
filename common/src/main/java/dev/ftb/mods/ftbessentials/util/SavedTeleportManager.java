@@ -41,14 +41,14 @@ public abstract class SavedTeleportManager {
 
     public CompoundTag writeNBT() {
         SNBTCompoundTag tag = new SNBTCompoundTag();
-        destinations.forEach((name, dest) -> tag.put(name, dest.write()));
+        destinations.forEach((name, dest) -> tag.put(name, dest.toNBT()));
         return tag;
     }
 
     public void readNBT(CompoundTag tag) {
         destinations.clear();
-        for (String key : tag.getAllKeys()) {
-            destinations.put(key, new TeleportPos(tag.getCompound(key)));
+        for (String key : tag.keySet()) {
+            destinations.put(key, TeleportPos.fromNBT(tag.getCompoundOrEmpty(key)));
         }
     }
 

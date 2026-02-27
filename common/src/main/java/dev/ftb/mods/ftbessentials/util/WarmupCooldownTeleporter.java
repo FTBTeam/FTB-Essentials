@@ -6,10 +6,10 @@ import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.TeleportPos.TeleportResult;
 import net.minecraft.ChatFormatting;
-import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
@@ -51,7 +51,8 @@ public class WarmupCooldownTeleporter {
 		return TeleportResult.SUCCESS;
 	}
 
-	@ExpectPlatform
+	@SuppressWarnings("unused")
+    @ExpectPlatform
 	private static boolean firePlatformTeleportEvent(ServerPlayer player, Vec3 pos) {
 		throw new AssertionError();
 	}
@@ -64,7 +65,7 @@ public class WarmupCooldownTeleporter {
 
 		TeleportPos pos = positionGetter.apply(player);
 
-        if (!player.hasPermissions(Commands.LEVEL_GAMEMASTERS) || !FTBEConfig.ADMINS_EXEMPT_DIMENSION_BLACKLISTS.get()) {
+        if (!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || !FTBEConfig.ADMINS_EXEMPT_DIMENSION_BLACKLISTS.get()) {
             TeleportResult blacklistedResult = pos.checkDimensionBlacklist(player);
             if (!blacklistedResult.isSuccess()) {
                 return blacklistedResult;

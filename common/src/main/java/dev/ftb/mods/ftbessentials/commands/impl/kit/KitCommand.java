@@ -22,15 +22,14 @@ import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import joptsimple.internal.Strings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.ClickEvent.Action;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
@@ -203,7 +202,7 @@ public class KitCommand implements FTBCommand {
     }
 
     static int giveKit(CommandSourceStack source, String name, Collection<ServerPlayer> players) throws CommandSyntaxException {
-        if (!source.hasPermission(Commands.LEVEL_GAMEMASTERS) && players.size() == 1 && source.getPlayer() != null && players.contains(source.getPlayer()) ) {
+        if (!source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) && players.size() == 1 && source.getPlayer() != null && players.contains(source.getPlayer()) ) {
             // giving to self and not an admin; also check the `ftbessentials.give_me_kit.<kitname>` node
             if (!Kit.checkPermissionNode(source.getPlayer(), name)) {
                 throw NO_KIT_PERMISSION.create(name);
@@ -223,7 +222,7 @@ public class KitCommand implements FTBCommand {
         kits.stream().sorted(Comparator.comparing(Kit::getKitName))
                 .forEach(kit -> source.sendSuccess(() -> Component.literal("• " + kit.getKitName()).withStyle(Style.EMPTY
                         .withColor(ChatFormatting.YELLOW)
-                        .withClickEvent(new ClickEvent(Action.RUN_COMMAND, "/kit show " + kit.getKitName()))
+                        .withClickEvent(new ClickEvent.RunCommand("/kit show " + kit.getKitName()))
                 ), false));
         return 1;
     }

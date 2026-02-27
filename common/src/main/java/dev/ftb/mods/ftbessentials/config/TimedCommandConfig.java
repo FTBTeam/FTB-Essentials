@@ -1,13 +1,13 @@
 package dev.ftb.mods.ftbessentials.config;
 
-import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
+import dev.ftb.mods.ftblibrary.config.value.Config;
 import net.minecraft.server.level.ServerPlayer;
 
 public class TimedCommandConfig extends ToggleableConfig {
 	private final PermissionBasedIntValue cooldown;
 	private final PermissionBasedIntValue warmup;
 
-	public TimedCommandConfig(SNBTConfig parent, String name, int defaultCooldown, int defaultWarmup) {
+	public TimedCommandConfig(Config parent, String name, int defaultCooldown, int defaultWarmup) {
 		super(parent, name);
 
 		cooldown = new PermissionBasedIntValue(

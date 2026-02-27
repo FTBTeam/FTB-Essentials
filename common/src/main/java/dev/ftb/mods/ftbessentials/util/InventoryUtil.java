@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class InventoryUtil {
     @ExpectPlatform
     public static NonNullList<ItemStack> getItemsInInventory(Level level, BlockPos pos, Direction side) {
@@ -26,7 +27,7 @@ public class InventoryUtil {
     public static BlockEntity requireBlockEntity(Level level, BlockPos pos) {
         BlockEntity be = level.getBlockEntity(pos);
         if (be == null) {
-            throw new IllegalArgumentException(String.format("No block entity at %s / [%d,%d,%d]", level.dimension().location(), pos.getX(), pos.getY(), pos.getZ()));
+            throw new IllegalArgumentException(String.format("No block entity at %s / [%d,%d,%d]", level.dimension().identifier(), pos.getX(), pos.getY(), pos.getZ()));
         }
         return be;
     }

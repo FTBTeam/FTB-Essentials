@@ -7,6 +7,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permission;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -15,37 +17,31 @@ import java.util.List;
  */
 public record SimpleCommandPlayer(
         String name,
-        int permissionLevel,
+        @Nullable
+        Permission permissionLevel,
+        @Nullable
+        Permission targetedPermissionLevel,  // when using the command with a "target" player
         ToggleableConfig config,
         EntitySelectorAction action
 ) implements FTBCommand {
-    public static SimpleCommandPlayer create(String name, int permissionLevel, ToggleableConfig config, EntitySelectorAction action) {
-        return new SimpleCommandPlayer(name, permissionLevel, config, action);
+    public static SimpleCommandPlayer create(String name, @Nullable Permission permissionLevel, ToggleableConfig config, EntitySelectorAction action) {
+        return new SimpleCommandPlayer(name, permissionLevel, permissionLevel, config, action);
     }
 
     public static SimpleCommandPlayer create(String name, ToggleableConfig config, EntitySelectorAction action) {
-        return new SimpleCommandPlayer(name,0, config, action);
+        return create(name, null, config, action);
     }
 
     @Override
     public List<LiteralArgumentBuilder<CommandSourceStack>> register() {
-        var command = Commands.literal(name);
-
-        if (this.permissionLevel > 0) {
-            command.requires(cs -> cs.hasPermission(this.permissionLevel));
-        }
-
-        command.executes(context -> {
-                var player = context.getSource().getPlayerOrException();
-                action.accept(context, player);
-                return 1;
-            }).then(Commands.argument("target", EntityArgument.player()).executes(context -> {
-                var entities = EntityArgument.getPlayer(context, "target");
-                action.accept(context, entities);
-                return 1;
-            }));
-
-        return List.of(command);
+        return List.of(
+                Commands.literal(name).requires(cs -> permissionLevel == null || cs.permissions().hasPermission(permissionLevel))
+                        .executes(context -> action.accept(context, context.getSource().getPlayerOrException()))
+                        .then(Commands.argument("target", EntityArgument.player())
+                                .requires(cs -> targetedPermissionLevel == null || cs.permissions().hasPermission(targetedPermissionLevel))
+                                .executes(context -> action.accept(context, EntityArgument.getPlayer(context, "target")))
+                        )
+        );
     }
 
     @Override
@@ -55,6 +51,6 @@ public record SimpleCommandPlayer(
 
     @FunctionalInterface
     public interface EntitySelectorAction {
-        void accept(CommandContext<CommandSourceStack> context, ServerPlayer players);
+        int accept(CommandContext<CommandSourceStack> context, ServerPlayer targetPlayer);
     }
 }

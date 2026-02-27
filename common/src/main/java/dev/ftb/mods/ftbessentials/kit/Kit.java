@@ -2,16 +2,18 @@ package dev.ftb.mods.ftbessentials.kit;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftbessentials.commands.impl.kit.KitCommand;
-import dev.ftb.mods.ftbessentials.integration.PermissionsHelper;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
+import dev.ftb.mods.ftblibrary.integration.permissions.PermissionHelper;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -69,20 +71,22 @@ public class Kit {
     }
 
     private SNBTCompoundTag saveStack(ItemStack stack, HolderLookup.Provider provider) {
-        var res = SNBTCompoundTag.of(stack.save(provider));
+        RegistryOps<Tag> nbtOps = provider.createSerializationContext(NbtOps.INSTANCE);
+        var res = SNBTCompoundTag.of(ItemStack.OPTIONAL_CODEC.encodeStart(nbtOps, stack).getOrThrow());
         res.singleLine();
         return res;
     }
 
     public static Kit fromNBT(String kitName, CompoundTag tag, HolderLookup.Provider provider) {
         List<ItemStack> items = new ArrayList<>();
-        ListTag list = tag.getList("items", Tag.TAG_COMPOUND);
+        ListTag list = tag.getListOrEmpty("items");
         list.forEach(el -> {
             if (el instanceof CompoundTag c) {
-                ItemStack.parse(provider, c).ifPresent(items::add);
+                ItemStack.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), c).result()
+                        .ifPresent(items::add);
             }
         });
-        return new Kit(kitName, items, tag.getLong("cooldown"), tag.getBoolean("auto_grant"));
+        return new Kit(kitName, items, tag.getLongOr("cooldown", 0L), tag.getBooleanOr("auto_grant", false));
     }
 
     public void giveToPlayer(ServerPlayer player, FTBEPlayerData playerData, boolean throwOnCooldown) throws CommandSyntaxException {
@@ -111,7 +115,7 @@ public class Kit {
             long lastUsed = data.getLastKitUseTime(kitName);
             if (cooldown < 0L && lastUsed != 0L) {
                 if (throwOnCooldown) {
-                    throw KitCommand.ONE_TIME_ONLY.create(kitName, player.getGameProfile().getName());
+                    throw KitCommand.ONE_TIME_ONLY.create(kitName, player.getGameProfile().name());
                 } else {
                     return true;
                 }
@@ -138,11 +142,11 @@ public class Kit {
 
     public boolean playerCanGetKit(@Nullable ServerPlayer player) {
         return player == null
-                || player.hasPermissions(Commands.LEVEL_GAMEMASTERS)
+                || player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)
                 || checkPermissionNode(player, kitName);
     }
 
     public static boolean checkPermissionNode(@NotNull ServerPlayer player, String kitName) {
-        return PermissionsHelper.getInstance().getBool(player, false, "ftbessentials.give_me_kit." + kitName);
+        return PermissionHelper.getProvider().getBooleanPermission(player, "ftbessentials.give_me_kit." + kitName, false);
     }
 }

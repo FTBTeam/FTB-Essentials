@@ -81,8 +81,8 @@ public class TPACommand implements FTBCommand {
         line2.append(Component.translatable("ftbessentials.tpa.accept").setStyle(Style.EMPTY
                 .applyFormat(ChatFormatting.GREEN)
                 .withBold(true)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpaccept " + request.id()))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("ftbessentials.tpa.accept.tooltip")))
+                .withClickEvent(new ClickEvent.RunCommand("/tpaccept " + request.id()))
+                .withHoverEvent(new HoverEvent.ShowText(Component.translatable("ftbessentials.tpa.accept.tooltip")))
         ));
 
         line2.append(" | ");
@@ -90,8 +90,8 @@ public class TPACommand implements FTBCommand {
         line2.append(Component.translatable("ftbessentials.tpa.deny").setStyle(Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
                 .withBold(true)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tpdeny " + request.id()))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("ftbessentials.tpa.deny.tooltip")))
+                .withClickEvent(new ClickEvent.RunCommand("/tpdeny " + request.id()))
+                .withHoverEvent(new HoverEvent.ShowText(Component.translatable("ftbessentials.tpa.deny.tooltip")))
         ));
 
         line2.append(" |");
@@ -120,7 +120,7 @@ public class TPACommand implements FTBCommand {
             return 0;
         }
 
-        ServerPlayer sourcePlayer = player.server.getPlayerList().getPlayer(request.source().getUuid());
+        ServerPlayer sourcePlayer = player.level().getServer().getPlayerList().getPlayer(request.source().getUuid());
 
         if (sourcePlayer == null) {
             player.displayClientMessage(Component.translatable("ftbessentials.tpa.gone_offline").withStyle(ChatFormatting.GOLD), false);
@@ -155,7 +155,7 @@ public class TPACommand implements FTBCommand {
 
         player.displayClientMessage(Component.translatable("ftbessentials.tpa.denied"), false);
 
-        ServerPlayer player2 = player.server.getPlayerList().getPlayer(request.target().getUuid());
+        ServerPlayer player2 = player.level().getServer().getPlayerList().getPlayer(request.target().getUuid());
 
         if (player2 != null) {
             player2.displayClientMessage(Component.translatable("ftbessentials.tpa.denied"), false);

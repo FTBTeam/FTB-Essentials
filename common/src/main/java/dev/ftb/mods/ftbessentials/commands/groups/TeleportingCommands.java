@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbessentials.commands.groups;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.architectury.event.EventResult;
@@ -30,6 +29,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
@@ -41,6 +42,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class TeleportingCommands {
     public static final TagKey<Block> IGNORE_RTP_BLOCKS = TagKey.create(Registries.BLOCK, FTBEssentials.essentialsId("ignore_rtp"));
@@ -56,6 +59,10 @@ public class TeleportingCommands {
             // Back command
             new SimpleConfigurableCommand(FTBEConfig.BACK, Commands.literal("back")
                     .executes(context -> back(context.getSource().getPlayerOrException()))),
+
+            // Playerspawn command
+            new SimpleConfigurableCommand(FTBEConfig.PLAYER_SPAWN, Commands.literal("playerspawn")
+                    .executes(context -> playerSpawn(context.getSource().getPlayerOrException()))),
 
             // Spawn command
             new SimpleConfigurableCommand(FTBEConfig.SPAWN, Commands.literal("spawn")
@@ -105,7 +112,7 @@ public class TeleportingCommands {
                 return 0;
             }
 
-            if (data.backTeleporter.teleport(player, serverPlayerEntity -> data.teleportHistory.getLast()).runCommand(player) != 0) {
+            if (data.backTeleporter.teleport(player, serverPlayerEntity -> data.teleportHistory.getLast().safeForPlayer(player)).runCommand(player) != 0) {
                 data.markDirty();
                 return 1;
             }
@@ -114,10 +121,25 @@ public class TeleportingCommands {
         }).orElse(0);
     }
 
+    public static int playerSpawn(ServerPlayer player) {
+        return FTBEPlayerData.getOrCreate(player).map(data -> {
+            var respawnConfig = player.getRespawnConfig();
+            if (respawnConfig != null) {
+                ServerLevel level = player.level().getServer().getLevel(respawnConfig.respawnData().dimension());
+                if (level == null) {
+                    return 0;
+                }
+                BlockPos pos = Objects.requireNonNullElse(respawnConfig.respawnData().pos(), level.getRespawnData().pos());
+                return data.spawnTeleporter.teleport(player, p -> new TeleportPos(level, pos, respawnConfig.respawnData().yaw(), 0F)).runCommand(player);
+            }
+            return 0;
+        }).orElse(0);
+    }
+
     private static int spawn(ServerPlayer player) {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
-            ServerLevel level = player.server.getLevel(Level.OVERWORLD);
-            return level == null ? 0 : data.spawnTeleporter.teleport(player, p -> new TeleportPos(level, level.getSharedSpawnPos(), level.getSharedSpawnAngle(), 0F)).runCommand(player);
+            ServerLevel level = player.level().getServer().getLevel(Level.OVERWORLD);
+            return level == null ? 0 : data.spawnTeleporter.teleport(player, p -> new TeleportPos(level, level.getRespawnData().pos(), level.getRespawnData().yaw(), 0F)).runCommand(player);
         }).orElse(0);
     }
 
@@ -127,14 +149,14 @@ public class TeleportingCommands {
             player.displayClientMessage(Component.translatable("ftbessentials.teleport.max_less_than_min"), false);
             return 0;
         }
-        if ((!player.hasPermissions(Commands.LEVEL_GAMEMASTERS) || !FTBEConfig.ADMINS_EXEMPT_DIMENSION_BLACKLISTS.get())
+        if ((!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || !FTBEConfig.ADMINS_EXEMPT_DIMENSION_BLACKLISTS.get())
                 && !DimensionFilter.isRtpDimensionOK(player.level().dimension())) {
             player.displayClientMessage(Component.translatable("ftbessentials.rtp.not_here").withStyle(ChatFormatting.RED), false);
             return 0;
         }
         return FTBEPlayerData.getOrCreate(player).map(data -> data.rtpTeleporter.teleport(player, p -> {
                     p.displayClientMessage(Component.translatable("ftbessentials.rtp.looking"), false);
-                    return findBlockPos((ServerLevel) player.level(), p, minDistance, maxDistance);
+                    return findBlockPos(player.level(), p, minDistance, maxDistance);
                 }).runCommand(player))
                 .orElse(0);
     }
@@ -191,8 +213,8 @@ public class TeleportingCommands {
     }
     //#endregion
 
-    private static int tpLast(ServerPlayer player, GameProfile to) {
-        ServerPlayer toPlayer = player.server.getPlayerList().getPlayer(to.getId());
+    private static int tpLast(ServerPlayer player, NameAndId to) {
+        ServerPlayer toPlayer = player.level().getServer().getPlayerList().getPlayer(to.id());
         if (toPlayer != null) {
             FTBEPlayerData.addTeleportHistory(player);
             new TeleportPos(toPlayer).teleport(player);
@@ -200,30 +222,30 @@ public class TeleportingCommands {
         }
 
         // dest player not online; teleport to where they were last seen
-        return FTBEPlayerData.getOrCreate(player.getServer(), to.getId())
-                .map(data -> {
+        return FTBEPlayerData.getOrCreate(player.level().getServer(), to.id())
+                .map(data -> data.getLastSeenPos().map(pos -> {
                     FTBEPlayerData.addTeleportHistory(player);
-                    data.getLastSeenPos().teleport(player);
-
+                    pos.teleport(player);
                     return 1;
-                }).orElse(0);
+                }).orElse(0))
+                .orElse(0);
     }
 
     private static int tpx(ServerPlayer player, ServerLevel to) {
-        player.teleportTo(to, player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
+        player.teleportTo(to, player.getX(), player.getY(), player.getZ(), Set.of(), player.getYRot(), player.getXRot(), false);
         return 1;
     }
 
     private static int jump(CommandSourceStack source) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
 
-        BlockHitResult res = BlockUtil.getFocusedBlock(player, player.getServer().getPlayerList().getViewDistance() * 16)
+        BlockHitResult res = BlockUtil.getFocusedBlock(player, player.level().getServer().getPlayerList().getViewDistance() * 16)
                 .orElseThrow(KitCommand.NOT_LOOKING_AT_BLOCK::create);
         // want to land the player on top of the focused block, so scan up as far as needed
         BlockPos.MutableBlockPos mPos = res.getBlockPos().above().mutable();
         while (true) {
             Level level = player.level();
-            if (isEmptyShape(level, mPos.above()) && isEmptyShape(level, mPos.above(2)) || mPos.getY() >= level.getMaxBuildHeight())
+            if (isEmptyShape(level, mPos.above()) && isEmptyShape(level, mPos.above(2)) || mPos.getY() >= level.getMaxY())
                 break;
             mPos.move(Direction.UP, 2);
         }
