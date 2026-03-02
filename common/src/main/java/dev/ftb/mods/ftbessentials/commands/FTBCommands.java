@@ -6,11 +6,13 @@ import dev.ftb.mods.ftbessentials.commands.groups.*;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.server.permissions.Permissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class FTBCommands {
@@ -29,6 +31,13 @@ public class FTBCommands {
         ).flatMap(List::stream).toList();
 
         registerCommandsToDispatcher(dispatcher, commandGroups);
+    }
+
+    public static Predicate<CommandSourceStack> requiresOPorSP() {
+        // server CAN be null! see Commands.COMMAND_NODE_INSPECTOR
+        //noinspection ConstantValue
+        return source -> source.getServer() != null && source.getServer().isSingleplayer()
+                || source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
     }
 
     /**
