@@ -91,7 +91,13 @@ public class FTBEWorldData {
 
 	public void load() {
 		try {
-			loadNBT(SNBT.tryRead(mkdirs("").resolve(DATA_FILE)));
+			Path dataFile = mkdirs("").resolve(DATA_FILE);
+			if (!Files.exists(dataFile)) {
+				// save a default file
+				SNBT.tryWrite(dataFile, toNBT());
+			} else {
+				loadNBT(SNBT.tryRead(dataFile));
+			}
 		} catch (Exception ex) {
 			FTBEssentials.LOGGER.error("Failed to load world data from {}: {} / {}", DATA_FILE, ex.getClass().getName(), ex.getMessage());
 		}
