@@ -7,7 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2111.1.1]
 
 ### Changed
-* A default empty world data file is now create in `world/ftbessentials/data.snbt` if it didn't exist already
+* A default empty world data file is now created in `world/ftbessentials/data.snbt` if it didn't exist already
+
+### Fixed
+* Fixed server null-check in commands permission testing
 
 ## [2111.1.0]
 
