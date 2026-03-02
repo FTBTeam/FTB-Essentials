@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
+import dev.ftb.mods.ftbessentials.commands.FTBCommands;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.SavedTeleportManager;
@@ -56,7 +57,7 @@ public class HomeCommand implements FTBCommand {
                         .requires(FTBEConfig.HOME)
                         .executes(context -> listHomes(context.getSource(), context.getSource().getPlayerOrException().nameAndId()))
                         .then(Commands.argument("player", GameProfileArgument.gameProfile())
-                                .requires(source -> source.getServer().isSingleplayer() || source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
+                                .requires(FTBCommands.requiresOPorSP())
                                 .executes(context -> listHomes(context.getSource(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
                         )
         );
