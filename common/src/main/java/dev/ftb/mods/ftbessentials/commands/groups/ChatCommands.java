@@ -6,7 +6,7 @@ import dev.ftb.mods.ftbessentials.commands.impl.chat.MuteCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.chat.NicknameCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
-import dev.ftb.mods.ftblibrary.util.PlayerDisplayNameUtil;
+import dev.ftb.mods.ftblibrary.platform.Platform;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,7 +29,7 @@ public class ChatCommands {
     public static int recording(ServerPlayer player) {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             data.setRecording(data.getRecording() == FTBEPlayerData.RecordingStatus.RECORDING ? FTBEPlayerData.RecordingStatus.NONE : FTBEPlayerData.RecordingStatus.RECORDING);
-            PlayerDisplayNameUtil.refreshDisplayName(player);
+            Platform.get().misc().refreshDisplayName(player);
 
             if (data.getRecording() == FTBEPlayerData.RecordingStatus.RECORDING) {
                 player.level().getServer().getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" ").append(Component.translatable("ftbessentials.chat.status.start_record")), false);
@@ -45,7 +45,7 @@ public class ChatCommands {
     public static int streaming(ServerPlayer player) {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             data.setRecording(data.getRecording() == FTBEPlayerData.RecordingStatus.STREAMING ? FTBEPlayerData.RecordingStatus.NONE : FTBEPlayerData.RecordingStatus.STREAMING);
-            PlayerDisplayNameUtil.refreshDisplayName(player);
+            Platform.get().misc().refreshDisplayName(player);
 
             if (data.getRecording() == FTBEPlayerData.RecordingStatus.STREAMING) {
                 player.level().getServer().getPlayerList().broadcastSystemMessage(player.getDisplayName().copy().withStyle(ChatFormatting.YELLOW).append(" ").append(Component.translatable("ftbessentials.chat.status.start_stream")), false);

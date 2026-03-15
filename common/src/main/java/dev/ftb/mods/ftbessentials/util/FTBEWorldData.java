@@ -140,7 +140,7 @@ public class FTBEWorldData {
 		toExpire.forEach(id -> {
 			ServerPlayer player = server.getPlayerList().getPlayer(id);
 			if (player != null) {
-				player.displayClientMessage(player.getDisplayName().copy().append(" is no longer muted"), false);
+				player.sendSystemMessage(player.getDisplayName().copy().append(" is no longer muted"));
 			}
 
 			FTBEPlayerData.getOrCreate(server, id).ifPresent(data -> {

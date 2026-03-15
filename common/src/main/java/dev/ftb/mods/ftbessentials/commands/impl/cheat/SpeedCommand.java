@@ -82,7 +82,7 @@ public class SpeedCommand implements FTBCommand {
         }
         source.sendSuccess(() -> msg, false);
         if (!source.isPlayer() || source.getPlayer() != target) {
-            target.displayClientMessage(msg, false);
+            target.sendSystemMessage(msg);
         }
     }
 }

@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbessentials.commands.groups;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
-import dev.ftb.mods.ftbessentials.FTBEssentialsPlatform;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.commands.SimpleCommandPlayer;
 import dev.ftb.mods.ftbessentials.commands.impl.cheat.SpeedCommand;
@@ -60,7 +59,7 @@ public class CheatCommands {
         targetPlayer.setHealth(targetPlayer.getMaxHealth());
         targetPlayer.getFoodData().eat(40, 40F);
         targetPlayer.clearFire();
-        FTBEssentialsPlatform.curePotionEffects(targetPlayer);
+        targetPlayer.removeAllEffects();
         return Command.SINGLE_SUCCESS;
     }
 
@@ -74,11 +73,11 @@ public class CheatCommands {
                     abilities.mayfly = false;
                     abilities.flying = false;
                 }
-                targetPlayer.displayClientMessage(Component.translatable("ftbessentials.flight.disabled"), true);
+                targetPlayer.sendOverlayMessage(Component.translatable("ftbessentials.flight.disabled"));
             } else {
                 data.setCanFly(true);
                 abilities.mayfly = true;
-                targetPlayer.displayClientMessage(Component.translatable("ftbessentials.flight.enabled"), true);
+                targetPlayer.sendOverlayMessage(Component.translatable("ftbessentials.flight.enabled"));
             }
 
             targetPlayer.onUpdateAbilities();
@@ -93,11 +92,11 @@ public class CheatCommands {
             if (data.isGod()) {
                 data.setGod(false);
                 abilities.invulnerable = false;
-                targetPlayer.displayClientMessage(Component.translatable("ftbessentials.god_mode.disabled"), true);
+                targetPlayer.sendOverlayMessage(Component.translatable("ftbessentials.god_mode.disabled"));
             } else {
                 data.setGod(true);
                 abilities.invulnerable = true;
-                targetPlayer.displayClientMessage(Component.translatable("ftbessentials.god_mode.enabled"), true);
+                targetPlayer.sendOverlayMessage(Component.translatable("ftbessentials.god_mode.enabled"));
             }
 
             targetPlayer.onUpdateAbilities();

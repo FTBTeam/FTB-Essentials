@@ -5,7 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
-import dev.ftb.mods.ftblibrary.util.PlayerDisplayNameUtil;
+import dev.ftb.mods.ftblibrary.platform.Platform;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,18 +34,18 @@ public class NicknameCommand implements FTBCommand {
 
     public int nickname(ServerPlayer player, String nick) {
         if (nick.length() > 30) {
-            player.displayClientMessage(Component.translatable("ftbessentials.nick.too_long"), false);
+            player.sendSystemMessage(Component.translatable("ftbessentials.nick.too_long"));
             return 0;
         }
 
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             data.setNick(nick.trim());
-            PlayerDisplayNameUtil.refreshDisplayName(player);
+            Platform.get().misc().refreshDisplayName(player);
 
             if (data.getNick().isEmpty()) {
-                player.displayClientMessage(Component.translatable("ftbessentials.nick.reset"), false);
+                player.sendSystemMessage(Component.translatable("ftbessentials.nick.reset"));
             } else {
-                player.displayClientMessage(Component.translatable("ftbessentials.nick.changed", data.getNick()), false);
+                player.sendSystemMessage(Component.translatable("ftbessentials.nick.changed", data.getNick()));
             }
 
             data.sendTabName(player.level().getServer());

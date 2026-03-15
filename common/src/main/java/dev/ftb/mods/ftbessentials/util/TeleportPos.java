@@ -165,7 +165,7 @@ public class TeleportPos {
 
 		static TeleportResult failed(Component msg) {
 			return player -> {
-				player.displayClientMessage(msg, false);
+				player.sendSystemMessage(msg);
 				return 0;
 			};
 		}
@@ -192,7 +192,7 @@ public class TeleportPos {
 		@Override
 		default int runCommand(ServerPlayer player) {
 			String secStr = TimeUtils.prettyTimeString(getCooldown() / 1000L);
-			player.displayClientMessage(Component.translatable("ftbessentials.teleport.on_cooldown", secStr), false);
+			player.sendSystemMessage(Component.translatable("ftbessentials.teleport.on_cooldown", secStr));
 			return 0;
 		}
 	}

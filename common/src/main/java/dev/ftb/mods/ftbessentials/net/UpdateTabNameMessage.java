@@ -1,9 +1,9 @@
 package dev.ftb.mods.ftbessentials.net;
 
-import dev.architectury.networking.NetworkManager;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.client.FTBEssentialsClient;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData.RecordingStatus;
+import dev.ftb.mods.ftblibrary.platform.network.PacketContext;
 import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
@@ -25,8 +25,8 @@ public record UpdateTabNameMessage(UUID uuid, String name, String nickname, Reco
 			UpdateTabNameMessage::new
 	);
 
-	public static void handle(UpdateTabNameMessage message, NetworkManager.PacketContext packetContext) {
-		packetContext.queue(() -> FTBEssentialsClient.updateTabName(message));
+	public static void handle(UpdateTabNameMessage message, PacketContext packetContext) {
+		packetContext.enqueue(() -> FTBEssentialsClient.updateTabName(message));
 	}
 
 	@Override

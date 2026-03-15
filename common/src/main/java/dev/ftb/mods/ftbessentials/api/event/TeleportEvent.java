@@ -1,15 +1,14 @@
 package dev.ftb.mods.ftbessentials.api.event;
 
-import dev.architectury.event.CompoundEventResult;
-import dev.architectury.event.Event;
-import dev.architectury.event.EventFactory;
+import dev.ftb.mods.ftblibrary.util.result.DataOutcome;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-public class TeleportEvent {
-    public static Event<Teleport> TELEPORT = EventFactory.createCompoundEventResult();
+// TODO: This isn't mapped to a real event yet!
+// TODO: Why does this not have a pos?
+@FunctionalInterface
+public interface TeleportEvent {
+    DataOutcome<Component> teleport(Data data);
 
-    public interface Teleport {
-        CompoundEventResult<Component> teleport(ServerPlayer player);
-    }
+    record Data(ServerPlayer player) {}
 }

@@ -58,7 +58,7 @@ public class TPACommand implements FTBCommand {
         }
 
         if (REQUESTS.values().stream().anyMatch(r -> r.source() == dataSource && r.target() == dataTarget)) {
-            player.displayClientMessage(Component.translatable("ftbessentials.tpa.already_sent"), false);
+            player.sendSystemMessage(Component.translatable("ftbessentials.tpa.already_sent"));
             return 0;
         }
 
@@ -96,10 +96,10 @@ public class TPACommand implements FTBCommand {
 
         line2.append(" |");
 
-        target.displayClientMessage(line1, false);
-        target.displayClientMessage(line2, false);
+        target.sendSystemMessage(line1);
+        target.sendSystemMessage(line2);
 
-        player.displayClientMessage(Component.translatable("ftbessentials.tpa.request_sent"), false);
+        player.sendSystemMessage(Component.translatable("ftbessentials.tpa.request_sent"));
         return 1;
     }
 
@@ -109,21 +109,21 @@ public class TPACommand implements FTBCommand {
 
         var uuid = attemptUuid(id);
         if (uuid == null) {
-            player.displayClientMessage(INVALID_REQUEST, false);
+            player.sendSystemMessage(INVALID_REQUEST);
             return 0;
         }
 
         TPARequest request = REQUESTS.get(uuid);
 
         if (request == null) {
-            player.displayClientMessage(INVALID_REQUEST, false);
+            player.sendSystemMessage(INVALID_REQUEST);
             return 0;
         }
 
         ServerPlayer sourcePlayer = player.level().getServer().getPlayerList().getPlayer(request.source().getUuid());
 
         if (sourcePlayer == null) {
-            player.displayClientMessage(Component.translatable("ftbessentials.tpa.gone_offline").withStyle(ChatFormatting.GOLD), false);
+            player.sendSystemMessage(Component.translatable("ftbessentials.tpa.gone_offline").withStyle(ChatFormatting.GOLD));
             return 0;
         }
 
@@ -141,24 +141,24 @@ public class TPACommand implements FTBCommand {
     public int tpdeny(ServerPlayer player, String id) {
         var uuid = attemptUuid(id);
         if (uuid == null) {
-            player.displayClientMessage(INVALID_REQUEST, false);
+            player.sendSystemMessage(INVALID_REQUEST);
             return 0;
         }
 
         TPARequest request = REQUESTS.get(uuid);
         if (request == null) {
-            player.displayClientMessage(INVALID_REQUEST, false);
+            player.sendSystemMessage(INVALID_REQUEST);
             return 0;
         }
 
         REQUESTS.remove(request.id());
 
-        player.displayClientMessage(Component.translatable("ftbessentials.tpa.denied"), false);
+        player.sendSystemMessage(Component.translatable("ftbessentials.tpa.denied"));
 
         ServerPlayer player2 = player.level().getServer().getPlayerList().getPlayer(request.target().getUuid());
 
         if (player2 != null) {
-            player2.displayClientMessage(Component.translatable("ftbessentials.tpa.denied"), false);
+            player2.sendSystemMessage(Component.translatable("ftbessentials.tpa.denied"));
         }
 
         return 1;

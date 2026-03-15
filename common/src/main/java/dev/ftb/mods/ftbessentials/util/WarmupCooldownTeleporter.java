@@ -1,10 +1,10 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import dev.architectury.event.CompoundEventResult;
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.TeleportPos.TeleportResult;
+import dev.ftb.mods.ftblibrary.platform.event.EventPostingHandler;
+import dev.ftb.mods.ftblibrary.util.result.DataOutcome;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -51,11 +51,11 @@ public class WarmupCooldownTeleporter {
 		return TeleportResult.SUCCESS;
 	}
 
-	@SuppressWarnings("unused")
-    @ExpectPlatform
-	private static boolean firePlatformTeleportEvent(ServerPlayer player, Vec3 pos) {
-		throw new AssertionError();
-	}
+//	@SuppressWarnings("unused")
+//    @ExpectPlatform
+//	private static boolean firePlatformTeleportEvent(ServerPlayer player, Vec3 pos) {
+//		throw new AssertionError();
+//	}
 
 	public TeleportResult teleport(ServerPlayer player, Function<ServerPlayer, TeleportPos> positionGetter) {
 		TeleportResult cooldownResult = checkCooldown(player);
@@ -72,14 +72,14 @@ public class WarmupCooldownTeleporter {
             }
         }
 
-        CompoundEventResult<Component> result = TeleportEvent.TELEPORT.invoker().teleport(player);
-		if (result.isFalse()) {
-			return TeleportResult.failed(result.object());
+		DataOutcome<Component> outcome = EventPostingHandler.INSTANCE.postEventWithResult(new TeleportEvent.Data(player));
+		if (outcome.isFail()) {
+			return TeleportResult.failed(outcome.data().orElse(Component.literal("Unknown error")));
 		}
 		
-		if (!firePlatformTeleportEvent(player, Vec3.atBottomCenterOf(pos.getPos()))) {
-			return TeleportResult.failed(Component.translatable("ftbessentials.teleport_prevented"));
-		}
+//		if (!firePlatformTeleportEvent(player, Vec3.atBottomCenterOf(pos.getPos()))) {
+//			return TeleportResult.failed(Component.translatable("ftbessentials.teleport_prevented"));
+//		}
 
 		int warmupTime = warmupConfig.applyAsInt(player);
 
@@ -137,10 +137,10 @@ public class WarmupCooldownTeleporter {
 					if (player.position().distanceToSqr(warmup.initialPos) > 0.25) {
 						// player has moved more than half a block
 						toRemove.add(playerId);
-						player.displayClientMessage(Component.translatable("ftbessentials.teleport.interrupted").withStyle(ChatFormatting.RED), true);
+						player.sendOverlayMessage(Component.translatable("ftbessentials.teleport.interrupted").withStyle(ChatFormatting.RED));
 					} else {
 						long seconds = (warmup.when() - now) / 1000L;
-						player.displayClientMessage(Component.translatable("ftbessentials.teleport.notify", seconds).withStyle(ChatFormatting.YELLOW), true);
+						player.sendOverlayMessage(Component.translatable("ftbessentials.teleport.notify", seconds).withStyle(ChatFormatting.YELLOW));
 					}
 				}
 			} else {
@@ -155,7 +155,7 @@ public class WarmupCooldownTeleporter {
 	public static void cancelWarmup(ServerPlayer player) {
 		if (WARMUPS.containsKey(player.getUUID())) {
 			pendingRemovals.add(player.getUUID());
-			player.displayClientMessage(Component.translatable("ftbessentials.teleport.interrupted").withStyle(ChatFormatting.RED), true);
+			player.sendOverlayMessage(Component.translatable("ftbessentials.teleport.interrupted").withStyle(ChatFormatting.RED));
 		}
 	}
 

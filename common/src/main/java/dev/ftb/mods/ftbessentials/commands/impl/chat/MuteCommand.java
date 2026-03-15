@@ -76,7 +76,7 @@ public class MuteCommand implements FTBCommand {
         // notify any online ops, plus the player being (un)muted
         source.getServer().getPlayerList().getPlayers().forEach(p -> {
             if (p.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || p == target) {
-                p.displayClientMessage(msg, false);
+                p.sendSystemMessage(msg);
             }
         });
         // notify command sender if not actually a player

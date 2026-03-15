@@ -63,16 +63,16 @@ public class WarpCommand implements FTBCommand {
 
     private int setWarp(ServerPlayer player, String name) {
         FTBEWorldData.getInstance().warpManager().addDestination(name, new TeleportPos(player), player);
-        player.displayClientMessage(Component.translatable("ftbessentials.warp.set"), false);
+        player.sendSystemMessage(Component.translatable("ftbessentials.warp.set"));
         return 1;
     }
 
     private int deleteWarp(ServerPlayer player, String name) {
         if (FTBEWorldData.getInstance().warpManager().deleteDestination(name.toLowerCase())) {
-            player.displayClientMessage(Component.translatable("ftbessentials.warp.deleted"), false);
+            player.sendSystemMessage(Component.translatable("ftbessentials.warp.deleted"));
             return 1;
         } else {
-            player.displayClientMessage(Component.translatable("ftbessentials.warp.not_found"), false);
+            player.sendSystemMessage(Component.translatable("ftbessentials.warp.not_found"));
             return 0;
         }
     }

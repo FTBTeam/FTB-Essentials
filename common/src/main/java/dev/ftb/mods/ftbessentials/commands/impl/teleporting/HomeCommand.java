@@ -79,14 +79,14 @@ public class HomeCommand implements FTBCommand {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             try {
                 if (player.blockPosition().getY() < FTBEConfig.HOME_MIN_Y.get()) {
-                    player.displayClientMessage(Component.translatable("ftbessentials.home.y_too_low", FTBEConfig.HOME_MIN_Y.get()), false);
+                    player.sendSystemMessage(Component.translatable("ftbessentials.home.y_too_low", FTBEConfig.HOME_MIN_Y.get()));
                     return 0;
                 }
                 data.homeManager().addDestination(name, new TeleportPos(player), player);
-                player.displayClientMessage(Component.translatable("ftbessentials.home.set"), false);
+                player.sendSystemMessage(Component.translatable("ftbessentials.home.set"));
                 return 1;
             } catch (SavedTeleportManager.TooManyDestinationsException e) {
-                player.displayClientMessage(Component.translatable("ftbessentials.home.too_many"), false);
+                player.sendSystemMessage(Component.translatable("ftbessentials.home.too_many"));
                 return 0;
             }
         }).orElse(0);
@@ -95,10 +95,10 @@ public class HomeCommand implements FTBCommand {
     public int delHome(ServerPlayer player, String name) {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             if (data.homeManager().deleteDestination(name.toLowerCase())) {
-                player.displayClientMessage(Component.translatable("ftbessentials.home.deleted"), false);
+                player.sendSystemMessage(Component.translatable("ftbessentials.home.deleted"));
                 return 1;
             } else {
-                player.displayClientMessage(Component.translatable("ftbessentials.home.not_found"), false);
+                player.sendSystemMessage(Component.translatable("ftbessentials.home.not_found"));
                 return 0;
             }
         }).orElse(0);

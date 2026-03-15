@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import dev.ftb.mods.ftblibrary.platform.Platform;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -13,14 +13,12 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public class InventoryUtil {
-    @ExpectPlatform
     public static NonNullList<ItemStack> getItemsInInventory(Level level, BlockPos pos, Direction side) {
-        throw new AssertionError();
+        return Platform.get().transfer().simple().blockEntity().getItems(level, pos, side);
     }
 
-    @ExpectPlatform
     public static boolean putItemsInInventory(List<ItemStack> items, Level level, BlockPos pos, Direction side) {
-        throw new AssertionError();
+        return Platform.get().transfer().simple().blockEntity().putItems(items, level, pos, side);
     }
 
     @NotNull

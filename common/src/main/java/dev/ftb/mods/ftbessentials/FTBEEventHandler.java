@@ -2,8 +2,6 @@ package dev.ftb.mods.ftbessentials;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.architectury.event.EventResult;
-import dev.architectury.event.events.common.*;
 import dev.ftb.mods.ftbessentials.api.records.TPARequest;
 import dev.ftb.mods.ftbessentials.commands.FTBCommands;
 import dev.ftb.mods.ftbessentials.commands.impl.teleporting.TPACommand;
@@ -13,67 +11,61 @@ import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import dev.ftb.mods.ftbessentials.util.WarmupCooldownTeleporter;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
+import dev.ftb.mods.ftblibrary.util.result.Outcome;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
+import java.util.List;
 
 public class FTBEEventHandler {
+	public FTBEEventHandler() {
+//		LifecycleEvent.SERVER_BEFORE_START.register(FTBEEventHandler::serverAboutToStart);
+//		LifecycleEvent.SERVER_STOPPED.register(FTBEEventHandler::serverStopped);
+//		LifecycleEvent.SERVER_LEVEL_SAVE.register(FTBEEventHandler::levelSave);
 
-	public static void init() {
-		LifecycleEvent.SERVER_BEFORE_START.register(FTBEEventHandler::serverAboutToStart);
-		LifecycleEvent.SERVER_STOPPED.register(FTBEEventHandler::serverStopped);
-		LifecycleEvent.SERVER_LEVEL_SAVE.register(FTBEEventHandler::levelSave);
+//		TickEvent.SERVER_POST.register(FTBEEventHandler::serverTickPost);
+//		CommandRegistrationEvent.EVENT.register(FTBEEventHandler::registerCommands);
 
-		TickEvent.SERVER_POST.register(FTBEEventHandler::serverTickPost);
-		TickEvent.PLAYER_POST.register(FTBEEventHandler::playerTickPost);
+//		PlayerEvent.PLAYER_JOIN.register(FTBEEventHandler::playerLoggedIn);
+//		PlayerEvent.PLAYER_QUIT.register(FTBEEventHandler::playerLoggedOut);
+//		PlayerEvent.PLAYER_CLONE.register(FTBEEventHandler::onPlayerDeath);
+//		PlayerEvent.CHANGE_DIMENSION.register(FTBEEventHandler::playerChangedDimension);
 
-		CommandRegistrationEvent.EVENT.register(FTBEEventHandler::registerCommands);
+//		EntityEvent.LIVING_HURT.register(FTBEEventHandler::playerHurt);
 
-		PlayerEvent.PLAYER_JOIN.register(FTBEEventHandler::playerLoggedIn);
-		PlayerEvent.PLAYER_QUIT.register(FTBEEventHandler::playerLoggedOut);
-		PlayerEvent.PLAYER_CLONE.register(FTBEEventHandler::onPlayerDeath);
-		PlayerEvent.CHANGE_DIMENSION.register(FTBEEventHandler::playerChangedDimension);
-
-		EntityEvent.LIVING_HURT.register(FTBEEventHandler::playerHurt);
-
-		ChatEvent.RECEIVED.register(FTBEEventHandler::playerChat);
+//		ChatEvent.RECEIVED.register(FTBEEventHandler::playerChat);
 	}
 
-	private static void serverAboutToStart(MinecraftServer minecraftServer) {
+	public void serverAboutToStart(MinecraftServer minecraftServer) {
 		FTBEWorldData.startup(minecraftServer);
 	}
 
-	private static void serverStopped(MinecraftServer minecraftServer) {
+	public void serverStopped(MinecraftServer minecraftServer) {
 		FTBEPlayerData.clear();
 		FTBEWorldData.shutdown();
 		TPACommand.clearRequests();
 	}
 
-	private static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection commandSelection) {
+	public void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection commandSelection) {
 		FTBCommands.register(dispatcher);
 	}
 
-	private static void levelSave(ServerLevel serverLevel) {
+	public void serverSave(MinecraftServer server) {
 		FTBEWorldData.ifAvailable(worldData -> {
 			worldData.saveIfChanged();
 			FTBEPlayerData.saveAll();
 		});
 	}
 
-	private static void playerLoggedIn(ServerPlayer serverPlayer) {
+	public void playerLoggedIn(ServerPlayer serverPlayer) {
 		FTBEPlayerData.getOrCreate(serverPlayer).ifPresent(data -> {
 			data.load();
 			data.setLastSeenPos(new TeleportPos(serverPlayer));
@@ -92,32 +84,30 @@ public class FTBEEventHandler {
 		});
 	}
 
-	private static void playerLoggedOut(ServerPlayer serverPlayer) {
+	public void playerLoggedOut(ServerPlayer serverPlayer) {
 		FTBEPlayerData.getOrCreate(serverPlayer).ifPresent(data -> {
 			data.setLastSeenPos(new TeleportPos(serverPlayer));
 			data.saveIfChanged();
 		});
 	}
 
-	private static void playerTickPost(Player player) {
-		if (!player.level().isClientSide()) {
-			FTBEPlayerData.getOrCreate(player).ifPresent(data -> {
-				var abilities = player.getAbilities();
+	private void tickPlayer(ServerPlayer player) {
+		FTBEPlayerData.getOrCreate(player).ifPresent(data -> {
+			var abilities = player.getAbilities();
 
-				if (data.isGod() && !abilities.invulnerable) {
-					abilities.invulnerable = true;
-					player.onUpdateAbilities();
-				}
+			if (data.isGod() && !abilities.invulnerable) {
+				abilities.invulnerable = true;
+				player.onUpdateAbilities();
+			}
 
-				if (data.canFly() && !abilities.mayfly) {
-					abilities.mayfly = true;
-					player.onUpdateAbilities();
-				}
-			});
-		}
+			if (data.canFly() && !abilities.mayfly) {
+				abilities.mayfly = true;
+				player.onUpdateAbilities();
+			}
+		});
 	}
 
-	private static void serverTickPost(MinecraftServer server) {
+	public void serverTickPost(MinecraftServer server) {
 		long now = System.currentTimeMillis();
 
 		Iterator<TPARequest> iterator = TPACommand.requests().values().iterator();
@@ -145,27 +135,35 @@ public class FTBEEventHandler {
 			WarmupCooldownTeleporter.tickWarmups(server);
 			FTBEWorldData.getInstance().tickMuteTimeouts(server);
 		}
+
+		List<ServerPlayer> players = server.getPlayerList().getPlayers();
+		for (ServerPlayer player : players) {
+			tickPlayer(player);
+		}
 	}
 
-	// FIXME this should run with HIGHEST priority but we can't do that with Arch
-	private static EventResult playerChat(@Nullable ServerPlayer serverPlayer, Component component) {
+	// FIXME this should run with HIGHEST priority
+	// TODO: This is easy with Forge but I'm not sure how we do it with fabric.
+    public Outcome allowChat(@Nullable ServerPlayer serverPlayer) {
 		return FTBEPlayerData.getOrCreate(serverPlayer).map(data -> {
 			if (data.isMuted()) {
 				// serverPlayer must be non-null if we got the player data
 				//noinspection DataFlowIssue
-				serverPlayer.displayClientMessage(Component.translatable("ftbessentials.muted").withStyle(ChatFormatting.RED), false);
+				serverPlayer.sendSystemMessage(Component.translatable("ftbessentials.muted").withStyle(ChatFormatting.RED));
 				FTBEWorldData.getInstance().getMuteTimeout(serverPlayer).ifPresent(expiry -> {
 					long left = (expiry - System.currentTimeMillis()) / 1000L;
-					serverPlayer.displayClientMessage(Component.translatable("ftbessentials.mute_expiry",
-							TimeUtils.prettyTimeString(left)).withStyle(ChatFormatting.RED), false);
+					serverPlayer.sendSystemMessage(Component.translatable("ftbessentials.mute_expiry",
+							TimeUtils.prettyTimeString(left)).withStyle(ChatFormatting.RED));
 				});
-				return EventResult.interruptFalse();
+				return Outcome.FAIL;
 			}
-			return EventResult.pass();
-		}).orElse(EventResult.pass());
+			return Outcome.PASS;
+		}).orElse(Outcome.PASS);
 	}
 
-	private static void onPlayerDeath(ServerPlayer oldPlayer, ServerPlayer newPlayer, boolean wonGame) {
+	// TODO: wonGame is actually "alive" on fabric so we should check this functionality as it might be wrong
+	//       post the move away from arch
+	public void onPlayerDeath(ServerPlayer oldPlayer, ServerPlayer newPlayer, boolean wonGame) {
 		// this is better than checking for living death event, because player cloning isn't cancellable
 		// the player death event is cancellable, and we can't detect cancelled events with Architectury
 		if (!wonGame) {
@@ -179,14 +177,13 @@ public class FTBEEventHandler {
 		}
 	}
 
-	private static EventResult playerHurt(LivingEntity livingEntity, DamageSource damageSource, float amount) {
-		if (livingEntity instanceof ServerPlayer sp && amount > 0f) {
+	public void playerHurt(LivingEntity livingEntity, float amount, boolean blocked) {
+		if (livingEntity instanceof ServerPlayer sp && amount > 0f && !blocked) {
 			WarmupCooldownTeleporter.cancelWarmup(sp);
 		}
-		return EventResult.pass();
 	}
 
-	private static void playerChangedDimension(ServerPlayer serverPlayer, ResourceKey<Level> oldDimension, ResourceKey<Level> newDimension) {
+	public void playerChangedDimension(ServerPlayer serverPlayer) {
 		WarmupCooldownTeleporter.cancelWarmup(serverPlayer);
 	}
 }
