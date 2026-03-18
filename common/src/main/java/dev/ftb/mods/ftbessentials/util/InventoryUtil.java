@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-@SuppressWarnings("unused")
 public class InventoryUtil {
     public static NonNullList<ItemStack> getItemsInInventory(Level level, BlockPos pos, Direction side) {
         return Platform.get().transfer().simple().blockEntity().getItems(level, pos, side);
@@ -19,14 +18,5 @@ public class InventoryUtil {
 
     public static boolean putItemsInInventory(List<ItemStack> items, Level level, BlockPos pos, Direction side) {
         return Platform.get().transfer().simple().blockEntity().putItems(items, level, pos, side);
-    }
-
-    @NotNull
-    public static BlockEntity requireBlockEntity(Level level, BlockPos pos) {
-        BlockEntity be = level.getBlockEntity(pos);
-        if (be == null) {
-            throw new IllegalArgumentException(String.format("No block entity at %s / [%d,%d,%d]", level.dimension().identifier(), pos.getX(), pos.getY(), pos.getZ()));
-        }
-        return be;
     }
 }

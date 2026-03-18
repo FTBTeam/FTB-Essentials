@@ -1,98 +1,54 @@
 package dev.ftb.mods.ftbessentials.kit;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.marhali.json5.Json5Element;
 import dev.ftb.mods.ftbessentials.commands.impl.kit.KitCommand;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftblibrary.integration.permissions.PermissionHelper;
-import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.util.Json5Ops;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class Kit {
-    private final String kitName;
-    private final List<ItemStack> items;
-    private final long cooldown; // seconds
-    private final boolean autoGrant;
+/**
+ * Represents one kit.
+ *
+ * @param items the items in the kit
+ * @param cooldown the cooldown between granting it to players
+ * @param autoGrant if true, autogranted on player login
+ */
+public record Kit(List<ItemStack> items, long cooldown, boolean autoGrant) {
+    public static final Codec<Kit> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+            ItemStack.OPTIONAL_CODEC.listOf().fieldOf("items").forGetter(Kit::items),
+            Codec.LONG.fieldOf("cooldown").forGetter(Kit::cooldown),
+            Codec.BOOL.optionalFieldOf("auto_grant", false).forGetter(Kit::autoGrant)
+    ).apply(builder, Kit::new));
 
-    public Kit(String kitName, Collection<ItemStack> items, long cooldown, boolean autoGrant) {
-        this.kitName = kitName;
-        this.items = List.copyOf(items);
-        this.cooldown = cooldown;
-        this.autoGrant = autoGrant;
+    public static Kit deepCopy(Collection<ItemStack> items, long cooldownSecs, boolean autoGrant) {
+        return new Kit(items.stream().map(ItemStack::copy).toList(), cooldownSecs, autoGrant);
     }
 
-    public static Kit deepCopy(String kitName, Collection<ItemStack> items, long cooldownSecs, boolean autoGrant) {
-        return new Kit(kitName, items.stream().map(ItemStack::copy).toList(), cooldownSecs, autoGrant);
+    public static Kit fromJson(Json5Element tag, HolderLookup.Provider provider) {
+        return CODEC.parse(provider.createSerializationContext(Json5Ops.INSTANCE), tag).getOrThrow();
     }
 
-    public String getKitName() {
-        return kitName;
+    public Json5Element toJson(HolderLookup.Provider provider) {
+        return CODEC.encodeStart(provider.createSerializationContext(Json5Ops.INSTANCE), this).getOrThrow();
     }
 
-    public List<ItemStack> getItems() {
-        return items;
-    }
-
-    public long getCooldown() {
-        return cooldown;
-    }
-
-    public boolean isAutoGrant() {
-        return autoGrant;
-    }
-
-    public CompoundTag toNBT(HolderLookup.Provider provider) {
-        CompoundTag tag = new CompoundTag();
-
-        ListTag list = new ListTag();
-        items.forEach(stack -> list.add(saveStack(stack, provider)));
-
-        tag.put("items", list);
-
-        tag.putLong("cooldown", cooldown);
-        if (autoGrant) tag.putBoolean("auto_grant", true);
-
-        return tag;
-    }
-
-    private SNBTCompoundTag saveStack(ItemStack stack, HolderLookup.Provider provider) {
-        RegistryOps<Tag> nbtOps = provider.createSerializationContext(NbtOps.INSTANCE);
-        var res = SNBTCompoundTag.of(ItemStack.OPTIONAL_CODEC.encodeStart(nbtOps, stack).getOrThrow());
-        res.singleLine();
-        return res;
-    }
-
-    public static Kit fromNBT(String kitName, CompoundTag tag, HolderLookup.Provider provider) {
-        List<ItemStack> items = new ArrayList<>();
-        ListTag list = tag.getListOrEmpty("items");
-        list.forEach(el -> {
-            if (el instanceof CompoundTag c) {
-                ItemStack.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), c).result()
-                        .ifPresent(items::add);
-            }
-        });
-        return new Kit(kitName, items, tag.getLongOr("cooldown", 0L), tag.getBooleanOr("auto_grant", false));
-    }
-
-    public void giveToPlayer(ServerPlayer player, FTBEPlayerData playerData, boolean throwOnCooldown) throws CommandSyntaxException {
+    public void giveToPlayer(String kitName, ServerPlayer player, FTBEPlayerData playerData, boolean throwOnCooldown) throws CommandSyntaxException {
         long now = System.currentTimeMillis();
 
-        if (!checkForCooldown(player, playerData, now, throwOnCooldown)) {
+        if (!checkForCooldown(kitName, playerData, now, throwOnCooldown)) {
             items.forEach(stack -> {
                 ItemStack stack1 = stack.copy();
                 if (!player.getInventory().add(stack1)) {
@@ -110,12 +66,12 @@ public class Kit {
         }
     }
 
-    private boolean checkForCooldown(ServerPlayer player, FTBEPlayerData data, long now, boolean throwOnCooldown) throws CommandSyntaxException {
+    private boolean checkForCooldown(String kitName, FTBEPlayerData data, long now, boolean throwOnCooldown) throws CommandSyntaxException {
         if (cooldown != 0) {
             long lastUsed = data.getLastKitUseTime(kitName);
             if (cooldown < 0L && lastUsed != 0L) {
                 if (throwOnCooldown) {
-                    throw KitCommand.ONE_TIME_ONLY.create(kitName, player.getGameProfile().name());
+                    throw KitCommand.ONE_TIME_ONLY.create(kitName, data.getName());
                 } else {
                     return true;
                 }
@@ -133,20 +89,20 @@ public class Kit {
     }
 
     public Kit withCooldown(long newCooldown) {
-        return new Kit(kitName, items, newCooldown, autoGrant);
+        return new Kit(items, newCooldown, autoGrant);
     }
 
     public Kit withAutoGrant(boolean newAutoGrant) {
-        return new Kit(kitName, items, cooldown, newAutoGrant);
+        return new Kit(items, cooldown, newAutoGrant);
     }
 
-    public boolean playerCanGetKit(@Nullable ServerPlayer player) {
+    public static boolean playerCanGet(@Nullable ServerPlayer player, String kitName) {
         return player == null
                 || player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)
                 || checkPermissionNode(player, kitName);
     }
 
-    public static boolean checkPermissionNode(@NotNull ServerPlayer player, String kitName) {
+    public static boolean checkPermissionNode(ServerPlayer player, String kitName) {
         return PermissionHelper.getProvider().getBooleanPermission(player, "ftbessentials.give_me_kit." + kitName, false);
     }
 }

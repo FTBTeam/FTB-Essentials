@@ -47,8 +47,8 @@ import java.util.Objects;
 import java.util.Set;
 
 public class TeleportingCommands {
-    public static final TagKey<Block> IGNORE_RTP_BLOCKS = TagKey.create(Registries.BLOCK, FTBEssentials.essentialsId("ignore_rtp"));
-    public static final TagKey<Biome> IGNORE_RTP_BIOMES = TagKey.create(Registries.BIOME, FTBEssentials.essentialsId("ignore_rtp"));
+    public static final TagKey<Block> IGNORE_RTP_BLOCKS = TagKey.create(Registries.BLOCK, FTBEssentials.id("ignore_rtp"));
+    public static final TagKey<Biome> IGNORE_RTP_BIOMES = TagKey.create(Registries.BIOME, FTBEssentials.id("ignore_rtp"));
 
     public static final List<FTBCommand> COMMANDS = List.of(
             new OfflineTeleportCommand(),

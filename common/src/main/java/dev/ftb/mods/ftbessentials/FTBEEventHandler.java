@@ -73,10 +73,10 @@ public class FTBEEventHandler {
 
 			FTBEPlayerData.sendPlayerTabs(serverPlayer);
 
-			KitManager.getInstance().allKits().forEach(kit -> {
-				if (kit.isAutoGrant()) {
+			KitManager.getInstance().allKits().forEach((kitName, kit) -> {
+				if (kit.autoGrant()) {
                     try {
-                        kit.giveToPlayer(serverPlayer, data, false);
+                        kit.giveToPlayer(kitName, serverPlayer, data, false);
                     } catch (CommandSyntaxException ignored) {
                     }
                 }
@@ -177,7 +177,7 @@ public class FTBEEventHandler {
 		}
 	}
 
-	public void playerHurt(LivingEntity livingEntity, float amount, boolean blocked) {
+	public void onPlayerHurt(LivingEntity livingEntity, float amount, boolean blocked) {
 		if (livingEntity instanceof ServerPlayer sp && amount > 0f && !blocked) {
 			WarmupCooldownTeleporter.cancelWarmup(sp);
 		}

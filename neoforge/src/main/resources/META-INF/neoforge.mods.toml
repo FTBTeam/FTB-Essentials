@@ -33,14 +33,14 @@ side = "BOTH"
 [[dependencies.ftbessentials]]
 modId = "ftblibrary"
 type = "required"
-versionRange = "[${libraryversion},)"
+versionRange = "[${ftblibraryversion},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.ftbessentials]]
 modId = "ftbranks"
 type = "optional"
-versionRange = "[${ranksversion},)"
+versionRange = "[${ftbranksversion},)"
 ordering = "AFTER"
 side = "BOTH"
 

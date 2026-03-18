@@ -24,7 +24,7 @@ import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
 public class SpeedCommand implements FTBCommand {
-    private static final Identifier ESSENTIALS_SPEED_ID = FTBEssentials.essentialsId("speed_boost");
+    private static final Identifier ESSENTIALS_SPEED_ID = FTBEssentials.id("speed_boost");
 
     @Override
     public boolean enabled() {

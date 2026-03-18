@@ -51,12 +51,6 @@ public class WarmupCooldownTeleporter {
 		return TeleportResult.SUCCESS;
 	}
 
-//	@SuppressWarnings("unused")
-//    @ExpectPlatform
-//	private static boolean firePlatformTeleportEvent(ServerPlayer player, Vec3 pos) {
-//		throw new AssertionError();
-//	}
-
 	public TeleportResult teleport(ServerPlayer player, Function<ServerPlayer, TeleportPos> positionGetter) {
 		TeleportResult cooldownResult = checkCooldown(player);
 		if (!cooldownResult.isSuccess()) {
@@ -72,14 +66,10 @@ public class WarmupCooldownTeleporter {
             }
         }
 
-		DataOutcome<Component> outcome = EventPostingHandler.INSTANCE.postEventWithResult(new TeleportEvent.Data(player));
+		DataOutcome<Component> outcome = EventPostingHandler.INSTANCE.postEventWithResult(new TeleportEvent.Data(player, Vec3.atBottomCenterOf(pos.getPos())));
 		if (outcome.isFail()) {
-			return TeleportResult.failed(outcome.data().orElse(Component.literal("Unknown error")));
+			return TeleportResult.failed(outcome.data().orElse(Component.empty()));
 		}
-		
-//		if (!firePlatformTeleportEvent(player, Vec3.atBottomCenterOf(pos.getPos()))) {
-//			return TeleportResult.failed(Component.translatable("ftbessentials.teleport_prevented"));
-//		}
 
 		int warmupTime = warmupConfig.applyAsInt(player);
 

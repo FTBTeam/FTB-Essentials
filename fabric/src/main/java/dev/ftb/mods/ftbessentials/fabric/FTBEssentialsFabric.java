@@ -21,7 +21,7 @@ public class FTBEssentialsFabric implements ModInitializer {
     public void onInitialize() {
         var essentials = new FTBEssentials();
 
-        EventPostingHandler.INSTANCE.registerEvent(TeleportEvent.Data.class, (data) -> FTBEssentialsFabricEvents.TELEPORT.invoker().teleport(data));
+        registerNativeEventPosting();
 
         ServerLifecycleEvents.SERVER_STARTING.register(essentials.eventHandler::serverAboutToStart);
         ServerLifecycleEvents.SERVER_STOPPED.register(essentials.eventHandler::serverStopped);
@@ -37,7 +37,7 @@ public class FTBEssentialsFabric implements ModInitializer {
         ServerEntityLevelChangeEvents.AFTER_PLAYER_CHANGE_LEVEL.register((player, ignoredOrigin, ignoredNewLevel) -> essentials.eventHandler.playerChangedDimension(player));
 
         ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, ignored, ignored1, amount, blocked) ->
-                essentials.eventHandler.playerHurt(entity, amount, blocked)
+                essentials.eventHandler.onPlayerHurt(entity, amount, blocked)
         );
 
         ServerMessageEvents.ALLOW_CHAT_MESSAGE.register(((ignored1, serverPlayer, ignored2) -> {
@@ -69,5 +69,10 @@ public class FTBEssentialsFabric implements ModInitializer {
             }
             return oldDisplayName;
         });
+    }
+
+    private static void registerNativeEventPosting() {
+        EventPostingHandler.INSTANCE.registerEventWithResult(TeleportEvent.Data.class,
+                data -> FTBEssentialsEvents.TELEPORT.invoker().teleport(data));
     }
 }

@@ -2,6 +2,8 @@ package dev.ftb.mods.ftbessentials.util;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.marhali.json5.Json5Element;
+import dev.ftb.mods.ftblibrary.util.Json5Ops;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -66,12 +68,12 @@ public class TeleportPos {
 		this(entity.level(), entity.blockPosition(), entity.getYRot(), entity.getXRot());
 	}
 
-	public static TeleportPos fromNBT(CompoundTag tag) {
-		return CODEC.parse(NbtOps.INSTANCE, tag).getOrThrow();
+	public static TeleportPos fromJson(Json5Element json) {
+		return CODEC.parse(Json5Ops.INSTANCE, json).getOrThrow();
 	}
 
-	public Tag toNBT() {
-		return CODEC.encodeStart(NbtOps.INSTANCE, this).getOrThrow();
+	public Json5Element toJson() {
+		return CODEC.encodeStart(Json5Ops.INSTANCE, this).getOrThrow();
 	}
 
 	public TeleportPos safeForPlayer(ServerPlayer player) {

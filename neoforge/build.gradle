@@ -36,16 +36,21 @@ repositories {
     maven {
         url "https://maven.neoforged.net/releases/"
     }
+
+    // TODO remove when Neo releases
+	maven {
+		name = "Maven for PR #2993" // https://github.com/neoforged/NeoForge/pull/2993
+		url = uri("https://prmaven.neoforged.net/NeoForge/pr2993")
+		content {
+			includeModule("net.neoforged", "neoforge")
+			includeModule("net.neoforged", "testframework")
+		}
+	}
 }
 
-apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/extra-local-mods.gradle"
-
 dependencies {
-    modImplementation("dev.ftb.mods:ftb-library-neoforge:${rootProject.ftb_library_version}") {
-        exclude module: 'me.shedaniel:RoughlyEnoughItems-neoforge'
-    }
-
-    modImplementation "dev.ftb.mods:ftb-ranks-neoforge:${rootProject.ftb_ranks_version}"
+    implementation("dev.ftb.mods:ftb-library-neoforge:${rootProject.ftb_library_version}")
+    implementation("dev.ftb.mods:ftb-ranks-neoforge:${rootProject.ftb_ranks_version}")
 
     compileOnly "net.luckperms:api:5.4"
 }

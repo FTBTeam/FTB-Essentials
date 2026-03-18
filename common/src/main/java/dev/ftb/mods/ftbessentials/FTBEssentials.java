@@ -32,11 +32,11 @@ public class FTBEssentials {
 		initPermissions();
 	}
 
-	public static Identifier essentialsId(String path) {
+	public static Identifier id(String path) {
 		return Identifier.fromNamespaceAndPath(MOD_ID, path);
 	}
 
-	public void initPermissions() {
+	private void initPermissions() {
 		// ftbxmodcompat handles this if it's present
 		if (!Platform.get().isModLoaded("ftbxmodcompat")) {
             if (Platform.get().isModLoaded("ftbranks")) {

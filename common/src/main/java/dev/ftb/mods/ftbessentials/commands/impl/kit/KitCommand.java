@@ -34,10 +34,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.commands.Commands.argument;
@@ -164,7 +161,7 @@ public class KitCommand implements FTBCommand {
                 .orElseThrow(NOT_LOOKING_AT_BLOCK::create);
         Kit kit = KitManager.getInstance().get(kitName).orElseThrow(() -> NO_SUCH_KIT.create(kitName));
 
-        if (!InventoryUtil.putItemsInInventory(kit.getItems(), player.level(), res.getBlockPos(), res.getDirection())) {
+        if (!InventoryUtil.putItemsInInventory(kit.items(), player.level(), res.getBlockPos(), res.getDirection())) {
             throw NOT_ENOUGH_SPACE.create();
         }
 
@@ -177,10 +174,12 @@ public class KitCommand implements FTBCommand {
     }
 
     static CompletableFuture<Suggestions> suggestKits(@Nullable ServerPlayer player, SuggestionsBuilder builder) {
-        List<String> list = KitManager.getInstance().allKits().stream()
-                .filter(kit -> kit.playerCanGetKit(player))
-                .map(Kit::getKitName)
-                .toList();
+        List<String> list = new ArrayList<>();
+        KitManager.getInstance().allKits().keySet().forEach(kitName -> {
+            if (Kit.playerCanGet(player, kitName)) {
+                list.add(kitName);
+            }
+        });
         return SharedSuggestionProvider.suggest(list, builder);
     }
 
@@ -216,13 +215,13 @@ public class KitCommand implements FTBCommand {
     }
 
     private static int listKits(CommandSourceStack source) {
-        Collection<Kit> kits = KitManager.getInstance().allKits();
+        Map<String,Kit> kits = KitManager.getInstance().allKits();
 
         source.sendSuccess(() -> Component.translatable("ftbessentials.kit.count", kits.size()).withStyle(ChatFormatting.AQUA), false);
-        kits.stream().sorted(Comparator.comparing(Kit::getKitName))
-                .forEach(kit -> source.sendSuccess(() -> Component.literal("• " + kit.getKitName()).withStyle(Style.EMPTY
+        kits.keySet().forEach(name -> source.sendSuccess(() ->
+                Component.literal("• " + name).withStyle(Style.EMPTY
                         .withColor(ChatFormatting.YELLOW)
-                        .withClickEvent(new ClickEvent.RunCommand("/kit show " + kit.getKitName()))
+                        .withClickEvent(new ClickEvent.RunCommand("/kit show " + name))
                 ), false));
         return 1;
     }
@@ -232,26 +231,26 @@ public class KitCommand implements FTBCommand {
 
         source.sendSuccess(() -> Component.literal(Strings.repeat('-', 40)).withStyle(ChatFormatting.GREEN), false);
         source.sendSuccess(() -> Component.translatable("ftbessentials.kit_name",
-                Component.literal(kit.getKitName()).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.AQUA), false);
-        if (kit.getCooldown() > 0L) {
+                Component.literal(kitName).withStyle(ChatFormatting.YELLOW)).withStyle(ChatFormatting.AQUA), false);
+        if (kit.cooldown() > 0L) {
             source.sendSuccess(() -> Component.literal("  ")
                     .append(Component.translatable("ftbessentials.kit.cooldown",
-                            Component.literal(TimeUtils.prettyTimeString(kit.getCooldown())).withStyle(ChatFormatting.YELLOW))
+                            Component.literal(TimeUtils.prettyTimeString(kit.cooldown())).withStyle(ChatFormatting.YELLOW))
                     ).withStyle(ChatFormatting.AQUA), false);
-        } else if (kit.getCooldown() == 0L) {
+        } else if (kit.cooldown() == 0L) {
             source.sendSuccess(() -> Component.literal("  ")
                     .append(Component.translatable("ftbessentials.kit.cooldown.none")).withStyle(ChatFormatting.AQUA), false);
         } else {
             source.sendSuccess(() -> Component.literal("  ")
                     .append(Component.translatable("ftbessentials.kit.one_time")).withStyle(ChatFormatting.AQUA), false);
         }
-        if (kit.isAutoGrant()) {
+        if (kit.autoGrant()) {
             source.sendSuccess(() -> Component.literal("  ")
                     .append(Component.translatable("ftbessentials.kit.autogranted")).withStyle(ChatFormatting.AQUA), false);
         }
         source.sendSuccess(() -> Component.literal("  ")
                 .append(Component.translatable("ftbessentials.kit.items")).withStyle(ChatFormatting.AQUA), false);
-        for (ItemStack stack : kit.getItems()) {
+        for (ItemStack stack : kit.items()) {
             source.sendSuccess(()-> Component.literal("  • ").withStyle(ChatFormatting.YELLOW)
                     .append(Component.literal(stack.getCount() + " x ").withStyle(ChatFormatting.WHITE))
                     .append(stack.getDisplayName()), false);
@@ -270,7 +269,7 @@ public class KitCommand implements FTBCommand {
     private static int modifyAutogrant(CommandSourceStack source, String kitName, boolean grant) throws CommandSyntaxException {
         Kit kit = KitManager.getInstance().get(kitName).orElseThrow(() -> NO_SUCH_KIT.create(kitName));
 
-        KitManager.getInstance().addKit(kit.withAutoGrant(grant), true);
+        KitManager.getInstance().addKit(kitName, kit.withAutoGrant(grant), true);
         source.sendSuccess(() -> Component.translatable("ftbessentials.kit.autogrant_modified", kitName, grant).withStyle(ChatFormatting.YELLOW), false);
 
         return 1;
@@ -280,7 +279,7 @@ public class KitCommand implements FTBCommand {
         Kit kit = KitManager.getInstance().get(kitName).orElseThrow(() -> NO_SUCH_KIT.create(kitName));
 
         long secs = DurationInfo.getSeconds(cooldown);
-        KitManager.getInstance().addKit(kit.withCooldown(secs), true);
+        KitManager.getInstance().addKit(kitName, kit.withCooldown(secs), true);
         Component newTime = secs < 0 ? Component.translatable("ftbessentials.kit.one_time") : Component.literal(TimeUtils.prettyTimeString(secs));
         source.sendSuccess(() -> Component.translatable("ftbessentials.kit.cooldown_modified", kitName, newTime).withStyle(ChatFormatting.YELLOW), false);
 

@@ -1,10 +1,10 @@
 package dev.ftb.mods.ftbessentials.util;
 
+import de.marhali.json5.Json5Object;
+import de.marhali.json5.Json5Primitive;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.kit.KitManager;
-import dev.ftb.mods.ftblibrary.snbt.SNBT;
-import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
-import net.minecraft.nbt.CompoundTag;
+import dev.ftb.mods.ftblibrary.util.Json5Util;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 
 public class FTBEWorldData {
 	private static final LevelResource FTBESSENTIALS_DIRECTORY = new LevelResource("ftbessentials");
-	private static final String DATA_FILE = "data.snbt";
+	private static final String DATA_FILE = "data.json5";
 
 	@Nullable
 	private static FTBEWorldData instance;
@@ -81,7 +81,7 @@ public class FTBEWorldData {
 	public void saveIfChanged() {
 		if (needSave) {
             try {
-                SNBT.tryWrite(mkdirs("").resolve(DATA_FILE), toNBT());
+                Json5Util.tryWrite(mkdirs("").resolve(DATA_FILE), toJson());
             } catch (IOException e) {
 				FTBEssentials.LOGGER.error("can't write {} : {} / {}", DATA_FILE, e.getClass().getName(), e.getMessage());
             }
@@ -94,39 +94,42 @@ public class FTBEWorldData {
 			Path dataFile = mkdirs("").resolve(DATA_FILE);
 			if (!Files.exists(dataFile)) {
 				// save a default file
-				SNBT.tryWrite(dataFile, toNBT());
+				Json5Util.tryWrite(dataFile, toJson());
 			} else {
-				loadNBT(SNBT.tryRead(dataFile));
+				loadJson(Json5Util.tryRead(dataFile));
 			}
 		} catch (Exception ex) {
 			FTBEssentials.LOGGER.error("Failed to load world data from {}: {} / {}", DATA_FILE, ex.getClass().getName(), ex.getMessage());
 		}
 	}
 
-	private SNBTCompoundTag toNBT() {
-		SNBTCompoundTag tag = new SNBTCompoundTag();
+	private Json5Object toJson() {
+		Json5Object tag = new Json5Object();
 
-		tag.put("warps", warpManager.writeNBT());
+		tag.add("warps", warpManager.toJson());
 
-		SNBTCompoundTag mutesTag = new SNBTCompoundTag();
-		muteTimeouts.forEach((id, until) -> mutesTag.putLong(id.toString(), until));
-		tag.put("mute_timeouts", mutesTag);
+		Json5Object mutesTag = new Json5Object();
+		muteTimeouts.forEach((id, until) -> mutesTag.addProperty(id.toString(), until));
+		tag.add("mute_timeouts", mutesTag);
 
-		tag.put("kits", KitManager.getInstance().save(server.registryAccess()));
+		tag.add("kits", KitManager.getInstance().save(server.registryAccess()));
 
 		return tag;
 	}
 
-	public void loadNBT(CompoundTag tag) {
-		warpManager.readNBT(tag.getCompoundOrEmpty("warps"));
+	public void loadJson(Json5Object json) {
+		Json5Util.getJson5Object(json, "warps").ifPresent(warpManager::readJson);
 
 		muteTimeouts.clear();
-		CompoundTag mutesTag = tag.getCompoundOrEmpty("mute_timeouts");
-		for (String key : mutesTag.keySet()) {
-			mutesTag.getLong(key).ifPresent(l -> muteTimeouts.put(UUID.fromString(key), l));
-		}
+		Json5Util.getJson5Object(json, "mute_timeouts").ifPresent(mutesTag -> {
+			mutesTag.asMap().forEach((key, el) -> {
+				if (el instanceof Json5Primitive p && p.isNumber()) {
+					muteTimeouts.put(UUID.fromString(key), p.getAsLong());
+				}
+			});
+		});
 
-		KitManager.getInstance().load(tag.getCompoundOrEmpty("kits"), server.registryAccess());
+		KitManager.getInstance().load(json.get("kits"), server.registryAccess());
 	}
 
 	public void tickMuteTimeouts(MinecraftServer server) {

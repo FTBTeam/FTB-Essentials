@@ -14,7 +14,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import java.util.UUID;
 
 public record UpdateTabNameMessage(UUID uuid, String name, String nickname, RecordingStatus recording, boolean afk) implements CustomPacketPayload {
-	public static final Type<UpdateTabNameMessage> TYPE = new Type<>(FTBEssentials.essentialsId("update_tab_name"));
+	public static final Type<UpdateTabNameMessage> TYPE = new Type<>(FTBEssentials.id("update_tab_name"));
 
 	public static StreamCodec<FriendlyByteBuf, UpdateTabNameMessage> STREAM_CODEC = StreamCodec.composite(
 			UUIDUtil.STREAM_CODEC, UpdateTabNameMessage::uuid,

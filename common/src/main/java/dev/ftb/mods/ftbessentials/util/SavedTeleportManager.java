@@ -1,8 +1,7 @@
 package dev.ftb.mods.ftbessentials.util;
 
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
-import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.HashMap;
@@ -39,16 +38,16 @@ public abstract class SavedTeleportManager {
         return destinations.entrySet().stream().map(e -> new DestinationEntry(e.getKey(), e.getValue()));
     }
 
-    public CompoundTag writeNBT() {
-        SNBTCompoundTag tag = new SNBTCompoundTag();
-        destinations.forEach((name, dest) -> tag.put(name, dest.toNBT()));
+    public Json5Object toJson() {
+        Json5Object tag = new Json5Object();
+        destinations.forEach((name, dest) -> tag.add(name, dest.toJson()));
         return tag;
     }
 
-    public void readNBT(CompoundTag tag) {
+    public void readJson(Json5Object json) {
         destinations.clear();
-        for (String key : tag.keySet()) {
-            destinations.put(key, TeleportPos.fromNBT(tag.getCompoundOrEmpty(key)));
+        for (String key : json.keySet()) {
+            destinations.put(key, TeleportPos.fromJson(json.get(key)));
         }
     }
 
