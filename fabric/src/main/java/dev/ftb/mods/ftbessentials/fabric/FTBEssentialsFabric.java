@@ -4,7 +4,7 @@ import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftblibrary.fabric.PlayerDisplayNameCallback;
-import dev.ftb.mods.ftblibrary.platform.event.EventPostingHandler;
+import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents;
@@ -72,7 +72,7 @@ public class FTBEssentialsFabric implements ModInitializer {
     }
 
     private static void registerNativeEventPosting() {
-        EventPostingHandler.INSTANCE.registerEventWithResult(TeleportEvent.Data.class,
+        NativeEventPosting.INSTANCE.registerEventWithResult(TeleportEvent.TYPE,
                 data -> FTBEssentialsEvents.TELEPORT.invoker().teleport(data));
     }
 }

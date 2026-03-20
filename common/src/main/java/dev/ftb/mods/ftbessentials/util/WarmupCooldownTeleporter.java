@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbessentials.util;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.TeleportPos.TeleportResult;
-import dev.ftb.mods.ftblibrary.platform.event.EventPostingHandler;
+import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import dev.ftb.mods.ftblibrary.util.result.DataOutcome;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -66,7 +66,9 @@ public class WarmupCooldownTeleporter {
             }
         }
 
-		DataOutcome<Component> outcome = EventPostingHandler.INSTANCE.postEventWithResult(new TeleportEvent.Data(player, Vec3.atBottomCenterOf(pos.getPos())));
+		DataOutcome<Component> outcome = NativeEventPosting.INSTANCE.postEventWithResult(
+				TeleportEvent.TYPE, new TeleportEvent.Data(player, Vec3.atBottomCenterOf(pos.getPos()))
+		);
 		if (outcome.isFail()) {
 			return TeleportResult.failed(outcome.data().orElse(Component.empty()));
 		}

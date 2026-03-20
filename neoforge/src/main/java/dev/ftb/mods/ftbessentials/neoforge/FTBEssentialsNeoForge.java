@@ -5,9 +5,8 @@ import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftbessentials.api.neoforge.FTBEssentialsEvent;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
-import dev.ftb.mods.ftblibrary.platform.event.EventPostingHandler;
+import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import dev.ftb.mods.ftblibrary.util.result.DataOutcome;
-import dev.ftb.mods.ftbranks.FTBRanksCommands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.EventPriority;
@@ -64,7 +63,7 @@ public class FTBEssentialsNeoForge {
 	}
 
 	private static void registerNativeEventPosting(IEventBus bus) {
-		EventPostingHandler.INSTANCE.registerEventWithResult(TeleportEvent.Data.class, data -> {
+		NativeEventPosting.INSTANCE.registerEventWithResult(TeleportEvent.TYPE, data -> {
 			FTBEssentialsEvent.Teleport event = new FTBEssentialsEvent.Teleport(data);
 			bus.post(event);
 			return event.isCanceled() ? DataOutcome.fail(Component.translatable("ftbessentials.teleport_prevented")) : DataOutcome.pass();

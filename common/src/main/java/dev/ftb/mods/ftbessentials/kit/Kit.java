@@ -7,7 +7,7 @@ import de.marhali.json5.Json5Element;
 import dev.ftb.mods.ftbessentials.commands.impl.kit.KitCommand;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftblibrary.integration.permissions.PermissionHelper;
-import dev.ftb.mods.ftblibrary.util.Json5Ops;
+import dev.ftb.mods.ftblibrary.json5.Json5Ops;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.server.level.ServerPlayer;

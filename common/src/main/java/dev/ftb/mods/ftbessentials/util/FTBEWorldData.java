@@ -4,7 +4,7 @@ import de.marhali.json5.Json5Object;
 import de.marhali.json5.Json5Primitive;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.kit.KitManager;
-import dev.ftb.mods.ftblibrary.util.Json5Util;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;

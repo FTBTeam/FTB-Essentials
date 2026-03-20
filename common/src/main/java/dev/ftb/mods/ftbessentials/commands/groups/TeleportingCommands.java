@@ -17,7 +17,7 @@ import dev.ftb.mods.ftbessentials.util.BlockUtil;
 import dev.ftb.mods.ftbessentials.util.DimensionFilter;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
-import dev.ftb.mods.ftblibrary.platform.event.EventPostingHandler;
+import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import dev.ftb.mods.ftblibrary.util.result.Outcome;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -180,9 +180,9 @@ public class TeleportingCommands {
             }
 
             // FTB Chunks (via FTB XMod Compat) listens to this.  Other mods can too.
-            Outcome outcome = EventPostingHandler.INSTANCE.postEventWithResult(new RTPEvent.Data(
-                    level, player, currentPos, attempt
-            ));
+            Outcome outcome = NativeEventPosting.INSTANCE.postEventWithResult(
+                    RTPEvent.TYPE, new RTPEvent.Data(level, player, currentPos, attempt)
+            );
 
             if (outcome.isFail()) {
                 continue;
