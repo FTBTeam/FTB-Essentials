@@ -327,10 +327,8 @@ public class FTBEPlayerData {
 		}
 	}
 
-	/**
-	 * Get all the known players UUID's from the playerdata folder
-	 * @return a list of all the known players UUID's
-	 */
+	/// Get all the known players UUID's from the playerdata folder
+	/// @return a list of all the known players UUID's
 	public static List<UUID> getAllKnownPlayers() {
 		try (Stream<Path> files = Files.list(FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH))) {
 			return files.filter(path -> path.toString().endsWith(".json5"))
@@ -345,12 +343,10 @@ public class FTBEPlayerData {
 		return Collections.emptyList();
 	}
 
-	/**
-	 * Attempt to parse a UUID from a string without fatal errors
-	 * @param inputUUID the string to parse
-	 *
-	 * @return the UUID if it could be parsed, otherwise null
-	 */
+	/// Attempt to parse a UUID from a string without fatal errors
+	/// @param inputUUID the string to parse
+	///
+	/// @return the UUID if it could be parsed, otherwise null
 	private static Optional<UUID> tryParseUUID(String inputUUID) {
 		try {
 			return Optional.of(UUID.fromString(inputUUID));

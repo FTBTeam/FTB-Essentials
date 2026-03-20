@@ -19,13 +19,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * Represents one kit.
- *
- * @param items the items in the kit
- * @param cooldown the cooldown between granting it to players
- * @param autoGrant if true, autogranted on player login
- */
+/// Represents one kit.
+///
+/// @param items the items in the kit
+/// @param cooldown the cooldown between granting it to players
+/// @param autoGrant if true, autogranted on player login
 public record Kit(List<ItemStack> items, long cooldown, boolean autoGrant) {
     public static final Codec<Kit> CODEC = RecordCodecBuilder.create(builder -> builder.group(
             ItemStack.OPTIONAL_CODEC.listOf().fieldOf("items").forGetter(Kit::items),

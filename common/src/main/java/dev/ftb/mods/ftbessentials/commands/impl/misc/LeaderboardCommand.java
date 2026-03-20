@@ -111,12 +111,10 @@ public class LeaderboardCommand implements FTBCommand {
         return list.size();
     }
 
-    /**
-     * Like {@link net.minecraft.server.players.PlayerList#getPlayerStats(Player)} but doesn't need an online player.
-     * @param server the server
-     * @param playerId UUID of the player
-     * @return the server stats
-     */
+    /// Like [net.minecraft.server.players.PlayerList#getPlayerStats(Player)] but doesn't need an online player.
+    /// @param server the server
+    /// @param playerId UUID of the player
+    /// @return the server stats
     private static ServerStatsCounter getPlayerStats(MinecraftServer server, UUID playerId) {
         Map<UUID, ServerStatsCounter> stats = ((PlayerListAccess) server.getPlayerList()).getStats();
         return stats.computeIfAbsent(playerId, k -> {

@@ -6,13 +6,9 @@ import net.minecraft.commands.CommandSourceStack;
 import java.util.List;
 
 public interface FTBCommand {
-    /**
-     * If the command is not enabled, the register method will not be called.
-     */
+    /// If the command is not enabled, the register method will not be called.
     boolean enabled();
 
-    /**
-     * Registers the command with the dispatcher.
-     */
+    /// Registers the command with the dispatcher.
     List<LiteralArgumentBuilder<CommandSourceStack>> register();
 }

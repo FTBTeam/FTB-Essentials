@@ -42,11 +42,9 @@ public class MiscCommands {
         return 1;
     }
 
-    /**
-     * Allows any item in the mainhand to be used as a head item
-     *
-     * @param player The player to swap the items for
-     */
+    /// Allows any item in the mainhand to be used as a head item
+    ///
+    /// @param player The player to swap the items for
     public static int hat(ServerPlayer player) {
         ItemStack headStack = player.getItemBySlot(EquipmentSlot.HEAD);
         ItemStack targetStack = player.getItemBySlot(EquipmentSlot.MAINHAND);

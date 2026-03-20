@@ -40,13 +40,11 @@ public class FTBCommands {
                 || source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
     }
 
-    /**
-     * Register a list of commands to a dispatcher with support for registering to a namespace instead
-     * of the global commands namespace
-     *
-     * @param dispatcher The dispatcher to register the commands to
-     * @param commands  The list of commands to register
-     */
+    /// Register a list of commands to a dispatcher with support for registering to a namespace instead
+    /// of the global commands namespace
+    ///
+    /// @param dispatcher The dispatcher to register the commands to
+    /// @param commands  The list of commands to register
     private static void registerCommandsToDispatcher(CommandDispatcher<CommandSourceStack> dispatcher, List<FTBCommand> commands) {
         var namespace = Commands.literal("ftbessentials");
         var commandStack = new ArrayList<LiteralArgumentBuilder<CommandSourceStack>>();
