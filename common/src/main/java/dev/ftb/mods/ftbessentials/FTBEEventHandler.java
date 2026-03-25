@@ -27,21 +27,6 @@ import java.util.List;
 
 public class FTBEEventHandler {
 	public FTBEEventHandler() {
-//		LifecycleEvent.SERVER_BEFORE_START.register(FTBEEventHandler::serverAboutToStart);
-//		LifecycleEvent.SERVER_STOPPED.register(FTBEEventHandler::serverStopped);
-//		LifecycleEvent.SERVER_LEVEL_SAVE.register(FTBEEventHandler::levelSave);
-
-//		TickEvent.SERVER_POST.register(FTBEEventHandler::serverTickPost);
-//		CommandRegistrationEvent.EVENT.register(FTBEEventHandler::registerCommands);
-
-//		PlayerEvent.PLAYER_JOIN.register(FTBEEventHandler::playerLoggedIn);
-//		PlayerEvent.PLAYER_QUIT.register(FTBEEventHandler::playerLoggedOut);
-//		PlayerEvent.PLAYER_CLONE.register(FTBEEventHandler::onPlayerDeath);
-//		PlayerEvent.CHANGE_DIMENSION.register(FTBEEventHandler::playerChangedDimension);
-
-//		EntityEvent.LIVING_HURT.register(FTBEEventHandler::playerHurt);
-
-//		ChatEvent.RECEIVED.register(FTBEEventHandler::playerChat);
 	}
 
 	public void serverAboutToStart(MinecraftServer minecraftServer) {
