@@ -9,7 +9,7 @@ import dev.ftb.mods.ftblibrary.config.value.StringListValue;
 
 import java.util.List;
 
-public interface FTBEConfig {
+public interface FTBEStartupConfig {
 	Config CONFIG = Config.create(FTBEssentials.MOD_ID).comment("FTB Essentials config file", "If you're a modpack maker, edit defaultconfigs/ftbessentials-server.snbt instead");
 
 	BooleanValue REGISTER_TO_NAMESPACE = CONFIG.addBoolean("register_to_namespace", false)

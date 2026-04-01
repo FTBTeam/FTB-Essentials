@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbessentials;
 
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.integration.FTBRanksIntegration;
 import dev.ftb.mods.ftbessentials.integration.LuckPermsIntegration;
 import dev.ftb.mods.ftbessentials.net.FTBEssentialsNet;
@@ -24,7 +24,7 @@ public class FTBEssentials {
 	public final FTBEEventHandler eventHandler;
 
 	public FTBEssentials() {
-		ConfigManager.getInstance().registerServerConfig(FTBEConfig.CONFIG, MOD_ID + "-server", false, FTBEConfig::onChanged);
+		ConfigManager.getInstance().registerStartupConfig(FTBEStartupConfig.CONFIG, MOD_ID + "-startup");
 
 		FTBEssentialsNet.init();
 		eventHandler = new FTBEEventHandler();

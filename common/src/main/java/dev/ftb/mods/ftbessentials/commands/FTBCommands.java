@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbessentials.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.groups.*;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.permissions.Permissions;
@@ -52,7 +52,7 @@ public class FTBCommands {
         for (FTBCommand command : commands) {
             if (command.enabled()) {
                 for (var builder : command.register()) {
-                    if (FTBEConfig.REGISTER_TO_NAMESPACE.get()) {
+                    if (FTBEStartupConfig.REGISTER_TO_NAMESPACE.get()) {
                         namespace.then(builder);
                         commandStack.add(builder);
                     } else {
@@ -62,10 +62,10 @@ public class FTBCommands {
             }
         }
 
-        if (FTBEConfig.REGISTER_TO_NAMESPACE.get()) {
+        if (FTBEStartupConfig.REGISTER_TO_NAMESPACE.get()) {
             // TODO: This should use alias instead of registering the command again
             //       I think this is possible?
-            if (FTBEConfig.REGISTER_ALIAS_AS_WELL_AS_NAMESPACE.get()) {
+            if (FTBEStartupConfig.REGISTER_ALIAS_AS_WELL_AS_NAMESPACE.get()) {
                 for (var builder : commandStack) {
                     dispatcher.register(builder);
                 }

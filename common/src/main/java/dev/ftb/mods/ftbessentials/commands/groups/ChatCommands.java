@@ -4,7 +4,7 @@ import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.commands.SimpleConfigurableCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.chat.MuteCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.chat.NicknameCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftblibrary.platform.Platform;
 import net.minecraft.ChatFormatting;
@@ -21,8 +21,8 @@ public class ChatCommands {
             new NicknameCommand(),
 
             // Recording
-            new SimpleConfigurableCommand(FTBEConfig.REC, literal("recording").executes(context -> recording(context.getSource().getPlayerOrException()))),
-            new SimpleConfigurableCommand(FTBEConfig.REC, literal("streaming").executes(context -> streaming(context.getSource().getPlayerOrException())))
+            new SimpleConfigurableCommand(FTBEStartupConfig.REC, literal("recording").executes(context -> recording(context.getSource().getPlayerOrException()))),
+            new SimpleConfigurableCommand(FTBEStartupConfig.REC, literal("streaming").executes(context -> streaming(context.getSource().getPlayerOrException())))
     );
 
     // TODO: These commands basically do the same thing, should be refactored into a single command

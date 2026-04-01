@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbessentials.util;
 
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.util.TeleportPos.TeleportResult;
 import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import dev.ftb.mods.ftblibrary.util.result.DataOutcome;
@@ -59,7 +59,7 @@ public class WarmupCooldownTeleporter {
 
 		TeleportPos pos = positionGetter.apply(player);
 
-        if (!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || !FTBEConfig.ADMINS_EXEMPT_DIMENSION_BLACKLISTS.get()) {
+        if (!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || !FTBEStartupConfig.ADMINS_EXEMPT_DIMENSION_BLACKLISTS.get()) {
             TeleportResult blacklistedResult = pos.checkDimensionBlacklist(player);
             if (!blacklistedResult.isSuccess()) {
                 return blacklistedResult;
@@ -94,7 +94,7 @@ public class WarmupCooldownTeleporter {
 		if (res.isSuccess()) {
 			if (popHistoryOnTeleport) {
 				playerData.popTeleportHistory();
-			} else if (!FTBEConfig.BACK_ON_DEATH_ONLY.get()) {
+			} else if (!FTBEStartupConfig.BACK_ON_DEATH_ONLY.get()) {
 				playerData.addTeleportHistory(player, currentPos);
 			}
 		}

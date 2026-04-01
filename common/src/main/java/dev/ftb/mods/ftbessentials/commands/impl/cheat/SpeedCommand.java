@@ -5,7 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.Holder;
@@ -28,7 +28,7 @@ public class SpeedCommand implements FTBCommand {
 
     @Override
     public boolean enabled() {
-        return FTBEConfig.SPEED.isEnabled();
+        return FTBEStartupConfig.SPEED.isEnabled();
     }
 
     @Override

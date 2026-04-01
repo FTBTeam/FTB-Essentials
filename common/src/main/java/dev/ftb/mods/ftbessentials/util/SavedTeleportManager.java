@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbessentials.util;
 
 import de.marhali.json5.Json5Object;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.HashMap;
@@ -70,7 +70,7 @@ public abstract class SavedTeleportManager {
 
         @Override
         protected int getMaxSize(ServerPlayer player) {
-            return FTBEConfig.MAX_HOMES.get(player);
+            return FTBEStartupConfig.MAX_HOMES.get(player);
         }
 
         @Override

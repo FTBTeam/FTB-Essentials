@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.api.records.TPARequest;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import net.minecraft.ChatFormatting;
@@ -24,7 +24,7 @@ public class TPACommand implements FTBCommand {
 
     @Override
     public boolean enabled() {
-        return FTBEConfig.TPA.isEnabled();
+        return FTBEStartupConfig.TPA.isEnabled();
     }
 
     @Override

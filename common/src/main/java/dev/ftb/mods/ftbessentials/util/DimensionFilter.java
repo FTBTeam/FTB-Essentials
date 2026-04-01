@@ -1,6 +1,6 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftblibrary.util.Lazy;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.resources.Identifier;
@@ -13,14 +13,14 @@ import java.util.function.Predicate;
 
 public class DimensionFilter {
     private static final Lazy<WildcardedRLMatcher> RTP_DIMENSION_MATCHER_B
-            = Lazy.of(() -> new WildcardedRLMatcher(FTBEConfig.RTP_DIMENSION_BLACKLIST.get()));
+            = Lazy.of(() -> new WildcardedRLMatcher(FTBEStartupConfig.RTP_DIMENSION_BLACKLIST.get()));
     private static final Lazy<WildcardedRLMatcher> RTP_DIMENSION_MATCHER_W
-            = Lazy.of(() -> new WildcardedRLMatcher(FTBEConfig.RTP_DIMENSION_WHITELIST.get()));
+            = Lazy.of(() -> new WildcardedRLMatcher(FTBEStartupConfig.RTP_DIMENSION_WHITELIST.get()));
 
     private static final Lazy<WildcardedRLMatcher> ALL_DIMENSION_MATCHER_B_TO
-            = Lazy.of(() -> new WildcardedRLMatcher(FTBEConfig.TELEPORTATION_BLACKLIST_TO.get()));
+            = Lazy.of(() -> new WildcardedRLMatcher(FTBEStartupConfig.TELEPORTATION_BLACKLIST_TO.get()));
     private static final Lazy<WildcardedRLMatcher> ALL_DIMENSION_MATCHER_B_FROM
-            = Lazy.of(() -> new WildcardedRLMatcher(FTBEConfig.TELEPORTATION_BLACKLIST_FROM.get()));
+            = Lazy.of(() -> new WildcardedRLMatcher(FTBEStartupConfig.TELEPORTATION_BLACKLIST_FROM.get()));
 
     public static boolean isRtpDimensionOK(ResourceKey<Level> levelKey) {
         Identifier name = levelKey.identifier();

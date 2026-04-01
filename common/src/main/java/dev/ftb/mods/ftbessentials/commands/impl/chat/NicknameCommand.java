@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbessentials.commands.impl.chat;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftblibrary.platform.Platform;
 import net.minecraft.commands.CommandSourceStack;
@@ -19,13 +19,13 @@ import static net.minecraft.commands.Commands.literal;
 public class NicknameCommand implements FTBCommand {
     @Override
     public boolean enabled() {
-        return FTBEConfig.NICK.isEnabled();
+        return FTBEStartupConfig.NICK.isEnabled();
     }
 
     @Override
     public List<LiteralArgumentBuilder<CommandSourceStack>> register() {
         return Collections.singletonList(literal("nickname")
-                .requires(FTBEConfig.NICK)
+                .requires(FTBEStartupConfig.NICK)
                 .executes(context -> nickname(context.getSource().getPlayerOrException(), ""))
                 .then(argument("nickname", StringArgumentType.greedyString())
                         .executes(context -> nickname(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "nickname")))

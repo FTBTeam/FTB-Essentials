@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbessentials.commands.impl.misc;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.mixin.PlayerListAccess;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.Leaderboard;
@@ -26,7 +26,7 @@ import java.util.*;
 public class LeaderboardCommand implements FTBCommand {
     @Override
     public boolean enabled() {
-        return FTBEConfig.LEADERBOARD.isEnabled();
+        return FTBEStartupConfig.LEADERBOARD.isEnabled();
     }
 
     @Override

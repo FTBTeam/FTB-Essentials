@@ -4,7 +4,7 @@ import de.marhali.json5.Json5Array;
 import de.marhali.json5.Json5Object;
 import de.marhali.json5.Json5Primitive;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
 import dev.ftb.mods.ftblibrary.platform.Platform;
@@ -75,12 +75,12 @@ public class FTBEPlayerData {
 		kitUseTimes = new HashMap<>();
 		homes = new SavedTeleportManager.HomeManager(this);
 
-		backTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.BACK::getCooldown, FTBEConfig.BACK::getWarmup, true);
-		spawnTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.SPAWN::getCooldown, FTBEConfig.SPAWN::getWarmup);
-		warpTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.WARP::getCooldown, FTBEConfig.WARP::getWarmup);
-		homeTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.HOME::getCooldown, FTBEConfig.HOME::getWarmup);
-		tpaTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.TPA::getCooldown, FTBEConfig.TPA::getWarmup);
-		rtpTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.RTP::getCooldown, FTBEConfig.RTP::getWarmup);
+		backTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.BACK::getCooldown, FTBEStartupConfig.BACK::getWarmup, true);
+		spawnTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.SPAWN::getCooldown, FTBEStartupConfig.SPAWN::getWarmup);
+		warpTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.WARP::getCooldown, FTBEStartupConfig.WARP::getWarmup);
+		homeTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.HOME::getCooldown, FTBEStartupConfig.HOME::getWarmup);
+		tpaTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.TPA::getCooldown, FTBEStartupConfig.TPA::getWarmup);
+		rtpTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.RTP::getCooldown, FTBEStartupConfig.RTP::getWarmup);
 		teleportHistory = new LinkedList<>();
 	}
 
@@ -267,7 +267,7 @@ public class FTBEPlayerData {
 	public void addTeleportHistory(ServerPlayer player, TeleportPos pos) {
 		teleportHistory.add(pos);
 
-		while (teleportHistory.size() > FTBEConfig.MAX_BACK.get(player)) {
+		while (teleportHistory.size() > FTBEStartupConfig.MAX_BACK.get(player)) {
 			teleportHistory.removeFirst();
 		}
 

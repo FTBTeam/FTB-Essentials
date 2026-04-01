@@ -11,7 +11,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.kit.Kit;
 import dev.ftb.mods.ftbessentials.kit.KitManager;
 import dev.ftb.mods.ftbessentials.util.BlockUtil;
@@ -62,7 +62,7 @@ public class KitCommand implements FTBCommand {
 
     @Override
     public boolean enabled() {
-        return FTBEConfig.KIT.isEnabled();
+        return FTBEStartupConfig.KIT.isEnabled();
     }
 
     @Override

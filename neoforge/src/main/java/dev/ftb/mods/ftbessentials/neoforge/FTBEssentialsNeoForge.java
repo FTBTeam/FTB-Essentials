@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbessentials.neoforge;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftbessentials.api.neoforge.FTBEssentialsEvent;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import dev.ftb.mods.ftblibrary.util.result.DataOutcome;
@@ -91,7 +91,7 @@ public class FTBEssentialsNeoForge {
 
 	public void vanillaTeleportCommand(EntityTeleportEvent.TeleportCommand event) {
 		// ignore teleport events that we ourselves fired
-		if (event.getEntity() instanceof ServerPlayer sp && !FTBEConfig.BACK_ON_DEATH_ONLY.get() && !(event instanceof FTBEssentialsEvent.Teleport)) {
+		if (event.getEntity() instanceof ServerPlayer sp && !FTBEStartupConfig.BACK_ON_DEATH_ONLY.get() && !(event instanceof FTBEssentialsEvent.Teleport)) {
 			FTBEPlayerData.addTeleportHistory(sp);
 		}
 	}
