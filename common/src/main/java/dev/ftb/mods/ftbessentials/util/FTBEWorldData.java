@@ -58,20 +58,16 @@ public class FTBEWorldData {
 
 	public Path mkdirs(String path) {
 		Path dir = server.getWorldPath(FTBESSENTIALS_DIRECTORY);
-
 		if (!path.isEmpty()) {
 			dir = dir.resolve(path);
 		}
 
-		if (Files.notExists(dir)) {
-			try {
-				Files.createDirectories(dir);
-			} catch (Exception ex) {
-				throw new RuntimeException("Could not create FTB Essentials data directory: " + ex);
-			}
+		try {
+			Files.createDirectories(dir);
+			return dir;
+		} catch (IOException ex) {
+			throw new RuntimeException("Could not create FTB Essentials data directory: " + ex.getMessage());
 		}
-
-		return dir;
 	}
 
 	public void markDirty() {
@@ -80,23 +76,24 @@ public class FTBEWorldData {
 
 	public void saveIfChanged() {
 		if (needSave) {
-            try {
-                Json5Util.tryWrite(mkdirs("").resolve(DATA_FILE), toJson());
-            } catch (IOException e) {
+			try {
+				Json5Util.tryWrite(mkdirs("").resolve(DATA_FILE), toJson());
+			} catch (IOException e) {
 				FTBEssentials.LOGGER.error("can't write {} : {} / {}", DATA_FILE, e.getClass().getName(), e.getMessage());
-            }
-            needSave = false;
+			}
+			needSave = false;
 		}
 	}
 
 	public void load() {
 		try {
 			Path dataFile = mkdirs("").resolve(DATA_FILE);
-			if (!Files.exists(dataFile)) {
+			if (Files.exists(dataFile)) {
+				deserialize(Json5Util.tryRead(dataFile));
+			} else {
 				// save a default file
 				Json5Util.tryWrite(dataFile, toJson());
-			} else {
-				loadJson(Json5Util.tryRead(dataFile));
+				FTBEssentials.LOGGER.info("created default world data file at {}", dataFile);
 			}
 		} catch (Exception ex) {
 			FTBEssentials.LOGGER.error("Failed to load world data from {}: {} / {}", DATA_FILE, ex.getClass().getName(), ex.getMessage());
@@ -117,7 +114,7 @@ public class FTBEWorldData {
 		return tag;
 	}
 
-	public void loadJson(Json5Object json) {
+	public void deserialize(Json5Object json) {
 		Json5Util.getJson5Object(json, "warps").ifPresent(warpManager::readJson);
 
 		muteTimeouts.clear();

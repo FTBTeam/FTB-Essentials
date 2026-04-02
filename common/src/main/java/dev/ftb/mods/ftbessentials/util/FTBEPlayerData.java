@@ -286,7 +286,11 @@ public class FTBEPlayerData {
 	public void load() {
 		Path path = FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".json5");
 		try {
-			readJson(Json5Util.tryRead(path));
+			if (Files.exists(path)) {
+				readJson(Json5Util.tryRead(path));
+			} else {
+				FTBEssentials.LOGGER.info("player data for {} doesn't exist yet, will create", uuid);
+			}
 		} catch (IOException e) {
 			FTBEssentials.LOGGER.error("can't read {} : {} / {}", path, e.getClass().getName(), e.getMessage());
 		}
