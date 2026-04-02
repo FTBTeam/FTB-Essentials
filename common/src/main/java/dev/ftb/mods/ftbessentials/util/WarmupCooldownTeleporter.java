@@ -8,6 +8,7 @@ import dev.ftb.mods.ftblibrary.util.result.DataOutcome;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.phys.Vec3;
@@ -66,8 +67,13 @@ public class WarmupCooldownTeleporter {
             }
         }
 
+		ServerLevel targetLevel = player.level().getServer().getLevel(pos.getDimensionId());
+		if (targetLevel == null) {
+			return TeleportResult.UNKNOWN_DESTINATION;
+		}
+
 		DataOutcome<Component> outcome = NativeEventPosting.INSTANCE.postEventWithResult(
-				TeleportEvent.TYPE, new TeleportEvent.Data(player, Vec3.atBottomCenterOf(pos.getPos()))
+				TeleportEvent.TYPE, new TeleportEvent.Data(player, targetLevel, Vec3.atBottomCenterOf(pos.getPos()))
 		);
 		if (outcome.isFail()) {
 			return TeleportResult.failed(outcome.data().orElse(Component.empty()));

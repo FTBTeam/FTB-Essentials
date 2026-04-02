@@ -73,6 +73,10 @@ public class TeleportPos {
 		return CODEC.encodeStart(Json5Ops.INSTANCE, this).getOrThrow();
 	}
 
+	public ResourceKey<Level> getDimensionId() {
+		return dimensionId;
+	}
+
 	public TeleportPos safeForPlayer(ServerPlayer player) {
 		ServerLevel level = player.level().getServer().getLevel(dimensionId);
 		if (level == null) return this;  // shouldn't happen
