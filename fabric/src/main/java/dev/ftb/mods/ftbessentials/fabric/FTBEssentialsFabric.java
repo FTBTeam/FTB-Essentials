@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbessentials.fabric;
 
 import dev.ftb.mods.ftbessentials.FTBEssentials;
+import dev.ftb.mods.ftbessentials.api.event.RTPEvent;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftblibrary.fabric.PlayerDisplayNameCallback;
@@ -74,5 +75,8 @@ public class FTBEssentialsFabric implements ModInitializer {
     private static void registerNativeEventPosting() {
         NativeEventPosting.INSTANCE.registerEventWithResult(TeleportEvent.TYPE,
                 data -> FTBEssentialsEvents.TELEPORT.invoker().teleport(data));
+        NativeEventPosting.INSTANCE.registerEventWithResult(RTPEvent.TYPE,
+                data -> FTBEssentialsEvents.RTP.invoker().teleport(data));
+
     }
 }

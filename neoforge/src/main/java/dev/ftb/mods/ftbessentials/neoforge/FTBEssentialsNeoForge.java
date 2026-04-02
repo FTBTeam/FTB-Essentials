@@ -1,12 +1,14 @@
 package dev.ftb.mods.ftbessentials.neoforge;
 
 import dev.ftb.mods.ftbessentials.FTBEssentials;
+import dev.ftb.mods.ftbessentials.api.event.RTPEvent;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftbessentials.api.neoforge.FTBEssentialsEvent;
 import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import dev.ftb.mods.ftblibrary.util.result.DataOutcome;
+import dev.ftb.mods.ftblibrary.util.result.Outcome;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.EventPriority;
@@ -63,10 +65,15 @@ public class FTBEssentialsNeoForge {
 	}
 
 	private static void registerNativeEventPosting(IEventBus bus) {
-		NativeEventPosting.INSTANCE.registerEventWithResult(TeleportEvent.TYPE, data -> {
+		NativeEventPosting.get().registerEventWithResult(TeleportEvent.TYPE, data -> {
 			FTBEssentialsEvent.Teleport event = new FTBEssentialsEvent.Teleport(data);
 			bus.post(event);
 			return event.isCanceled() ? DataOutcome.fail(Component.translatable("ftbessentials.teleport_prevented")) : DataOutcome.pass();
+		});
+		NativeEventPosting.get().registerEventWithResult(RTPEvent.TYPE, data -> {
+			FTBEssentialsEvent.RTP event = new FTBEssentialsEvent.RTP(data);
+			bus.post(event);
+			return event.isCanceled() ? Outcome.FAIL : Outcome.PASS;
 		});
 	}
 
