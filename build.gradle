@@ -9,6 +9,10 @@ tasks.named('wrapper', Wrapper).configure {
     distributionType = Wrapper.DistributionType.BIN
 }
 
+base {
+    archivesName = archives_base_name
+}
+
 allprojects {
     apply plugin: 'idea'
     apply plugin: 'java-library'
@@ -21,10 +25,6 @@ allprojects {
 
     version = createModVersion(project)
     group = project.maven_group
-
-    base {
-        archivesName = project.archives_base_name
-    }
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
@@ -41,6 +41,10 @@ allprojects {
 }
 
 subprojects {
+    base {
+        archivesName = rootProject.base.archivesName.get() + (project.name != "common" ? "-" + project.name : "")
+    }
+
     if (project.name != "common") {
         dependencies {
             api project(":common")
