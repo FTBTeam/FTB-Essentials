@@ -36,21 +36,17 @@ repositories {
     maven {
         url "https://maven.neoforged.net/releases/"
     }
+}
 
-    // TODO remove when Neo releases
-	maven {
-		name = "Maven for PR #2993" // https://github.com/neoforged/NeoForge/pull/2993
-		url = uri("https://prmaven.neoforged.net/NeoForge/pr2993")
-		content {
-			includeModule("net.neoforged", "neoforge")
-			includeModule("net.neoforged", "testframework")
-		}
-	}
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
 }
 
 dependencies {
-    implementation("dev.ftb.mods:ftb-library-neoforge:${rootProject.ftb_library_version}")
-    implementation("dev.ftb.mods:ftb-ranks-neoforge:${rootProject.ftb_ranks_version}")
+    api("dev.ftb.mods:ftb-library-neoforge:${rootProject.ftb_library_version}")
+
+    compileOnly("dev.ftb.mods:ftb-ranks-neoforge:${rootProject.ftb_ranks_version}")
+    localRuntime("dev.ftb.mods:ftb-ranks-neoforge:${rootProject.ftb_ranks_version}")
 
     compileOnly "net.luckperms:api:5.4"
 }
@@ -66,15 +62,5 @@ jar {
                 "Implementation-Vendor"   : project.mod_author,
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
-    }
-}
-
-publishing {
-    publications {
-        mavenForge(MavenPublication) {
-            artifactId = "${rootProject.archives_base_name}-${project.name}"
-            version ftbPublishing.mavenVersion
-            from components.java
-        }
     }
 }

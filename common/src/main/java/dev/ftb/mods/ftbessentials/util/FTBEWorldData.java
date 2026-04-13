@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbessentials.util;
 
+import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
 import de.marhali.json5.Json5Primitive;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
@@ -77,7 +78,7 @@ public class FTBEWorldData {
 	public void saveIfChanged() {
 		if (needSave) {
 			try {
-				Json5Util.tryWrite(mkdirs("").resolve(DATA_FILE), toJson());
+				Json5Util.tryWrite(mkdirs("").resolve(DATA_FILE), (Json5Element) toJson());
 			} catch (IOException e) {
 				FTBEssentials.LOGGER.error("can't write {} : {} / {}", DATA_FILE, e.getClass().getName(), e.getMessage());
 			}
@@ -92,7 +93,7 @@ public class FTBEWorldData {
 				deserialize(Json5Util.tryRead(dataFile));
 			} else {
 				// save a default file
-				Json5Util.tryWrite(dataFile, toJson());
+				Json5Util.tryWrite(dataFile, (Json5Element) toJson());
 				FTBEssentials.LOGGER.info("created default world data file at {}", dataFile);
 			}
 		} catch (Exception ex) {

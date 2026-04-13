@@ -152,6 +152,10 @@ public class TeleportPos {
 		return pos.toShortString().replaceAll(",", "");
 	}
 
+	public ResourceKey<Level> dimensionId() {
+		return dimensionId;
+	}
+
 	@FunctionalInterface
 	public interface TeleportResult {
 		TeleportResult SUCCESS = new TeleportResult() {

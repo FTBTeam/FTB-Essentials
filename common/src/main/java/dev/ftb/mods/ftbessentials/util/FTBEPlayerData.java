@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbessentials.util;
 
 import de.marhali.json5.Json5Array;
+import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
 import de.marhali.json5.Json5Primitive;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
@@ -300,7 +301,7 @@ public class FTBEPlayerData {
 		if (needSave) {
 			Path path = FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".json5");
 			try {
-				Json5Util.tryWrite(path, toJson());
+				Json5Util.tryWrite(path, (Json5Element) toJson());
             } catch (IOException e) {
 				FTBEssentials.LOGGER.error("can't write {} : {} / {}", path, e.getClass().getName(), e.getMessage());
             }

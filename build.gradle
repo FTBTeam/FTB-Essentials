@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'net.fabricmc.fabric-loom' version '1.15.2' apply(false)
-    id 'net.neoforged.moddev' version '2.0.140' apply(false)
+    id 'net.neoforged.moddev' version '2.0.141' apply(false)
     id "me.modmuss50.mod-publish-plugin" version "1.1.0"
 }
 
@@ -9,24 +9,22 @@ tasks.named('wrapper', Wrapper).configure {
     distributionType = Wrapper.DistributionType.BIN
 }
 
-apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/changelog.gradle'
-
 allprojects {
     apply plugin: 'idea'
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
 
-    apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/git-md-changelog.gradle"
+    apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/v1/gradle/maven.gradle'
+    apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/v1/gradle/publishing-2.gradle'
+    apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/v1/gradle/utils.gradle'
+    apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/v1/gradle/changelog.gradle'
 
-    version = project.mod_version
+    version = createModVersion(project)
     group = project.maven_group
 
     base {
-        archivesName = "${project.archives_base_name}-${project.name}"
+        archivesName = project.archives_base_name
     }
-
-    // needs to be done AFTER version is set
-    apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/publishing.gradle"
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
@@ -39,20 +37,6 @@ allprojects {
 
     java {
         withSourcesJar()
-    }
-
-    publishing {
-        repositories {
-            if (ftbPublishing.ftbToken) {
-                maven {
-                    url ftbPublishing.ftbURL
-                    credentials {
-                        username = ftbPublishing.ftbUser
-                        password = ftbPublishing.ftbToken
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -70,27 +54,7 @@ subprojects {
     repositories {
         mavenCentral()
         mavenLocal()
-
-        maven {
-            url "https://www.cursemaven.com"
-            content {
-                includeGroup "curse.maven"
-            }
-        }
-
-        maven {
-            url "https://maven.ftb.dev/releases"
-            content {
-                includeGroup "dev.ftb.mods"
-            }
-        }
-
-        maven {
-            url "https://maven.ftb.dev/snapshots"
-            content {
-                includeGroup "dev.ftb.mods"
-            }
-        }
+        commonMavenRepos(repositories)
     }
 
     processResources {
@@ -98,28 +62,17 @@ subprojects {
 
         inputs.property "version", project.version
 
-        // TODO: Fabric is working on resolving this: https://github.com/FabricMC/fabric-loader/pull/1101
-        def fixedMcVersion = project.minecraft_version
-        if (fixedMcVersion.contains("-") && project.name == "fabric") {
-            def hyphenParts = fixedMcVersion.split("-")
-            fixedMcVersion = ""
-            for (int i = 0; i < hyphenParts.size(); i++) {
-                if (i < 2) {
-                    fixedMcVersion = fixedMcVersion + (i > 0 ? "-" : "") + hyphenParts[i]
-                } else {
-                    fixedMcVersion = fixedMcVersion + "." + hyphenParts[i]
-                }
-            }
-        }
-
         filesMatching(["META-INF/neoforge.mods.toml", "fabric.mod.json"]) {
             expand "version": project.version,
-                    "neoforgeversionrange": project.neoforge_version_range,
-                    "neoforgeloaderversion": project.neoforge_loader_version,
-                    "mcversion": fixedMcVersion,
-                    "fabricapiversionrange": project.fabric_api_version_range,
-                    "ftblibraryversion": project.ftb_library_version,
-                    "ftbranksversion": project.ftb_ranks_version
+                    "neoforge_version_range": neoforge_version_range,
+                    "neoforge_loader_version": neoforge_loader_version,
+                    "minecraft_version_range_maven": minecraft_version_range_maven,
+                    "minecraft_version_range_semver": minecraft_version_range_semver,
+                    "fabricapi_version_range": fabric_api_version_range,
+                    "ftb_library_version_range_semver": ftb_library_version_range_semver,
+                    "ftb_library_version_range_maven": ftb_library_version_range_maven,
+                    "ftb_ranks_version_range_semver": ftb_ranks_version_range_semver,
+                    "ftb_ranks_version_range_maven": ftb_ranks_version_range_maven
         }
     }
 }
@@ -131,30 +84,30 @@ idea {
     }
 }
 
+createMavenPublishingBlock(project)
+
 publishMods {
     dryRun = providers.environmentVariable("CURSEFORGE_KEY").getOrNull() == null
     changelog = createChangelog(project)
-    version = mod_version
-
-    // TODO: Migrate to something else
-    def tag = providers.environmentVariable("TAG").getOrElse("release")
-    type = tag.endsWith("-beta") ? BETA : (tag.endsWith("-alpha") ? ALPHA : STABLE)
+    version = project.version
+    type = createReleaseType(project)
 
     def createOptions = (String projectName) -> {
         publishOptions {
-            file = project.provider { project(":$projectName").tasks.remapJar }.flatMap { it.archiveFile }
-            displayName = "[${projectName.toUpperCase()}][${minecraft_version}] ${readable_name} ${mod_version}"
+            file = project.provider { project(":$projectName").tasks.jar }.flatMap { it.archiveFile }
+            displayName = "${readable_name} ${projectName.capitalize()} ${project.version}"
             modLoaders.add(projectName.toLowerCase())
         }
     }
 
     def fabricOptions = createOptions("fabric")
-//	def forgeOptions = createOptions("forge")
     def neoForgeOptions = createOptions("neoforge")
 
     def curseForgeOptions = curseforgeOptions {
         accessToken = providers.environmentVariable("CURSEFORGE_KEY")
-        minecraftVersions.add("${minecraft_version}")
+        supported_minecraft_versions.split(",").each {
+            minecraftVersions.add(it.trim())
+        }
         javaVersions.add(JavaVersion.VERSION_25)
     }
 

@@ -31,18 +31,10 @@ dependencies {
     api "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     api "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
-    implementation("dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}")
-    implementation("dev.ftb.mods:ftb-ranks-fabric:${rootProject.ftb_ranks_version}") { transitive = false }
+    api("dev.ftb.mods:ftb-library-fabric:${rootProject.ftb_library_version}")
+
+    compileOnly("dev.ftb.mods:ftb-ranks-fabric:${rootProject.ftb_ranks_version}")
+    localRuntime("dev.ftb.mods:ftb-ranks-fabric:${rootProject.ftb_ranks_version}")
 
     compileOnly "net.luckperms:api:5.4"
-}
-
-publishing {
-    publications {
-        mavenFabric(MavenPublication) {
-            artifactId = "${rootProject.archives_base_name}-${project.name}"
-            version ftbPublishing.mavenVersion
-            from components.java
-        }
-    }
 }

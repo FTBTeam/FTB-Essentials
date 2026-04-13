@@ -75,6 +75,7 @@ public class WarmupCooldownTeleporter {
 		DataOutcome<Component> outcome = NativeEventPosting.INSTANCE.postEventWithResult(
 				TeleportEvent.TYPE, new TeleportEvent.Data(player, targetLevel, Vec3.atBottomCenterOf(pos.getPos()))
 		);
+
 		if (outcome.isFail()) {
 			return TeleportResult.failed(outcome.data().orElse(Component.empty()));
 		}
