@@ -2,9 +2,8 @@ package dev.ftb.mods.ftbessentials.commands.groups;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.architectury.event.EventResult;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
-import dev.ftb.mods.ftbessentials.FTBEssentialsEvents;
+import dev.ftb.mods.ftbessentials.api.event.RTPEvent;
 import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.commands.SimpleConfigurableCommand;
@@ -13,11 +12,13 @@ import dev.ftb.mods.ftbessentials.commands.impl.teleporting.HomeCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.teleporting.OfflineTeleportCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.teleporting.TPACommand;
 import dev.ftb.mods.ftbessentials.commands.impl.teleporting.WarpCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.util.BlockUtil;
 import dev.ftb.mods.ftbessentials.util.DimensionFilter;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
+import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
+import dev.ftb.mods.ftblibrary.util.result.Outcome;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -46,8 +47,8 @@ import java.util.Objects;
 import java.util.Set;
 
 public class TeleportingCommands {
-    public static final TagKey<Block> IGNORE_RTP_BLOCKS = TagKey.create(Registries.BLOCK, FTBEssentials.essentialsId("ignore_rtp"));
-    public static final TagKey<Biome> IGNORE_RTP_BIOMES = TagKey.create(Registries.BIOME, FTBEssentials.essentialsId("ignore_rtp"));
+    public static final TagKey<Block> IGNORE_RTP_BLOCKS = TagKey.create(Registries.BLOCK, FTBEssentials.id("ignore_rtp"));
+    public static final TagKey<Biome> IGNORE_RTP_BIOMES = TagKey.create(Registries.BIOME, FTBEssentials.id("ignore_rtp"));
 
     public static final List<FTBCommand> COMMANDS = List.of(
             new OfflineTeleportCommand(),
@@ -57,47 +58,47 @@ public class TeleportingCommands {
 
             // General teleport commands
             // Back command
-            new SimpleConfigurableCommand(FTBEConfig.BACK, Commands.literal("back")
+            new SimpleConfigurableCommand(FTBEStartupConfig.BACK, Commands.literal("back")
                     .executes(context -> back(context.getSource().getPlayerOrException()))),
 
             // Playerspawn command
-            new SimpleConfigurableCommand(FTBEConfig.PLAYER_SPAWN, Commands.literal("playerspawn")
+            new SimpleConfigurableCommand(FTBEStartupConfig.PLAYER_SPAWN, Commands.literal("playerspawn")
                     .executes(context -> playerSpawn(context.getSource().getPlayerOrException()))),
 
             // Spawn command
-            new SimpleConfigurableCommand(FTBEConfig.SPAWN, Commands.literal("spawn")
+            new SimpleConfigurableCommand(FTBEStartupConfig.SPAWN, Commands.literal("spawn")
                     .executes(context -> spawn(context.getSource().getPlayerOrException()))),
 
             // Random teleport command
-            new SimpleConfigurableCommand(FTBEConfig.RTP, Commands.literal("rtp")
-                    .then(Commands.argument("maxDistance", IntegerArgumentType.integer(FTBEConfig.RTP_MIN_DISTANCE.get(), FTBEConfig.RTP_MAX_DISTANCE.get()))
-                            .requires(context -> FTBEConfig.RTP_MAX_DISTANCE_CUSTOM.get(context.getPlayer()))
-                            .executes(context -> rtp(context.getSource().getPlayerOrException(), FTBEConfig.RTP_MIN_DISTANCE.get(), IntegerArgumentType.getInteger(context, "maxDistance")))
+            new SimpleConfigurableCommand(FTBEStartupConfig.RTP, Commands.literal("rtp")
+                    .then(Commands.argument("maxDistance", IntegerArgumentType.integer(FTBEStartupConfig.RTP_MIN_DISTANCE.get(), FTBEStartupConfig.RTP_MAX_DISTANCE.get()))
+                            .requires(context -> FTBEStartupConfig.RTP_MAX_DISTANCE_CUSTOM.get(context.getPlayer()))
+                            .executes(context -> rtp(context.getSource().getPlayerOrException(), FTBEStartupConfig.RTP_MIN_DISTANCE.get(), IntegerArgumentType.getInteger(context, "maxDistance")))
                     )
-                    .then(Commands.argument("minDistance", IntegerArgumentType.integer(0, FTBEConfig.RTP_MAX_DISTANCE.get()))
-                            .requires(context -> FTBEConfig.RTP_MIN_DISTANCE_CUSTOM.get(context.getPlayer()))
-                            .then(Commands.argument("maxDistance", IntegerArgumentType.integer(0, FTBEConfig.RTP_MAX_DISTANCE.get()))
+                    .then(Commands.argument("minDistance", IntegerArgumentType.integer(0, FTBEStartupConfig.RTP_MAX_DISTANCE.get()))
+                            .requires(context -> FTBEStartupConfig.RTP_MIN_DISTANCE_CUSTOM.get(context.getPlayer()))
+                            .then(Commands.argument("maxDistance", IntegerArgumentType.integer(0, FTBEStartupConfig.RTP_MAX_DISTANCE.get()))
                                     .executes(context -> rtp(context.getSource().getPlayerOrException(), IntegerArgumentType.getInteger(context, "minDistance"), IntegerArgumentType.getInteger(context, "maxDistance")))
                             )
                     )
-                    .executes(context -> rtp(context.getSource().getPlayerOrException(), FTBEConfig.RTP_MIN_DISTANCE.get(), FTBEConfig.RTP_MAX_DISTANCE.get()))),
+                    .executes(context -> rtp(context.getSource().getPlayerOrException(), FTBEStartupConfig.RTP_MIN_DISTANCE.get(), FTBEStartupConfig.RTP_MAX_DISTANCE.get()))),
 
             // Teleport to the last location of a player
-            new SimpleConfigurableCommand(FTBEConfig.TPL, Commands.literal("teleport_last")
+            new SimpleConfigurableCommand(FTBEStartupConfig.TPL, Commands.literal("teleport_last")
                     .requires(CommandUtils.isGamemaster())
                     .then(Commands.argument("player", GameProfileArgument.gameProfile())
                             .executes(context -> tpLast(context.getSource().getPlayerOrException(), GameProfileArgument.getGameProfiles(context, "player").iterator().next()))
                     )),
 
             // Teleport to a specific dimension
-            new SimpleConfigurableCommand(FTBEConfig.TPX, Commands.literal("tpx")
+            new SimpleConfigurableCommand(FTBEStartupConfig.TPX, Commands.literal("tpx")
                     .requires(CommandUtils.isGamemaster())
                     .then(Commands.argument("dimension", DimensionArgument.dimension())
                             .executes(context -> tpx(context.getSource().getPlayerOrException(), DimensionArgument.getDimension(context, "dimension")))
                     )),
 
             // Jump to command, allows you to jump to the top of the block you're looking at
-            new SimpleConfigurableCommand(FTBEConfig.JUMP, Commands.literal("jump")
+            new SimpleConfigurableCommand(FTBEStartupConfig.JUMP, Commands.literal("jump")
                     .requires(CommandUtils.isGamemaster())
                     .executes(ctx -> jump(ctx.getSource())))
     );
@@ -108,7 +109,7 @@ public class TeleportingCommands {
     private static int back(ServerPlayer player) {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             if (data.teleportHistory.isEmpty()) {
-                player.displayClientMessage(Component.translatable("ftbessentials.teleport.history_empty").withStyle(ChatFormatting.RED), false);
+                player.sendSystemMessage(Component.translatable("ftbessentials.teleport.history_empty").withStyle(ChatFormatting.RED));
                 return 0;
             }
 
@@ -146,56 +147,60 @@ public class TeleportingCommands {
     //#region RTP
     private static int rtp(ServerPlayer player, int minDistance, int maxDistance) {
         if (maxDistance < minDistance) {
-            player.displayClientMessage(Component.translatable("ftbessentials.teleport.max_less_than_min"), false);
+            player.sendSystemMessage(Component.translatable("ftbessentials.teleport.max_less_than_min"));
             return 0;
         }
-        if ((!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || !FTBEConfig.ADMINS_EXEMPT_DIMENSION_BLACKLISTS.get())
+        if ((!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || !FTBEStartupConfig.ADMINS_EXEMPT_DIMENSION_BLACKLISTS.get())
                 && !DimensionFilter.isRtpDimensionOK(player.level().dimension())) {
-            player.displayClientMessage(Component.translatable("ftbessentials.rtp.not_here").withStyle(ChatFormatting.RED), false);
+            player.sendSystemMessage(Component.translatable("ftbessentials.rtp.not_here").withStyle(ChatFormatting.RED));
             return 0;
         }
         return FTBEPlayerData.getOrCreate(player).map(data -> data.rtpTeleporter.teleport(player, p -> {
-                    p.displayClientMessage(Component.translatable("ftbessentials.rtp.looking"), false);
+                    p.sendSystemMessage(Component.translatable("ftbessentials.rtp.looking"));
                     return findBlockPos(player.level(), p, minDistance, maxDistance);
                 }).runCommand(player))
                 .orElse(0);
     }
 
-    private static TeleportPos findBlockPos(ServerLevel world, ServerPlayer player, int minDistance, int maxDistance) {
-        for (int attempt = 0; attempt < FTBEConfig.RTP_MAX_TRIES.get(); attempt++) {
-            double dist = minDistance + world.random.nextDouble() * (maxDistance - minDistance);
-            double angle = world.random.nextDouble() * Math.PI * 2D;
+    private static TeleportPos findBlockPos(ServerLevel level, ServerPlayer player, int minDistance, int maxDistance) {
+        for (int attempt = 0; attempt < FTBEStartupConfig.RTP_MAX_TRIES.get(); attempt++) {
+            double dist = minDistance + level.getRandom().nextDouble() * (maxDistance - minDistance);
+            double angle = level.getRandom().nextDouble() * Math.PI * 2D;
 
             int x = Mth.floor(Math.cos(angle) * dist);
             int y = 256;
             int z = Mth.floor(Math.sin(angle) * dist);
             BlockPos currentPos = new BlockPos(x, y, z);
 
-            if (!world.getWorldBorder().isWithinBounds(currentPos)) {
+            if (!level.getWorldBorder().isWithinBounds(currentPos)) {
                 continue;
             }
-            if (world.getBiome(currentPos).is(IGNORE_RTP_BIOMES)) {
-                continue;
-            }
-            // FTB Chunks (via FTB XMod Compat) listens to this.  Other mods can too.
-            EventResult res = FTBEssentialsEvents.RTP_EVENT.invoker().teleport(world, player, currentPos, attempt);
-            if (res.isFalse()) {
+            if (level.getBiome(currentPos).is(IGNORE_RTP_BIOMES)) {
                 continue;
             }
 
-            world.getChunkAt(currentPos);
-            BlockPos hmPos = world.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, currentPos);
+            // FTB Chunks (via FTB XMod Compat) listens to this.  Other mods can too.
+            Outcome outcome = NativeEventPosting.INSTANCE.postEventWithResult(
+                    RTPEvent.TYPE, new RTPEvent.Data(level, player, currentPos, attempt)
+            );
+
+            if (outcome.isFail()) {
+                continue;
+            }
+
+            level.getChunkAt(currentPos);
+            BlockPos hmPos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, currentPos);
 
             if (hmPos.getY() > 0) {
                 BlockPos goodPos = null;
-                if (hmPos.getY() < world.getLogicalHeight()) {
+                if (hmPos.getY() < level.getLogicalHeight()) {
                     goodPos = hmPos;
                 } else {
                     // broken heightmap (nether, other mod dimensions)
-                    for (BlockPos newPos : BlockPos.spiralAround(new BlockPos(hmPos.getX(), world.getSeaLevel(), hmPos.getZ()), 16, Direction.EAST, Direction.SOUTH)) {
-                        BlockState bs = world.getBlockState(newPos);
-                        if (bs.blocksMotion() && !bs.is(IGNORE_RTP_BLOCKS) && world.isEmptyBlock(newPos.above(1))
-                                && world.isEmptyBlock(newPos.above(2)) && world.isEmptyBlock(newPos.above(3))) {
+                    for (BlockPos newPos : BlockPos.spiralAround(new BlockPos(hmPos.getX(), level.getSeaLevel(), hmPos.getZ()), 16, Direction.EAST, Direction.SOUTH)) {
+                        BlockState bs = level.getBlockState(newPos);
+                        if (bs.blocksMotion() && !bs.is(IGNORE_RTP_BLOCKS) && level.isEmptyBlock(newPos.above(1))
+                                && level.isEmptyBlock(newPos.above(2)) && level.isEmptyBlock(newPos.above(3))) {
                             goodPos = newPos.immutable();
                             break;
                         }
@@ -203,12 +208,12 @@ public class TeleportingCommands {
                 }
                 if (goodPos != null) {
                     String pos = String.format(" @ [x %d, y %d, z %d]", goodPos.getX(), goodPos.getY(), goodPos.getZ());
-                    player.displayClientMessage(Component.translatable("ftbessentials.rtp.found", attempt + 1, pos), false);
-                    return new TeleportPos(world.dimension(), goodPos.above());
+                    player.sendSystemMessage(Component.translatable("ftbessentials.rtp.found", attempt + 1, pos));
+                    return new TeleportPos(level.dimension(), goodPos.above());
                 }
             }
         }
-        player.displayClientMessage(Component.translatable("ftbessentials.rtp.failed").withStyle(ChatFormatting.RED), false);
+        player.sendSystemMessage(Component.translatable("ftbessentials.rtp.failed").withStyle(ChatFormatting.RED));
         return new TeleportPos(player);
     }
     //#endregion

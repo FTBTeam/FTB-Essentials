@@ -108,10 +108,8 @@ public class Leaderboard<N extends Number> {
 		return name;
 	}
 
-	/**
-	 * Remove the underscores from the name and capitalize the first letter of each word
-	 * @return the formatted name
-	 */
+	/// Remove the underscores from the name and capitalize the first letter of each word
+	/// @return the formatted name
 	public String formattedName() {
 		var parts = this.name.split("_");
 		return Stream.of(parts)

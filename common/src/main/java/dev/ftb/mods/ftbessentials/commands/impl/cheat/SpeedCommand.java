@@ -5,7 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.Holder;
@@ -24,11 +24,11 @@ import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
 public class SpeedCommand implements FTBCommand {
-    private static final Identifier ESSENTIALS_SPEED_ID = FTBEssentials.essentialsId("speed_boost");
+    private static final Identifier ESSENTIALS_SPEED_ID = FTBEssentials.id("speed_boost");
 
     @Override
     public boolean enabled() {
-        return FTBEConfig.SPEED.isEnabled();
+        return FTBEStartupConfig.SPEED.isEnabled();
     }
 
     @Override
@@ -82,7 +82,7 @@ public class SpeedCommand implements FTBCommand {
         }
         source.sendSuccess(() -> msg, false);
         if (!source.isPlayer() || source.getPlayer() != target) {
-            target.displayClientMessage(msg, false);
+            target.sendSystemMessage(msg);
         }
     }
 }

@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbessentials.commands.impl.kit;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import net.minecraft.commands.CommandSourceStack;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import static net.minecraft.commands.Commands.literal;
 public class GiveMeKitCommand implements FTBCommand {
     @Override
     public boolean enabled() {
-        return FTBEConfig.KIT.isEnabled();
+        return FTBEStartupConfig.KIT.isEnabled();
     }
 
     @Override

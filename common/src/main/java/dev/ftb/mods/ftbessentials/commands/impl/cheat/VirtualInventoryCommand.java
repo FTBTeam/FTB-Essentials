@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbessentials.commands.impl.cheat;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -23,10 +23,10 @@ public class VirtualInventoryCommand implements FTBCommand {
     public boolean enabled() {
         // Not the best but it'll do
         boolean enabled = false;
-        enabled |= FTBEConfig.ANVIL.isEnabled();
-        enabled |= FTBEConfig.CRAFTING_TABLE.isEnabled();
-        enabled |= FTBEConfig.SMITHING_TABLE.isEnabled();
-        enabled |= FTBEConfig.STONECUTTER.isEnabled();
+        enabled |= FTBEStartupConfig.ANVIL.isEnabled();
+        enabled |= FTBEStartupConfig.CRAFTING_TABLE.isEnabled();
+        enabled |= FTBEStartupConfig.SMITHING_TABLE.isEnabled();
+        enabled |= FTBEStartupConfig.STONECUTTER.isEnabled();
 
         return enabled;
     }
@@ -36,19 +36,19 @@ public class VirtualInventoryCommand implements FTBCommand {
         var openCommand = Commands.literal("open")
                 .requires(CommandUtils.isGamemaster());
 
-        if (FTBEConfig.ANVIL.isEnabled()) {
+        if (FTBEStartupConfig.ANVIL.isEnabled()) {
             openCommand.then(createMenu("anvil", "block.minecraft.anvil", VirtualAnvilMenu::new));
         }
 
-        if (FTBEConfig.CRAFTING_TABLE.isEnabled()) {
+        if (FTBEStartupConfig.CRAFTING_TABLE.isEnabled()) {
             openCommand.then(createMenu("crafting", "block.minecraft.crafting_table", VirtualCraftingMenu::new));
         }
 
-        if (FTBEConfig.SMITHING_TABLE.isEnabled()) {
+        if (FTBEStartupConfig.SMITHING_TABLE.isEnabled()) {
             openCommand.then(createMenu("smithing", "block.minecraft.smithing_table", VirtualSmithingMenu::new));
         }
 
-        if (FTBEConfig.STONECUTTER.isEnabled()) {
+        if (FTBEStartupConfig.STONECUTTER.isEnabled()) {
             openCommand.then(createMenu("stonecutter", "block.minecraft.stonecutter", VirtualStoneCutterMenu::new));
         }
 

@@ -1,12 +1,12 @@
 package dev.ftb.mods.ftbessentials;
 
-import dev.architectury.platform.Platform;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.integration.FTBRanksIntegration;
 import dev.ftb.mods.ftbessentials.integration.LuckPermsIntegration;
 import dev.ftb.mods.ftbessentials.net.FTBEssentialsNet;
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import dev.ftb.mods.ftblibrary.integration.permissions.PermissionHelper;
+import dev.ftb.mods.ftblibrary.platform.Platform;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
@@ -21,25 +21,27 @@ public class FTBEssentials {
 	public static final Style RECORDING_STYLE = Style.EMPTY.applyFormat(ChatFormatting.RED);
 	public static final Style STREAMING_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x9146FF));
 
-	public static void init() {
-		ConfigManager.getInstance().registerServerConfig(FTBEConfig.CONFIG, MOD_ID + "-server", false, FTBEConfig::onChanged);
+	public final FTBEEventHandler eventHandler;
+
+	public FTBEssentials() {
+		ConfigManager.getInstance().registerStartupConfig(FTBEStartupConfig.CONFIG, MOD_ID + "-startup");
 
 		FTBEssentialsNet.init();
-		FTBEEventHandler.init();
+		eventHandler = new FTBEEventHandler();
 
 		initPermissions();
 	}
 
-	public static Identifier essentialsId(String path) {
+	public static Identifier id(String path) {
 		return Identifier.fromNamespaceAndPath(MOD_ID, path);
 	}
 
-	public static void initPermissions() {
+	private void initPermissions() {
 		// ftbxmodcompat handles this if it's present
-		if (!Platform.isModLoaded("ftbxmodcompat")) {
-            if (Platform.isModLoaded("ftbranks")) {
+		if (!Platform.get().isModLoaded("ftbxmodcompat")) {
+            if (Platform.get().isModLoaded("ftbranks")) {
                 PermissionHelper.INSTANCE.setProviderImpl(new FTBRanksIntegration());
-            } else if (Platform.isModLoaded("luckperms")) {
+            } else if (Platform.get().isModLoaded("luckperms")) {
                 PermissionHelper.INSTANCE.setProviderImpl(new LuckPermsIntegration());
             }
         }

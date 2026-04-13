@@ -2,13 +2,12 @@ package dev.ftb.mods.ftbessentials.util;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import de.marhali.json5.Json5Element;
+import dev.ftb.mods.ftblibrary.json5.Json5Ops;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -66,12 +65,16 @@ public class TeleportPos {
 		this(entity.level(), entity.blockPosition(), entity.getYRot(), entity.getXRot());
 	}
 
-	public static TeleportPos fromNBT(CompoundTag tag) {
-		return CODEC.parse(NbtOps.INSTANCE, tag).getOrThrow();
+	public static TeleportPos fromJson(Json5Element json) {
+		return CODEC.parse(Json5Ops.INSTANCE, json).getOrThrow();
 	}
 
-	public Tag toNBT() {
-		return CODEC.encodeStart(NbtOps.INSTANCE, this).getOrThrow();
+	public Json5Element toJson() {
+		return CODEC.encodeStart(Json5Ops.INSTANCE, this).getOrThrow();
+	}
+
+	public ResourceKey<Level> getDimensionId() {
+		return dimensionId;
 	}
 
 	public TeleportPos safeForPlayer(ServerPlayer player) {
@@ -148,7 +151,7 @@ public class TeleportPos {
 		// Normal shortString would be 1, 2, 3 so we remove the commas
 		return pos.toShortString().replaceAll(",", "");
 	}
-
+	
 	@FunctionalInterface
 	public interface TeleportResult {
 		TeleportResult SUCCESS = new TeleportResult() {
@@ -165,7 +168,7 @@ public class TeleportPos {
 
 		static TeleportResult failed(Component msg) {
 			return player -> {
-				player.displayClientMessage(msg, false);
+				player.sendSystemMessage(msg);
 				return 0;
 			};
 		}
@@ -192,7 +195,7 @@ public class TeleportPos {
 		@Override
 		default int runCommand(ServerPlayer player) {
 			String secStr = TimeUtils.prettyTimeString(getCooldown() / 1000L);
-			player.displayClientMessage(Component.translatable("ftbessentials.teleport.on_cooldown", secStr), false);
+			player.sendSystemMessage(Component.translatable("ftbessentials.teleport.on_cooldown", secStr));
 			return 0;
 		}
 	}

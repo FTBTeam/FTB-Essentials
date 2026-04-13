@@ -5,7 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.util.DurationInfo;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
@@ -24,14 +24,14 @@ import static net.minecraft.commands.Commands.literal;
 public class MuteCommand implements FTBCommand {
     @Override
     public boolean enabled() {
-        return FTBEConfig.MUTE.isEnabled();
+        return FTBEStartupConfig.MUTE.isEnabled();
     }
 
     @Override
     public List<LiteralArgumentBuilder<CommandSourceStack>> register() {
         return List.of(
                 literal("mute")
-                        .requires(FTBEConfig.MUTE.enabledAndOp())
+                        .requires(FTBEStartupConfig.MUTE.enabledAndOp())
                         .then(argument("player", EntityArgument.player())
                                 .executes(context -> mute(context.getSource(), EntityArgument.getPlayer(context, "player"), ""))
                                 .then(argument("until", StringArgumentType.greedyString())
@@ -40,7 +40,7 @@ public class MuteCommand implements FTBCommand {
                                 )
                         ),
                 literal("unmute")
-                        .requires(FTBEConfig.MUTE.enabledAndOp())
+                        .requires(FTBEStartupConfig.MUTE.enabledAndOp())
                         .then(argument("player", EntityArgument.player())
                                 .executes(context -> unmute(context.getSource(), EntityArgument.getPlayer(context, "player")))
                         )
@@ -76,7 +76,7 @@ public class MuteCommand implements FTBCommand {
         // notify any online ops, plus the player being (un)muted
         source.getServer().getPlayerList().getPlayers().forEach(p -> {
             if (p.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || p == target) {
-                p.displayClientMessage(msg, false);
+                p.sendSystemMessage(msg);
             }
         });
         // notify command sender if not actually a player

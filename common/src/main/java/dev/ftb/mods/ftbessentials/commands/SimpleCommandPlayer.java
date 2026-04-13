@@ -12,9 +12,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
-/**
- * Abstraction around a command that takes a single entity selector argument and performs an action on it.
- */
+/// Abstraction around a command that takes a single entity selector argument and performs an action on it.
 public record SimpleCommandPlayer(
         String name,
         @Nullable

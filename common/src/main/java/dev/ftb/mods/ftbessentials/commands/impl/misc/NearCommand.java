@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftblibrary.integration.permissions.PermissionHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -26,7 +26,7 @@ public class NearCommand implements FTBCommand {
 
     @Override
     public boolean enabled() {
-        return FTBEConfig.NEAR.isEnabled();
+        return FTBEStartupConfig.NEAR.isEnabled();
     }
 
     @Override

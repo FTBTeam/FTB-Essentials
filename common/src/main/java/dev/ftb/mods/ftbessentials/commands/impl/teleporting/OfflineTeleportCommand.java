@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbessentials.commands.impl.teleporting;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.UuidArgument;
@@ -29,13 +29,13 @@ import static net.minecraft.commands.Commands.literal;
 public class OfflineTeleportCommand implements FTBCommand {
     @Override
     public boolean enabled() {
-        return FTBEConfig.TP_OFFLINE.isEnabled();
+        return FTBEStartupConfig.TP_OFFLINE.isEnabled();
     }
 
     @Override
     public List<LiteralArgumentBuilder<CommandSourceStack>> register() {
         LiteralArgumentBuilder<CommandSourceStack> tpOffline = literal("tp_offline");
-        tpOffline.requires(FTBEConfig.TP_OFFLINE.enabledAndOp())
+        tpOffline.requires(FTBEStartupConfig.TP_OFFLINE.enabledAndOp())
                 .then(literal("name")
                         .then(argument("player", StringArgumentType.word())
                                 .then(argument("pos", Vec3Argument.vec3())
@@ -51,7 +51,7 @@ public class OfflineTeleportCommand implements FTBCommand {
                         )
                 );
 
-        var alias = literal("tpo").requires(FTBEConfig.TP_OFFLINE.enabledAndOp()).redirect(tpOffline.build());
+        var alias = literal("tpo").requires(FTBEStartupConfig.TP_OFFLINE.enabledAndOp()).redirect(tpOffline.build());
 
         return List.of(tpOffline, alias);
     }

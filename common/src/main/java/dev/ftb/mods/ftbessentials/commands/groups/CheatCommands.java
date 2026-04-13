@@ -2,12 +2,11 @@ package dev.ftb.mods.ftbessentials.commands.groups;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
-import dev.ftb.mods.ftbessentials.FTBEssentialsPlatform;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.commands.SimpleCommandPlayer;
 import dev.ftb.mods.ftbessentials.commands.impl.cheat.SpeedCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.cheat.VirtualInventoryCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -21,14 +20,14 @@ import java.util.List;
 
 public class CheatCommands {
     public static final List<FTBCommand> COMMANDS = List.of(
-            SimpleCommandPlayer.create("heal", Permissions.COMMANDS_GAMEMASTER, FTBEConfig.HEAL, (ctx, player) -> heal(player)),
-            SimpleCommandPlayer.create("feed", Permissions.COMMANDS_GAMEMASTER, FTBEConfig.FEED, (ctx, player) -> feed(player)),
-            SimpleCommandPlayer.create("extinguish", Permissions.COMMANDS_GAMEMASTER, FTBEConfig.EXTINGUISH, (ctx, player) -> clearFire(player)),
-            SimpleCommandPlayer.create("fly", Permissions.COMMANDS_GAMEMASTER, FTBEConfig.FLY, (ctx, player) -> fly(player)),
-            SimpleCommandPlayer.create("god", Permissions.COMMANDS_GAMEMASTER, FTBEConfig.GOD, (ctx, player) -> god(player)),
+            SimpleCommandPlayer.create("heal", Permissions.COMMANDS_GAMEMASTER, FTBEStartupConfig.HEAL, (ctx, player) -> heal(player)),
+            SimpleCommandPlayer.create("feed", Permissions.COMMANDS_GAMEMASTER, FTBEStartupConfig.FEED, (ctx, player) -> feed(player)),
+            SimpleCommandPlayer.create("extinguish", Permissions.COMMANDS_GAMEMASTER, FTBEStartupConfig.EXTINGUISH, (ctx, player) -> clearFire(player)),
+            SimpleCommandPlayer.create("fly", Permissions.COMMANDS_GAMEMASTER, FTBEStartupConfig.FLY, (ctx, player) -> fly(player)),
+            SimpleCommandPlayer.create("god", Permissions.COMMANDS_GAMEMASTER, FTBEStartupConfig.GOD, (ctx, player) -> god(player)),
             new SpeedCommand(),
             new VirtualInventoryCommand(),
-            new SimpleCommandPlayer("enderchest", null, Permissions.COMMANDS_GAMEMASTER, FTBEConfig.ENDER_CHEST, CheatCommands::enderChest)
+            new SimpleCommandPlayer("enderchest", null, Permissions.COMMANDS_GAMEMASTER, FTBEStartupConfig.ENDER_CHEST, CheatCommands::enderChest)
     );
 
     private static int enderChest(CommandContext<CommandSourceStack> ctx, ServerPlayer targetPlayer) {
@@ -60,7 +59,7 @@ public class CheatCommands {
         targetPlayer.setHealth(targetPlayer.getMaxHealth());
         targetPlayer.getFoodData().eat(40, 40F);
         targetPlayer.clearFire();
-        FTBEssentialsPlatform.curePotionEffects(targetPlayer);
+        targetPlayer.removeAllEffects();
         return Command.SINGLE_SUCCESS;
     }
 
@@ -74,11 +73,11 @@ public class CheatCommands {
                     abilities.mayfly = false;
                     abilities.flying = false;
                 }
-                targetPlayer.displayClientMessage(Component.translatable("ftbessentials.flight.disabled"), true);
+                targetPlayer.sendOverlayMessage(Component.translatable("ftbessentials.flight.disabled"));
             } else {
                 data.setCanFly(true);
                 abilities.mayfly = true;
-                targetPlayer.displayClientMessage(Component.translatable("ftbessentials.flight.enabled"), true);
+                targetPlayer.sendOverlayMessage(Component.translatable("ftbessentials.flight.enabled"));
             }
 
             targetPlayer.onUpdateAbilities();
@@ -93,11 +92,11 @@ public class CheatCommands {
             if (data.isGod()) {
                 data.setGod(false);
                 abilities.invulnerable = false;
-                targetPlayer.displayClientMessage(Component.translatable("ftbessentials.god_mode.disabled"), true);
+                targetPlayer.sendOverlayMessage(Component.translatable("ftbessentials.god_mode.disabled"));
             } else {
                 data.setGod(true);
                 abilities.invulnerable = true;
-                targetPlayer.displayClientMessage(Component.translatable("ftbessentials.god_mode.enabled"), true);
+                targetPlayer.sendOverlayMessage(Component.translatable("ftbessentials.god_mode.enabled"));
             }
 
             targetPlayer.onUpdateAbilities();

@@ -22,12 +22,11 @@
     "ftbessentials-common.mixins.json"
   ],
   "depends": {
-    "fabric": "${fabricapiversionrange}",
-    "minecraft": ">=${mcversion}",
-    "architectury": ">=${archversion}",
-    "ftblibrary": ">=${ftblibraryversion}"
+    "fabric-api": "${fabricapi_version_range}",
+    "minecraft": "${minecraft_version_range_semver}",
+    "ftblibrary": "${ftb_library_version_range_semver}"
   },
   "suggests": {
-    "ftbranks": ">=2000.1.1"
+    "ftbranks": "${ftb_ranks_version_range_semver}"
   }
 }

@@ -1,6 +1,8 @@
 package dev.ftb.mods.ftbessentials.kit;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import de.marhali.json5.Json5Element;
+import de.marhali.json5.Json5Object;
 import dev.ftb.mods.ftbessentials.commands.impl.kit.KitCommand;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
@@ -9,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
@@ -27,28 +28,31 @@ public enum KitManager {
         return INSTANCE;
     }
 
-    public void load(CompoundTag kits, HolderLookup.Provider provider) {
+    public void load(Json5Element kits, HolderLookup.Provider provider) {
         allKits.clear();
-        kits.keySet().forEach(key -> allKits.put(key, Kit.fromNBT(key, kits.getCompoundOrEmpty(key), provider)));
+        if (kits instanceof Json5Object o) {
+            o.asMap().forEach((key, el) -> allKits.put(key, Kit.fromJson(el, provider)));
+        }
     }
 
-    public CompoundTag save(HolderLookup.Provider provider) {
-        return Util.make(new CompoundTag(), tag -> allKits.forEach((name, kit) -> tag.put(name, kit.toNBT(provider))));
+    public Json5Object save(HolderLookup.Provider provider) {
+        return Util.make(new Json5Object(), tag -> allKits.forEach((name, kit) -> tag.add(name, kit.toJson(provider))));
     }
 
     public Optional<Kit> get(String kitName) {
         return Optional.ofNullable(allKits.get(kitName));
     }
 
-    public Collection<Kit> allKits() {
-        return Collections.unmodifiableCollection(allKits.values());
+    public Map<String, Kit> allKits() {
+        return Collections.unmodifiableMap(allKits);
     }
 
     public void giveKitToPlayer(String kitName, ServerPlayer player) throws CommandSyntaxException {
         Kit kit = get(kitName).orElseThrow(() -> KitCommand.NO_SUCH_KIT.create(kitName));
-        var playerData = FTBEPlayerData.getOrCreate(player).orElse(null);
-        if (playerData != null) {
-            kit.giveToPlayer(player, playerData, true);
+
+        var playerData = FTBEPlayerData.getOrCreate(player);
+        if (playerData.isPresent()) {
+            kit.giveToPlayer(kitName, player, playerData.get(), true);
         }
     }
 
@@ -89,15 +93,15 @@ public enum KitManager {
             throw KitCommand.NO_ITEMS_TO_ADD.create();
         }
 
-        addKit(new Kit(kitName, items, cooldownSecs, false), false);
+        addKit(kitName, new Kit(items, cooldownSecs, false), false);
     }
 
-    public void addKit(Kit kit, boolean overwrite) throws CommandSyntaxException {
-        if (!overwrite && allKits.containsKey(kit.getKitName())) {
-            throw KitCommand.ALREADY_EXISTS.create(kit.getKitName());
+    public void addKit(String kitName, Kit kit, boolean overwrite) throws CommandSyntaxException {
+        if (!overwrite && allKits.containsKey(kitName)) {
+            throw KitCommand.ALREADY_EXISTS.create(kitName);
         }
 
-        allKits.put(kit.getKitName(), kit);
+        allKits.put(kitName, kit);
 
         FTBEWorldData.getInstance().markDirty();
     }

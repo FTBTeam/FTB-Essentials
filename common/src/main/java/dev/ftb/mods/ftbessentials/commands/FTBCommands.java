@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbessentials.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.groups.*;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.permissions.Permissions;
@@ -40,13 +40,11 @@ public class FTBCommands {
                 || source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
     }
 
-    /**
-     * Register a list of commands to a dispatcher with support for registering to a namespace instead
-     * of the global commands namespace
-     *
-     * @param dispatcher The dispatcher to register the commands to
-     * @param commands  The list of commands to register
-     */
+    /// Register a list of commands to a dispatcher with support for registering to a namespace instead
+    /// of the global commands namespace
+    ///
+    /// @param dispatcher The dispatcher to register the commands to
+    /// @param commands  The list of commands to register
     private static void registerCommandsToDispatcher(CommandDispatcher<CommandSourceStack> dispatcher, List<FTBCommand> commands) {
         var namespace = Commands.literal("ftbessentials");
         var commandStack = new ArrayList<LiteralArgumentBuilder<CommandSourceStack>>();
@@ -54,7 +52,7 @@ public class FTBCommands {
         for (FTBCommand command : commands) {
             if (command.enabled()) {
                 for (var builder : command.register()) {
-                    if (FTBEConfig.REGISTER_TO_NAMESPACE.get()) {
+                    if (FTBEStartupConfig.REGISTER_TO_NAMESPACE.get()) {
                         namespace.then(builder);
                         commandStack.add(builder);
                     } else {
@@ -64,10 +62,10 @@ public class FTBCommands {
             }
         }
 
-        if (FTBEConfig.REGISTER_TO_NAMESPACE.get()) {
+        if (FTBEStartupConfig.REGISTER_TO_NAMESPACE.get()) {
             // TODO: This should use alias instead of registering the command again
             //       I think this is possible?
-            if (FTBEConfig.REGISTER_ALIAS_AS_WELL_AS_NAMESPACE.get()) {
+            if (FTBEStartupConfig.REGISTER_ALIAS_AS_WELL_AS_NAMESPACE.get()) {
                 for (var builder : commandStack) {
                     dispatcher.register(builder);
                 }

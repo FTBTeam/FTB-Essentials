@@ -2,7 +2,7 @@ package dev.ftb.mods.ftbessentials.commands.impl.misc;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.mixin.PlayerListAccess;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.Leaderboard;
@@ -26,7 +26,7 @@ import java.util.*;
 public class LeaderboardCommand implements FTBCommand {
     @Override
     public boolean enabled() {
-        return FTBEConfig.LEADERBOARD.isEnabled();
+        return FTBEStartupConfig.LEADERBOARD.isEnabled();
     }
 
     @Override
@@ -111,12 +111,10 @@ public class LeaderboardCommand implements FTBCommand {
         return list.size();
     }
 
-    /**
-     * Like {@link net.minecraft.server.players.PlayerList#getPlayerStats(Player)} but doesn't need an online player.
-     * @param server the server
-     * @param playerId UUID of the player
-     * @return the server stats
-     */
+    /// Like [net.minecraft.server.players.PlayerList#getPlayerStats(Player)] but doesn't need an online player.
+    /// @param server the server
+    /// @param playerId UUID of the player
+    /// @return the server stats
     private static ServerStatsCounter getPlayerStats(MinecraftServer server, UUID playerId) {
         Map<UUID, ServerStatsCounter> stats = ((PlayerListAccess) server.getPlayerList()).getStats();
         return stats.computeIfAbsent(playerId, k -> {

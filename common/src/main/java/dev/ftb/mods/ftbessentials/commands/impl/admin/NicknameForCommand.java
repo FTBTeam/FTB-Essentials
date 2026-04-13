@@ -4,9 +4,9 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
-import dev.ftb.mods.ftblibrary.util.PlayerDisplayNameUtil;
+import dev.ftb.mods.ftblibrary.platform.Platform;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
@@ -21,13 +21,13 @@ import static net.minecraft.commands.Commands.literal;
 public class NicknameForCommand implements FTBCommand {
     @Override
     public boolean enabled() {
-        return FTBEConfig.NICK.isEnabled();
+        return FTBEStartupConfig.NICK.isEnabled();
     }
 
     @Override
     public List<LiteralArgumentBuilder<CommandSourceStack>> register() {
         return Collections.singletonList(literal("nicknamefor")
-                .requires(FTBEConfig.NICK.enabledAndOp())
+                .requires(FTBEStartupConfig.NICK.enabledAndOp())
                 .then(argument("player", EntityArgument.player())
                         .requires(CommandUtils.isGamemaster())
                         .executes(context -> nicknameFor(context.getSource(), EntityArgument.getPlayer(context, "player"), ""))
@@ -39,14 +39,14 @@ public class NicknameForCommand implements FTBCommand {
 
     public int nicknameFor(CommandSourceStack source, ServerPlayer player, String nick) {
         if (nick.length() > 30) {
-            player.displayClientMessage(Component.translatable("ftbessentials.nick.too_long"), false);
+            player.sendSystemMessage(Component.translatable("ftbessentials.nick.too_long"));
             return 0;
         }
 
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             data.setNick(nick.trim());
             data.markDirty();
-            PlayerDisplayNameUtil.refreshDisplayName(player);
+            Platform.get().misc().refreshDisplayName(player);
 
             if (data.getNick().isEmpty()) {
                 source.sendSuccess(() -> Component.translatable("ftbessentials.nick.reset"), true);

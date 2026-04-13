@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.ftb.mods.ftbessentials.commands.CommandUtils;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
@@ -23,7 +23,7 @@ import java.util.Set;
 public class WarpCommand implements FTBCommand {
     @Override
     public boolean enabled() {
-        return FTBEConfig.WARP.isEnabled();
+        return FTBEStartupConfig.WARP.isEnabled();
     }
 
     @Override
@@ -46,7 +46,7 @@ public class WarpCommand implements FTBCommand {
                                 .executes(context -> deleteWarp(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
                         ),
                 Commands.literal("listwarps")
-                        .requires(FTBEConfig.WARP)
+                        .requires(FTBEStartupConfig.WARP)
                         .executes(context -> listWarps(context.getSource()))
         );
     }
@@ -63,16 +63,16 @@ public class WarpCommand implements FTBCommand {
 
     private int setWarp(ServerPlayer player, String name) {
         FTBEWorldData.getInstance().warpManager().addDestination(name, new TeleportPos(player), player);
-        player.displayClientMessage(Component.translatable("ftbessentials.warp.set"), false);
+        player.sendSystemMessage(Component.translatable("ftbessentials.warp.set"));
         return 1;
     }
 
     private int deleteWarp(ServerPlayer player, String name) {
         if (FTBEWorldData.getInstance().warpManager().deleteDestination(name.toLowerCase())) {
-            player.displayClientMessage(Component.translatable("ftbessentials.warp.deleted"), false);
+            player.sendSystemMessage(Component.translatable("ftbessentials.warp.deleted"));
             return 1;
         } else {
-            player.displayClientMessage(Component.translatable("ftbessentials.warp.not_found"), false);
+            player.sendSystemMessage(Component.translatable("ftbessentials.warp.not_found"));
             return 0;
         }
     }

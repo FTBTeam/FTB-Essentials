@@ -1,15 +1,17 @@
 package dev.ftb.mods.ftbessentials.api.event;
 
-import dev.architectury.event.CompoundEventResult;
-import dev.architectury.event.Event;
-import dev.architectury.event.EventFactory;
+import dev.ftb.mods.ftblibrary.platform.event.TypedEvent;
+import dev.ftb.mods.ftblibrary.util.result.DataOutcome;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 
-public class TeleportEvent {
-    public static Event<Teleport> TELEPORT = EventFactory.createCompoundEventResult();
+@FunctionalInterface
+public interface TeleportEvent {
+    TypedEvent<Data,DataOutcome<Component>> TYPE = TypedEvent.of(TeleportEvent.Data.class);
 
-    public interface Teleport {
-        CompoundEventResult<Component> teleport(ServerPlayer player);
-    }
+    DataOutcome<Component> teleport(Data data);
+
+    record Data(ServerPlayer player, ServerLevel targetLevel, Vec3 dest) {}
 }

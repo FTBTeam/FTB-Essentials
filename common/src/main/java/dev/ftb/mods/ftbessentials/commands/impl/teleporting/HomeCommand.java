@@ -6,7 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.commands.FTBCommands;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.SavedTeleportManager;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
@@ -27,34 +27,34 @@ import java.util.Set;
 public class HomeCommand implements FTBCommand {
     @Override
     public boolean enabled() {
-        return FTBEConfig.HOME.isEnabled();
+        return FTBEStartupConfig.HOME.isEnabled();
     }
 
     @Override
     public List<LiteralArgumentBuilder<CommandSourceStack>> register() {
         return List.of(
                 Commands.literal("home")
-                        .requires(FTBEConfig.HOME)
+                        .requires(FTBEStartupConfig.HOME)
                         .executes(context -> home(context.getSource().getPlayerOrException(), "home"))
                         .then(Commands.argument("name", StringArgumentType.greedyString())
                                 .suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context), builder))
                                 .executes(context -> home(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
                         ),
                 Commands.literal("sethome")
-                        .requires(FTBEConfig.HOME)
+                        .requires(FTBEStartupConfig.HOME)
                         .executes(context -> setHome(context.getSource().getPlayerOrException(), "home"))
                         .then(Commands.argument("name", StringArgumentType.greedyString())
                                 .executes(context -> setHome(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
                         ),
                 Commands.literal("delhome")
-                        .requires(FTBEConfig.HOME)
+                        .requires(FTBEStartupConfig.HOME)
                         .executes(context -> delHome(context.getSource().getPlayerOrException(), "home"))
                         .then(Commands.argument("name", StringArgumentType.greedyString())
                                 .suggests((context, builder) -> SharedSuggestionProvider.suggest(getHomeSuggestions(context), builder))
                                 .executes(context -> delHome(context.getSource().getPlayerOrException(), StringArgumentType.getString(context, "name")))
                         ),
                 Commands.literal("listhomes")
-                        .requires(FTBEConfig.HOME)
+                        .requires(FTBEStartupConfig.HOME)
                         .executes(context -> listHomes(context.getSource(), context.getSource().getPlayerOrException().nameAndId()))
                         .then(Commands.argument("player", GameProfileArgument.gameProfile())
                                 .requires(FTBCommands.requiresOPorSP())
@@ -78,15 +78,15 @@ public class HomeCommand implements FTBCommand {
     public int setHome(ServerPlayer player, String name) {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             try {
-                if (player.blockPosition().getY() < FTBEConfig.HOME_MIN_Y.get()) {
-                    player.displayClientMessage(Component.translatable("ftbessentials.home.y_too_low", FTBEConfig.HOME_MIN_Y.get()), false);
+                if (player.blockPosition().getY() < FTBEStartupConfig.HOME_MIN_Y.get()) {
+                    player.sendSystemMessage(Component.translatable("ftbessentials.home.y_too_low", FTBEStartupConfig.HOME_MIN_Y.get()));
                     return 0;
                 }
                 data.homeManager().addDestination(name, new TeleportPos(player), player);
-                player.displayClientMessage(Component.translatable("ftbessentials.home.set"), false);
+                player.sendSystemMessage(Component.translatable("ftbessentials.home.set"));
                 return 1;
             } catch (SavedTeleportManager.TooManyDestinationsException e) {
-                player.displayClientMessage(Component.translatable("ftbessentials.home.too_many"), false);
+                player.sendSystemMessage(Component.translatable("ftbessentials.home.too_many"));
                 return 0;
             }
         }).orElse(0);
@@ -95,10 +95,10 @@ public class HomeCommand implements FTBCommand {
     public int delHome(ServerPlayer player, String name) {
         return FTBEPlayerData.getOrCreate(player).map(data -> {
             if (data.homeManager().deleteDestination(name.toLowerCase())) {
-                player.displayClientMessage(Component.translatable("ftbessentials.home.deleted"), false);
+                player.sendSystemMessage(Component.translatable("ftbessentials.home.deleted"));
                 return 1;
             } else {
-                player.displayClientMessage(Component.translatable("ftbessentials.home.not_found"), false);
+                player.sendSystemMessage(Component.translatable("ftbessentials.home.not_found"));
                 return 0;
             }
         }).orElse(0);

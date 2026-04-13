@@ -5,7 +5,7 @@ import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.commands.SimpleConfigurableCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.misc.LeaderboardCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.misc.NearCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,9 +23,9 @@ import static net.minecraft.commands.Commands.literal;
 
 public class MiscCommands {
     public static final List<FTBCommand> COMMANDS = List.of(
-            new SimpleConfigurableCommand(FTBEConfig.KICKME, literal("kickme")
+            new SimpleConfigurableCommand(FTBEStartupConfig.KICKME, literal("kickme")
                     .executes(context -> kickme(context.getSource().getPlayerOrException()))),
-            new SimpleConfigurableCommand(FTBEConfig.HAT, literal("hat")
+            new SimpleConfigurableCommand(FTBEStartupConfig.HAT, literal("hat")
                     .requires(CommandUtils.isGamemaster())
                     .executes(context -> hat(context.getSource().getPlayerOrException()))),
 
@@ -33,7 +33,7 @@ public class MiscCommands {
             new NearCommand(),
 
             // Trash command
-            new SimpleConfigurableCommand(FTBEConfig.TRASHCAN, Commands.literal("trashcan")
+            new SimpleConfigurableCommand(FTBEStartupConfig.TRASHCAN, Commands.literal("trashcan")
                     .executes(context -> trashcan(context.getSource().getPlayerOrException())))
     );
 
@@ -42,11 +42,9 @@ public class MiscCommands {
         return 1;
     }
 
-    /**
-     * Allows any item in the mainhand to be used as a head item
-     *
-     * @param player The player to swap the items for
-     */
+    /// Allows any item in the mainhand to be used as a head item
+    ///
+    /// @param player The player to swap the items for
     public static int hat(ServerPlayer player) {
         ItemStack headStack = player.getItemBySlot(EquipmentSlot.HEAD);
         ItemStack targetStack = player.getItemBySlot(EquipmentSlot.MAINHAND);

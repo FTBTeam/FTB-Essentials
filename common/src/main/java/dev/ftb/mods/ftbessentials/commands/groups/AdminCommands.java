@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbessentials.commands.groups;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.commands.SimpleConfigurableCommand;
 import dev.ftb.mods.ftbessentials.commands.impl.admin.NicknameForCommand;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.util.OtherPlayerInventory;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
@@ -27,9 +27,9 @@ public class AdminCommands {
 
         // Invsee command
         new SimpleConfigurableCommand(
-                FTBEConfig.INVSEE,
+                FTBEStartupConfig.INVSEE,
                 literal("invsee")
-                        .requires(FTBEConfig.INVSEE.enabledAndOp())
+                        .requires(FTBEStartupConfig.INVSEE.enabledAndOp())
                         .then(argument("player", EntityArgument.player())
                                 .executes(context -> viewInventory(context.getSource().getPlayerOrException(), EntityArgument.getPlayer(context, "player")))
                         )

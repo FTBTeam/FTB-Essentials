@@ -1,16 +1,17 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import dev.architectury.hooks.level.entity.PlayerHooks;
+import de.marhali.json5.Json5Array;
+import de.marhali.json5.Json5Element;
+import de.marhali.json5.Json5Object;
+import de.marhali.json5.Json5Primitive;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
-import dev.ftb.mods.ftblibrary.snbt.SNBT;
-import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
+import dev.ftb.mods.ftblibrary.json5.Json5Util;
+import dev.ftb.mods.ftblibrary.platform.Platform;
+import dev.ftb.mods.ftblibrary.platform.network.Server2PlayNetworking;
 import dev.ftb.mods.ftblibrary.util.NameMap;
-import dev.ftb.mods.ftblibrary.util.NetworkHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -75,12 +76,12 @@ public class FTBEPlayerData {
 		kitUseTimes = new HashMap<>();
 		homes = new SavedTeleportManager.HomeManager(this);
 
-		backTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.BACK::getCooldown, FTBEConfig.BACK::getWarmup, true);
-		spawnTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.SPAWN::getCooldown, FTBEConfig.SPAWN::getWarmup);
-		warpTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.WARP::getCooldown, FTBEConfig.WARP::getWarmup);
-		homeTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.HOME::getCooldown, FTBEConfig.HOME::getWarmup);
-		tpaTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.TPA::getCooldown, FTBEConfig.TPA::getWarmup);
-		rtpTeleporter = new WarmupCooldownTeleporter(this, FTBEConfig.RTP::getCooldown, FTBEConfig.RTP::getWarmup);
+		backTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.BACK::getCooldown, FTBEStartupConfig.BACK::getWarmup, true);
+		spawnTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.SPAWN::getCooldown, FTBEStartupConfig.SPAWN::getWarmup);
+		warpTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.WARP::getCooldown, FTBEStartupConfig.WARP::getWarmup);
+		homeTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.HOME::getCooldown, FTBEStartupConfig.HOME::getWarmup);
+		tpaTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.TPA::getCooldown, FTBEStartupConfig.TPA::getWarmup);
+		rtpTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.RTP::getCooldown, FTBEStartupConfig.RTP::getWarmup);
 		teleportHistory = new LinkedList<>();
 	}
 
@@ -175,7 +176,7 @@ public class FTBEPlayerData {
     }
 
 	public static Optional<FTBEPlayerData> getOrCreate(@Nullable Player player) {
-		if (player == null || PlayerHooks.isFake(player)) {
+		if (player == null || Platform.get().misc().isFakePlayer(player)) {
 			return Optional.empty();
 		}
 
@@ -214,58 +215,60 @@ public class FTBEPlayerData {
 		needSave = true;
 	}
 
-	public SNBTCompoundTag write() {
-		SNBTCompoundTag nbt = new SNBTCompoundTag();
-		nbt.putBoolean("muted", muted);
-		nbt.putBoolean("fly", canFly);
-		nbt.putBoolean("god", god);
-		nbt.putString("nick", nick);
-		if (lastSeenPos != null) nbt.put("last_seen", lastSeenPos.toNBT());
-		nbt.putString("recording", recording.getId());
+	public Json5Object toJson() {
+		Json5Object nbt = new Json5Object();
+		nbt.addProperty("muted", muted);
+		nbt.addProperty("fly", canFly);
+		nbt.addProperty("god", god);
+		nbt.addProperty("nick", nick);
+		if (lastSeenPos != null) nbt.add("last_seen", lastSeenPos.toJson());
+		nbt.addProperty("recording", recording.getId());
 
-		ListTag tph = new ListTag();
+		Json5Array tph = new Json5Array();
 		for (TeleportPos pos : teleportHistory) {
-			tph.add(pos.toNBT());
+			tph.add(pos.toJson());
 		}
-		nbt.put("teleport_history", tph);
+		nbt.add("teleport_history", tph);
 
-		nbt.put("homes", homes.writeNBT());
+		nbt.add("homes", homes.toJson());
 
-		nbt.put("kit_use_times", Util.make(new CompoundTag(), tag -> kitUseTimes.forEach(tag::putLong)));
+		nbt.add("kit_use_times", Util.make(new Json5Object(), tag -> kitUseTimes.forEach(tag::addProperty)));
 
 		return nbt;
 	}
 
-	public void read(CompoundTag tag) {
+	public void readJson(Json5Object json) {
 		// TODO codec
-		muted = tag.getBooleanOr("muted", false);
-		canFly = tag.getBooleanOr("fly", false);
-		god = tag.getBooleanOr("god", false);
-		nick = tag.getStringOr("nick", "");
-		recording = tag.getString("recording").map(rec -> RecordingStatus.NAME_MAP.map.getOrDefault(rec, RecordingStatus.NONE)).orElse(RecordingStatus.NONE);
-		lastSeenPos = tag.getCompound("last_seen").map(TeleportPos::fromNBT).orElse(null);
+		muted = Json5Util.getBoolean(json, "muted").orElse(false);
+		canFly = Json5Util.getBoolean(json, "fly").orElse(false);
+		god = Json5Util.getBoolean(json, "god").orElse(false);
+		nick = Json5Util.getString(json, "nick").orElse("");
+		recording = Json5Util.getString(json, "recording")
+				.map(rec -> RecordingStatus.NAME_MAP.map.getOrDefault(rec, RecordingStatus.NONE))
+				.orElse(RecordingStatus.NONE);
+		lastSeenPos = Json5Util.getJson5Object(json, "last_seen").map(TeleportPos::fromJson).orElse(null);
 
 		teleportHistory.clear();
-		tag.getList("teleport_history").ifPresent(th -> {
-			for (int i = 0; i < th.size(); i++) {
-				th.getCompound(i).ifPresent(c -> teleportHistory.add(TeleportPos.fromNBT(c)));
-			}
-		});
+		if (json.get("teleport_history") instanceof Json5Array th) {
+			th.forEach(el -> teleportHistory.add(TeleportPos.fromJson(el)));
+		}
 
 		kitUseTimes.clear();
-		tag.getCompound("kit_use_times").ifPresent(kitTag -> {
-			for (String name : kitTag.keySet()) {
-				kitTag.getLong(name).ifPresent(l -> kitUseTimes.put(name, l));
-			}
-		});
+		if (json.get("kit_use_times") instanceof Json5Object j) {
+			j.asMap().forEach((name, el) -> {
+				if (el instanceof Json5Primitive p && p.isNumber()) {
+					kitUseTimes.put(name, p.getAsLong());
+				}
+			});
+		}
 
-		homes.readNBT(tag.getCompoundOrEmpty("homes"));
+		Json5Util.getJson5Object(json, "homes").ifPresent(homes::readJson);
 	}
 
 	public void addTeleportHistory(ServerPlayer player, TeleportPos pos) {
 		teleportHistory.add(pos);
 
-		while (teleportHistory.size() > FTBEConfig.MAX_BACK.get(player)) {
+		while (teleportHistory.size() > FTBEStartupConfig.MAX_BACK.get(player)) {
 			teleportHistory.removeFirst();
 		}
 
@@ -282,9 +285,13 @@ public class FTBEPlayerData {
 	}
 
 	public void load() {
-		Path path = FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".snbt");
+		Path path = FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".json5");
 		try {
-			read(SNBT.tryRead(path));
+			if (Files.exists(path)) {
+				readJson(Json5Util.tryRead(path));
+			} else {
+				FTBEssentials.LOGGER.info("player data for {} doesn't exist yet, will create", uuid);
+			}
 		} catch (IOException e) {
 			FTBEssentials.LOGGER.error("can't read {} : {} / {}", path, e.getClass().getName(), e.getMessage());
 		}
@@ -292,9 +299,9 @@ public class FTBEPlayerData {
 
 	public void saveIfChanged() {
 		if (needSave) {
-			Path path = FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".snbt");
+			Path path = FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".json5");
 			try {
-				SNBT.tryWrite(path, write());
+				Json5Util.tryWrite(path, (Json5Element) toJson());
             } catch (IOException e) {
 				FTBEssentials.LOGGER.error("can't write {} : {} / {}", path, e.getClass().getName(), e.getMessage());
             }
@@ -303,11 +310,11 @@ public class FTBEPlayerData {
 	}
 
 	public void sendTabName(MinecraftServer server) {
-		NetworkHelper.sendToAll(server, new UpdateTabNameMessage(uuid, name, nick, recording, false));
+		Server2PlayNetworking.sendToAllPlayers(server, new UpdateTabNameMessage(uuid, name, nick, recording, false));
 	}
 
 	public void sendTabName(ServerPlayer to) {
-		NetworkHelper.sendTo(to, new UpdateTabNameMessage(uuid, name, nick, recording, false));
+		Server2PlayNetworking.send(to, new UpdateTabNameMessage(uuid, name, nick, recording, false));
 	}
 
 	public long getLastKitUseTime(String kitName) {
@@ -325,15 +332,14 @@ public class FTBEPlayerData {
 		}
 	}
 
-	/**
-	 * Get all the known players UUID's from the playerdata folder
-	 * @return a list of all the known players UUID's
-	 */
+	/// Get all the known players UUID's from the playerdata folder
+	/// @return a list of all the known players UUID's
 	public static List<UUID> getAllKnownPlayers() {
 		try (Stream<Path> files = Files.list(FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH))) {
-			return files.filter(path -> path.toString().endsWith(".snbt"))
-					.map(path -> tryParseUUID(path.getFileName().toString().replace(".snbt", "")))
-					.filter(Objects::nonNull)
+			return files.filter(path -> path.toString().endsWith(".json5"))
+					.map(path -> tryParseUUID(path.getFileName().toString().replace(".json5", "")))
+					.filter(Optional::isPresent)
+					.map(Optional::get)
 					.toList();
 		} catch (Exception ex) {
             LOGGER.error("Failed to get all known players: {}", ex.getMessage());
@@ -342,18 +348,15 @@ public class FTBEPlayerData {
 		return Collections.emptyList();
 	}
 
-	/**
-	 * Attempt to parse a UUID from a string without fatal errors
-	 * @param inputUUID the string to parse
-	 *
-	 * @return the UUID if it could be parsed, otherwise null
-	 */
-	@Nullable
-	private static UUID tryParseUUID(String inputUUID) {
+	/// Attempt to parse a UUID from a string without fatal errors
+	/// @param inputUUID the string to parse
+	///
+	/// @return the UUID if it could be parsed, otherwise null
+	private static Optional<UUID> tryParseUUID(String inputUUID) {
 		try {
-			return UUID.fromString(inputUUID);
+			return Optional.of(UUID.fromString(inputUUID));
 		} catch (IllegalArgumentException ex) {
-			return null;
+			return Optional.empty();
 		}
 	}
 

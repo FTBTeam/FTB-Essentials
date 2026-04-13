@@ -1,13 +1,14 @@
 package dev.ftb.mods.ftbessentials.util;
 
-import dev.architectury.event.CompoundEventResult;
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
-import dev.ftb.mods.ftbessentials.config.FTBEConfig;
+import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.util.TeleportPos.TeleportResult;
+import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
+import dev.ftb.mods.ftblibrary.util.result.DataOutcome;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.phys.Vec3;
@@ -51,12 +52,6 @@ public class WarmupCooldownTeleporter {
 		return TeleportResult.SUCCESS;
 	}
 
-	@SuppressWarnings("unused")
-    @ExpectPlatform
-	private static boolean firePlatformTeleportEvent(ServerPlayer player, Vec3 pos) {
-		throw new AssertionError();
-	}
-
 	public TeleportResult teleport(ServerPlayer player, Function<ServerPlayer, TeleportPos> positionGetter) {
 		TeleportResult cooldownResult = checkCooldown(player);
 		if (!cooldownResult.isSuccess()) {
@@ -65,20 +60,24 @@ public class WarmupCooldownTeleporter {
 
 		TeleportPos pos = positionGetter.apply(player);
 
-        if (!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || !FTBEConfig.ADMINS_EXEMPT_DIMENSION_BLACKLISTS.get()) {
+        if (!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER) || !FTBEStartupConfig.ADMINS_EXEMPT_DIMENSION_BLACKLISTS.get()) {
             TeleportResult blacklistedResult = pos.checkDimensionBlacklist(player);
             if (!blacklistedResult.isSuccess()) {
                 return blacklistedResult;
             }
         }
 
-        CompoundEventResult<Component> result = TeleportEvent.TELEPORT.invoker().teleport(player);
-		if (result.isFalse()) {
-			return TeleportResult.failed(result.object());
+		ServerLevel targetLevel = player.level().getServer().getLevel(pos.getDimensionId());
+		if (targetLevel == null) {
+			return TeleportResult.UNKNOWN_DESTINATION;
 		}
-		
-		if (!firePlatformTeleportEvent(player, Vec3.atBottomCenterOf(pos.getPos()))) {
-			return TeleportResult.failed(Component.translatable("ftbessentials.teleport_prevented"));
+
+		DataOutcome<Component> outcome = NativeEventPosting.INSTANCE.postEventWithResult(
+				TeleportEvent.TYPE, new TeleportEvent.Data(player, targetLevel, Vec3.atBottomCenterOf(pos.getPos()))
+		);
+
+		if (outcome.isFail()) {
+			return TeleportResult.failed(outcome.data().orElse(Component.empty()));
 		}
 
 		int warmupTime = warmupConfig.applyAsInt(player);
@@ -102,7 +101,7 @@ public class WarmupCooldownTeleporter {
 		if (res.isSuccess()) {
 			if (popHistoryOnTeleport) {
 				playerData.popTeleportHistory();
-			} else if (!FTBEConfig.BACK_ON_DEATH_ONLY.get()) {
+			} else if (!FTBEStartupConfig.BACK_ON_DEATH_ONLY.get()) {
 				playerData.addTeleportHistory(player, currentPos);
 			}
 		}
@@ -137,10 +136,10 @@ public class WarmupCooldownTeleporter {
 					if (player.position().distanceToSqr(warmup.initialPos) > 0.25) {
 						// player has moved more than half a block
 						toRemove.add(playerId);
-						player.displayClientMessage(Component.translatable("ftbessentials.teleport.interrupted").withStyle(ChatFormatting.RED), true);
+						player.sendOverlayMessage(Component.translatable("ftbessentials.teleport.interrupted").withStyle(ChatFormatting.RED));
 					} else {
 						long seconds = (warmup.when() - now) / 1000L;
-						player.displayClientMessage(Component.translatable("ftbessentials.teleport.notify", seconds).withStyle(ChatFormatting.YELLOW), true);
+						player.sendOverlayMessage(Component.translatable("ftbessentials.teleport.notify", seconds).withStyle(ChatFormatting.YELLOW));
 					}
 				}
 			} else {
@@ -155,7 +154,7 @@ public class WarmupCooldownTeleporter {
 	public static void cancelWarmup(ServerPlayer player) {
 		if (WARMUPS.containsKey(player.getUUID())) {
 			pendingRemovals.add(player.getUUID());
-			player.displayClientMessage(Component.translatable("ftbessentials.teleport.interrupted").withStyle(ChatFormatting.RED), true);
+			player.sendOverlayMessage(Component.translatable("ftbessentials.teleport.interrupted").withStyle(ChatFormatting.RED));
 		}
 	}
 

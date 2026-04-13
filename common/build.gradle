@@ -1,38 +1,27 @@
-architectury {
-    common(rootProject.enabled_platforms.split(","))
+plugins {
+    id 'net.fabricmc.fabric-loom'
 }
 
 loom {
-    accessWidenerPath = file("src/main/resources/ftbessentials.accesswidener")
+    accessWidenerPath = project(":common").file("src/main/resources/${project.mod_id}.accesswidener")
+
+    mixin {
+        useLegacyMixinAp = false
+    }
 }
 
 dependencies {
-    // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
-    // Do NOT use other classes from fabric loader
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    // Remove the next line if you don't want to depend on the API
-    modApi "dev.architectury:architectury:${rootProject.architectury_api_version}"
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
 
-    modImplementation("dev.ftb.mods:ftb-library:${rootProject.ftb_library_version}") { transitive = false }
-    modImplementation("dev.ftb.mods:ftb-ranks:${rootProject.ftb_ranks_version}") { transitive = false }
+    compileOnly group: 'net.fabricmc', name: 'sponge-mixin', version: '0.17.0+mixin.0.8.7'
+    compileOnly "io.github.llamalad7:mixinextras-fabric:0.5.0"
+
+    implementation("dev.ftb.mods:ftb-library:${rootProject.ftb_library_version}")
+    implementation("dev.ftb.mods:ftb-ranks:${rootProject.ftb_ranks_version}")
 
     compileOnly "net.luckperms:api:5.4"
 }
 
-configurations {
-    dev
-}
-
-artifacts {
-    dev(jar)
-}
-
-publishing {
-    publications {
-        mavenForge(MavenPublication) {
-            artifactId = "${rootProject.archives_base_name}"
-            version ftbPublishing.mavenVersion
-            from components.java
-        }
-    }
+test {
+    useJUnitPlatform()
 }
