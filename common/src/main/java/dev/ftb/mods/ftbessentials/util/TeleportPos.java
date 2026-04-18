@@ -87,11 +87,16 @@ public class TeleportPos {
 	}
 
 	private Optional<TeleportPos> tryFindSafePos(ServerLevel level, Direction dir1, Direction dir2) {
+		int[] yOffsets = {0, 1, -1, 2, -2, 3, -3};
 		for (BlockPos p0 : BlockPos.spiralAround(pos, 16, dir1, dir2)) {
-			for (int yOff = -3; yOff <= 3; yOff++) {
+			for (int yOff : yOffsets) {
 				BlockPos p1 = p0.relative(Direction.Axis.Y, yOff);
 				BlockPos p2 = p1.above();
-				if (!level.getBlockState(p1).isSuffocating(level, p1) && !level.getBlockState(p2).isSuffocating(level, p2)) {
+				BlockPos floor = p1.below();
+
+				if (level.getBlockState(floor).isSolid()
+						&& !level.getBlockState(p1).isSuffocating(level, p1)
+						&& !level.getBlockState(p2).isSuffocating(level, p2)) {
 					return Optional.of(new TeleportPos(dimensionId, p1.immutable(), yRot, xRot, time));
 				}
 			}
