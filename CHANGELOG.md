@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [26.1.2.3-beta]
+
+### Fixed
+* Issue with teleporting using the `/back` and other teleporting commands causing the player to incorrectly find a safe location to teleport to. This now works by checking the target area, then expanding up and down from that location to check for a safe location.
+
 ## [26.1.2.2-beta]
 
 ### Fixed
