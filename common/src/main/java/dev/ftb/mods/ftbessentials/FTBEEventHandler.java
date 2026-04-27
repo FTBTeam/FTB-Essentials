@@ -10,6 +10,7 @@ import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.FTBEWorldData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import dev.ftb.mods.ftbessentials.util.WarmupCooldownTeleporter;
+import dev.ftb.mods.ftblibrary.platform.Platform;
 import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import dev.ftb.mods.ftblibrary.util.result.Outcome;
 import net.minecraft.ChatFormatting;
@@ -55,6 +56,10 @@ public class FTBEEventHandler {
 			data.load();
 			data.setLastSeenPos(new TeleportPos(serverPlayer));
 			data.markDirty();
+
+			if (!data.getNick().isEmpty()) {
+				Platform.get().misc().refreshDisplayName(serverPlayer);
+			}
 
 			FTBEPlayerData.sendPlayerTabs(serverPlayer);
 
