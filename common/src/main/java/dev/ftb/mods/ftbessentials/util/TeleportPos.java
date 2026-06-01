@@ -1,12 +1,12 @@
 package dev.ftb.mods.ftbessentials.util;
 
+import dev.ftb.mods.ftbessentials.api.TeleportDestination;
+import dev.ftb.mods.ftbessentials.api.TeleportResult;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
-import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -28,14 +28,6 @@ public class TeleportPos {
 		this(d, p, null, null);
 	}
 
-	public TeleportPos(ResourceKey<Level> d, BlockPos p, Float yRot, Float xRot) {
-		dimension = d;
-		pos = p;
-		this.yRot = yRot;
-		this.xRot = xRot;
-		time = System.currentTimeMillis();
-	}
-
 	public TeleportPos(Level world, BlockPos p, Float yRot, Float xRot) {
 		this(world.dimension(), p, yRot, xRot);
 	}
@@ -50,6 +42,27 @@ public class TeleportPos {
 		this.yRot = (tag.getTagType("yRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("yRot") : null;
 		this.xRot = (tag.getTagType("xRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("xRot") : null;
 		time = tag.getLong("time");
+	}
+
+	private TeleportPos(ResourceKey<Level> d, BlockPos p, Float yRot, Float xRot) {
+		this(d, p, yRot, xRot, System.currentTimeMillis());
+	}
+
+	private TeleportPos(ResourceKey<Level> dimension, BlockPos pos, Float yRot, Float xRot, long time) {
+		this.dimension = dimension;
+		this.pos = pos;
+		this.yRot = yRot;
+		this.xRot = xRot;
+		this.time = time;
+	}
+
+	@Nullable
+	public static TeleportPos fromDestination(@Nullable TeleportDestination dest) {
+        return dest == null ? null : new TeleportPos(dest.dimension(), dest.pos(), dest.yRot().orElse(null), dest.xRot().orElse(null));
+    }
+
+	TeleportDestination asDestination() {
+		return new TeleportDestination(dimension, pos, Optional.ofNullable(yRot), Optional.ofNullable(xRot));
 	}
 
 	public TeleportPos safeForPlayer(ServerPlayer player) {
@@ -148,53 +161,5 @@ public class TeleportPos {
 	public String posAsString() {
 		// Normal shortString would be 1, 2, 3 so we remove the commas
 		return pos.toShortString().replaceAll(",", "");
-	}
-
-	@FunctionalInterface
-	public interface TeleportResult {
-		TeleportResult SUCCESS = new TeleportResult() {
-			@Override
-			public int runCommand(ServerPlayer player) {
-				return 1;
-			}
-
-			@Override
-			public boolean isSuccess() {
-				return true;
-			}
-		};
-
-		static TeleportResult failed(Component msg) {
-			return player -> {
-				player.displayClientMessage(msg, false);
-				return 0;
-			};
-		}
-
-		TeleportResult DIMENSION_NOT_FOUND = failed(Component.translatable("ftbessentials.dimension_not_found"));
-
-		TeleportResult UNKNOWN_DESTINATION = failed(Component.translatable("ftbessentials.unknown_dest"));
-
-		TeleportResult DIMENSION_NOT_ALLOWED_FROM = failed(Component.translatable("ftbessentials.teleport.not_from_here"));
-
-		TeleportResult DIMENSION_NOT_ALLOWED_TO = failed(Component.translatable("ftbessentials.teleport.not_to_here"));
-
-		int runCommand(ServerPlayer player);
-
-		default boolean isSuccess() {
-			return false;
-		}
-	}
-
-	@FunctionalInterface
-	public interface CooldownTeleportResult extends TeleportResult {
-		long getCooldown();
-
-		@Override
-		default int runCommand(ServerPlayer player) {
-			String secStr = TimeUtils.prettyTimeString(getCooldown() / 1000L);
-			player.displayClientMessage(Component.translatable("ftbessentials.teleport.on_cooldown", secStr), false);
-			return 0;
-		}
 	}
 }

@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbessentials.commands.impl.teleporting;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import dev.ftb.mods.ftbessentials.api.TeleportResult;
 import dev.ftb.mods.ftbessentials.api.records.TPARequest;
 import dev.ftb.mods.ftbessentials.commands.FTBCommand;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
@@ -62,7 +63,7 @@ public class TPACommand implements FTBCommand {
             return 0;
         }
 
-        TeleportPos.TeleportResult result = here ?
+        TeleportResult result = here ?
                 dataTarget.tpaTeleporter.checkCooldown(target) :
                 dataSource.tpaTeleporter.checkCooldown(player);
 
@@ -127,7 +128,7 @@ public class TPACommand implements FTBCommand {
             return 0;
         }
 
-        TeleportPos.TeleportResult result = request.here() ?
+        TeleportResult result = request.here() ?
                 request.target().tpaTeleporter.teleport(player, p -> new TeleportPos(sourcePlayer)) :
                 request.source().tpaTeleporter.teleport(sourcePlayer, p -> new TeleportPos(player));
 

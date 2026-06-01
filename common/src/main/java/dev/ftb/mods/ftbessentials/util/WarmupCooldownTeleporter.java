@@ -4,7 +4,7 @@ import dev.architectury.event.CompoundEventResult;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
-import dev.ftb.mods.ftbessentials.util.TeleportPos.TeleportResult;
+import dev.ftb.mods.ftbessentials.api.TeleportResult;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -45,7 +45,7 @@ public class WarmupCooldownTeleporter {
 		long nextRun = lastRun + Math.max(0L, cooldownConfig.applyAsInt(player) * 1000L);
 
 		if (now < nextRun) {
-			return (TeleportPos.CooldownTeleportResult) () -> nextRun - now;
+			return TeleportResult.OnCooldown.create(() -> nextRun - now);
 		}
 
 		return TeleportResult.SUCCESS;

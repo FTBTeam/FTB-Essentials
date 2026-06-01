@@ -1,13 +1,17 @@
 package dev.ftb.mods.ftbessentials.util;
 
+import dev.ftb.mods.ftbessentials.api.TeleportResult;
+import dev.ftb.mods.ftbessentials.api.event.SavedTeleportEvent;
 import dev.ftb.mods.ftbessentials.config.FTBEConfig;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 public abstract class SavedTeleportManager {
@@ -19,20 +23,34 @@ public abstract class SavedTeleportManager {
             throw new TooManyDestinationsException();
         }
         destinations.put(nameLower, dest);
+        SavedTeleportEvent.ADDED.invoker().onAdded(name, dest.asDestination(), player, owningPlayer());
         onChanged();
     }
 
     public boolean deleteDestination(String name) {
-        if (destinations.remove(name.toLowerCase()) != null) {
+        TeleportPos removed = destinations.remove(name.toLowerCase());
+        if (removed != null) {
+            SavedTeleportEvent.DELETED.invoker().onDeleted(name, removed.asDestination(), owningPlayer());
             onChanged();
             return true;
         }
         return false;
     }
 
-    public TeleportPos.TeleportResult teleportTo(String name, ServerPlayer player, WarmupCooldownTeleporter teleporter) {
+    public TeleportResult teleportTo(String name, ServerPlayer player, WarmupCooldownTeleporter teleporter) {
         TeleportPos pos = destinations.get(name.toLowerCase());
-        return pos != null ? teleporter.teleport(player, p -> pos) : TeleportPos.TeleportResult.UNKNOWN_DESTINATION;
+        if (pos == null) {
+            return TeleportResult.UNKNOWN_DESTINATION;
+        }
+
+        var result = SavedTeleportEvent.PRE_TELEPORT.invoker().onTeleport(name, player, pos.asDestination(), owningPlayer());
+        if (result.isFalse()) {
+            return TeleportResult.failed(result.object().reason());
+        }
+
+        TeleportPos newPos = result.isEmpty() ? pos : TeleportPos.fromDestination(result.object().dest());
+
+        return newPos != null ? teleporter.teleport(player, p -> newPos) : TeleportResult.UNKNOWN_DESTINATION;
     }
 
     public Stream<DestinationEntry> destinations() {
@@ -62,6 +80,9 @@ public abstract class SavedTeleportManager {
 
     protected abstract void onChanged();
 
+    @Nullable
+    protected abstract UUID owningPlayer();
+
     public static class HomeManager extends SavedTeleportManager {
         private final FTBEPlayerData playerData;
 
@@ -78,6 +99,11 @@ public abstract class SavedTeleportManager {
         protected void onChanged() {
             playerData.markDirty();
         }
+
+        @Override
+        protected UUID owningPlayer() {
+            return playerData.getUuid();
+        }
     }
 
     public static class WarpManager extends SavedTeleportManager {
@@ -90,6 +116,11 @@ public abstract class SavedTeleportManager {
         @Override
         protected void onChanged() {
             worldData.markDirty();
+        }
+
+        @Override
+        protected UUID owningPlayer() {
+            return null;
         }
     }
 
