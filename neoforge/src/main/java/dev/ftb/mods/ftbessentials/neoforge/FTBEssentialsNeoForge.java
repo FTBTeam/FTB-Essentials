@@ -53,7 +53,7 @@ public class FTBEssentialsNeoForge {
 				essentials.eventHandler.onPlayerDeath((ServerPlayer) event.getOriginal(), (ServerPlayer) event.getEntity(), !event.isWasDeath())
 		);
 		bus.addListener(LivingDamageEvent.Post.class, event ->
-				essentials.eventHandler.onPlayerHurt(event.getEntity(), event.getNewDamage(), event.getNewDamage() > 0f)
+				essentials.eventHandler.onPlayerHurt(event.getEntity(), event.getInflictedDamage(), event.getBlockedDamage() > 0f)
 		);
 		bus.addListener(EventPriority.HIGHEST, ServerChatEvent.class, event -> {
 			if (essentials.eventHandler.allowChat(event.getPlayer()).isFail()) {

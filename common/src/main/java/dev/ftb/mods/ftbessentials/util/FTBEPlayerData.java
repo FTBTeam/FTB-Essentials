@@ -216,25 +216,25 @@ public class FTBEPlayerData {
 	}
 
 	public Json5Object toJson() {
-		Json5Object nbt = new Json5Object();
-		nbt.addProperty("muted", muted);
-		nbt.addProperty("fly", canFly);
-		nbt.addProperty("god", god);
-		nbt.addProperty("nick", nick);
-		if (lastSeenPos != null) nbt.add("last_seen", lastSeenPos.toJson());
-		nbt.addProperty("recording", recording.getId());
+		Json5Object json = new Json5Object();
+		json.addProperty("muted", muted);
+		json.addProperty("fly", canFly);
+		json.addProperty("god", god);
+		json.addProperty("nick", nick);
+		if (lastSeenPos != null) json.add("last_seen", lastSeenPos.toJson());
+		json.addProperty("recording", recording.getId());
 
 		Json5Array tph = new Json5Array();
 		for (TeleportPos pos : teleportHistory) {
 			tph.add(pos.toJson());
 		}
-		nbt.add("teleport_history", tph);
+		json.add("teleport_history", tph);
 
-		nbt.add("homes", homes.toJson());
+		json.add("homes", homes.toJson());
 
-		nbt.add("kit_use_times", Util.make(new Json5Object(), tag -> kitUseTimes.forEach(tag::addProperty)));
+		json.add("kit_use_times", Util.make(new Json5Object(), tag -> kitUseTimes.forEach(tag::addProperty)));
 
-		return nbt;
+		return json;
 	}
 
 	public void readJson(Json5Object json) {
