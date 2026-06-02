@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [26.1.2.4-beta]
 
+### Changed
+* NeoForge 26.1.2.71 required
+  * Previous versions of FTB Essentials will not work with NeoForge 26.1.2.70+ due to NeoForge API break
+
 ### Fixed
 * Fixed player nickname not being shown after player logs in again (or after server restart)
 
