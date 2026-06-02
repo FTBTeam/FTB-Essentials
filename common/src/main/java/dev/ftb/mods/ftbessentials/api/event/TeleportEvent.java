@@ -9,9 +9,10 @@ import net.minecraft.server.level.ServerPlayer;
 public class TeleportEvent {
     public static Event<Teleport> TELEPORT = EventFactory.createCompoundEventResult();
 
+    @FunctionalInterface
     public interface Teleport {
         /**
-         * Fired just before a player teleports (but before any warmup is started). This can be canceled to prevent
+         * Fired when the player is ready to teleport, but before any warmup is started. This can be canceled to prevent
          * teleportation by returning {@link CompoundEventResult#interruptFalse(Object)} with a message to supply to the
          * player about why teleportation was prevented.
          *

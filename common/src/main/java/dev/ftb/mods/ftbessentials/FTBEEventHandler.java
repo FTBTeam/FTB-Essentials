@@ -4,6 +4,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.*;
+import dev.ftb.mods.ftbessentials.api.TeleportDestination;
+import dev.ftb.mods.ftbessentials.api.event.TeleportImmediateEvent;
 import dev.ftb.mods.ftbessentials.api.records.TPARequest;
 import dev.ftb.mods.ftbessentials.commands.FTBCommands;
 import dev.ftb.mods.ftbessentials.commands.impl.teleporting.TPACommand;
@@ -54,6 +56,9 @@ public class FTBEEventHandler {
 		EntityEvent.LIVING_HURT.register(FTBEEventHandler::playerHurt);
 
 		ChatEvent.RECEIVED.register(FTBEEventHandler::playerChat);
+
+		TeleportImmediateEvent.TELEPORT.register((player, dest) ->
+				dest.success(dest.withPos(dest.pos().above(10))));
 	}
 
 	private static void serverAboutToStart(MinecraftServer minecraftServer) {

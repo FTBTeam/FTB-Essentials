@@ -66,7 +66,7 @@ public abstract class SavedTeleportManager {
     public void readNBT(CompoundTag tag) {
         destinations.clear();
         for (String key : tag.getAllKeys()) {
-            destinations.put(key, new TeleportPos(tag.getCompound(key)));
+            destinations.put(key, new TeleportPos(tag.getCompound(key), owningPlayer()));
         }
     }
 

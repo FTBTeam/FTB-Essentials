@@ -16,7 +16,7 @@ public interface SavedTeleportEvent {
      */
     Event<SavedTeleportEvent> ADDED = EventFactory.createLoop();
     /**
-     * See {@link #onDeleted(String, TeleportDestination, UUID)} (String, TeleportDestination, ServerPlayer, UUID)}
+     * See {@link #onDeleted(String, TeleportDestination, UUID)}
      */
     Event<SavedTeleportEvent> DELETED = EventFactory.createLoop();
     /**
@@ -43,6 +43,7 @@ public interface SavedTeleportEvent {
      */
     void onDeleted(String name, TeleportDestination destination, @Nullable UUID owningPlayer);
 
+    @FunctionalInterface
     interface PreTeleport {
         /**
          * Fired when a player is about to teleport to a saved destination (home or warp). This event allows

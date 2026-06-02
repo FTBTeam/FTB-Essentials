@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbessentials.util;
 
 import dev.ftb.mods.ftbessentials.api.TeleportDestination;
 import dev.ftb.mods.ftbessentials.api.TeleportResult;
+import dev.ftb.mods.ftbessentials.api.event.TeleportImmediateEvent;
 import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,55 +18,66 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class TeleportPos {
 	private final ResourceKey<Level> dimension;
 	private final BlockPos pos;
+	@Nullable
 	public final Float yRot, xRot;
-	private final long time;
+	@Nullable
+	private final UUID playerId;
 
 	public TeleportPos(ResourceKey<Level> d, BlockPos p) {
 		this(d, p, null, null);
 	}
 
-	public TeleportPos(Level world, BlockPos p, Float yRot, Float xRot) {
+	public TeleportPos(Level world, BlockPos p, @Nullable Float yRot, @Nullable Float xRot) {
 		this(world.dimension(), p, yRot, xRot);
 	}
 
 	public TeleportPos(Entity entity) {
-		this(entity.level(), entity.blockPosition(), entity.getYRot(), entity.getXRot());
+		this(entity.level().dimension(), entity.blockPosition(), entity.getYRot(), entity.getXRot(),
+				entity instanceof Player p ? p.getUUID() : null);
 	}
 
-	public TeleportPos(CompoundTag tag) {
+	public TeleportPos(CompoundTag tag, @Nullable UUID playerId) {
 		dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(tag.getString("dim")));
 		pos = new BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"));
 		this.yRot = (tag.getTagType("yRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("yRot") : null;
 		this.xRot = (tag.getTagType("xRot") == CompoundTag.TAG_FLOAT) ? tag.getFloat("xRot") : null;
-		time = tag.getLong("time");
+		this.playerId = playerId;
 	}
 
-	private TeleportPos(ResourceKey<Level> d, BlockPos p, Float yRot, Float xRot) {
-		this(d, p, yRot, xRot, System.currentTimeMillis());
+	private TeleportPos(ResourceKey<Level> d, BlockPos p, @Nullable Float yRot, @Nullable Float xRot) {
+		this(d, p, yRot, xRot, null);
 	}
 
-	private TeleportPos(ResourceKey<Level> dimension, BlockPos pos, Float yRot, Float xRot, long time) {
+	// canonical ctor
+	private TeleportPos(ResourceKey<Level> dimension, BlockPos pos, @Nullable Float yRot, @Nullable Float xRot, @Nullable UUID playerId) {
 		this.dimension = dimension;
 		this.pos = pos;
 		this.yRot = yRot;
 		this.xRot = xRot;
-		this.time = time;
+		this.playerId = playerId;
 	}
 
 	@Nullable
 	public static TeleportPos fromDestination(@Nullable TeleportDestination dest) {
-        return dest == null ? null : new TeleportPos(dest.dimension(), dest.pos(), dest.yRot().orElse(null), dest.xRot().orElse(null));
+        return dest == null ?
+				null :
+				new TeleportPos(dest.dimension(), dest.pos(),
+						dest.yRot().orElse(null), dest.xRot().orElse(null),
+						dest.playerId()
+				);
     }
 
 	TeleportDestination asDestination() {
-		return new TeleportDestination(dimension, pos, Optional.ofNullable(yRot), Optional.ofNullable(xRot));
+		return new TeleportDestination(dimension, pos, Optional.ofNullable(yRot), Optional.ofNullable(xRot), playerId);
 	}
 
 	public TeleportPos safeForPlayer(ServerPlayer player) {
+		assert player.getServer() != null;
 		ServerLevel level = player.getServer().getLevel(dimension);
 		if (level == null) return this;  // shouldn't happen
 
@@ -107,6 +119,17 @@ public class TeleportPos {
 	}
 
 	public TeleportResult teleport(ServerPlayer player) {
+		TeleportDestination oldDest = asDestination();
+		var outcome = TeleportImmediateEvent.TELEPORT.invoker().teleport(player, oldDest);
+		if (outcome != null && !outcome.success()) {
+			return TeleportResult.failed(outcome.reason());
+		}
+
+		TeleportPos newPos = outcome == null || outcome.dest().equals(oldDest) ? this : TeleportPos.fromDestination(outcome.dest());
+		return newPos.actuallyTeleport(player);
+	}
+
+	private TeleportResult actuallyTeleport(ServerPlayer player) {
 		ServerLevel level = player.server.getLevel(dimension);
 		if (level == null) {
 			return TeleportResult.DIMENSION_NOT_FOUND;
@@ -127,7 +150,6 @@ public class TeleportPos {
 		tag.putInt("x", pos.getX());
 		tag.putInt("y", pos.getY());
 		tag.putInt("z", pos.getZ());
-		tag.putLong("time", time);
 		if (this.xRot != null) tag.putFloat("xRot", this.xRot);
 		if (this.yRot != null) tag.putFloat("yRot", this.yRot);
 		return tag;
@@ -160,6 +182,6 @@ public class TeleportPos {
 
 	public String posAsString() {
 		// Normal shortString would be 1, 2, 3 so we remove the commas
-		return pos.toShortString().replaceAll(",", "");
+		return pos.toShortString().replace(",", "");
 	}
 }
