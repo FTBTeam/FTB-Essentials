@@ -57,9 +57,6 @@ public class FTBEEventHandler {
 		EntityEvent.LIVING_HURT.register(FTBEEventHandler::playerHurt);
 
 		ChatEvent.RECEIVED.register(FTBEEventHandler::playerChat);
-
-		TeleportImmediateEvent.TELEPORT.register((player, dest) ->
-				CompoundEventResult.pass());
 	}
 
 	private static void serverAboutToStart(MinecraftServer minecraftServer) {
