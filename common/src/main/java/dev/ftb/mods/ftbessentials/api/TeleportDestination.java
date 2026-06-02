@@ -36,7 +36,7 @@ public record TeleportDestination(
      * @return a successful outcome
      */
     public Outcome success() {
-        return new Outcome(true, this, Component.empty());
+        return new Outcome(this, Component.empty());
     }
 
     /**
@@ -45,7 +45,7 @@ public record TeleportDestination(
      * @return a successful outcome
      */
     public Outcome success(TeleportDestination newDest) {
-        return new Outcome(true, newDest, Component.empty());
+        return new Outcome(newDest, Component.empty());
     }
 
     /**
@@ -55,9 +55,9 @@ public record TeleportDestination(
      * @return a failed outcome
      */
     public Outcome failed(Component reason) {
-        return new Outcome(false, this, reason);
+        return new Outcome(this, reason);
     }
 
-    public record Outcome(boolean success, TeleportDestination dest, Component reason) {
+    public record Outcome(TeleportDestination dest, Component reason) {
     }
 }

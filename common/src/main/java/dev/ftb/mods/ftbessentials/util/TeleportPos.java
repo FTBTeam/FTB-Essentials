@@ -121,11 +121,12 @@ public class TeleportPos {
 	public TeleportResult teleport(ServerPlayer player) {
 		TeleportDestination oldDest = asDestination();
 		var outcome = TeleportImmediateEvent.TELEPORT.invoker().teleport(player, oldDest);
-		if (outcome != null && !outcome.success()) {
-			return TeleportResult.failed(outcome.reason());
+		if (outcome.isFalse()) {
+			return TeleportResult.failed(outcome.object().reason());
 		}
 
-		TeleportPos newPos = outcome == null || outcome.dest().equals(oldDest) ? this : TeleportPos.fromDestination(outcome.dest());
+		var newDest = outcome.isEmpty() ? oldDest : outcome.object().dest();
+		TeleportPos newPos = newDest.equals(oldDest) ? this : TeleportPos.fromDestination(newDest);
 		return newPos.actuallyTeleport(player);
 	}
 

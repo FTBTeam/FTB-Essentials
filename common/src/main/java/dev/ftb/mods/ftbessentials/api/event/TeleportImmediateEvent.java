@@ -1,12 +1,13 @@
 package dev.ftb.mods.ftbessentials.api.event;
 
+import dev.architectury.event.CompoundEventResult;
 import dev.architectury.event.Event;
 import dev.architectury.event.EventFactory;
 import dev.ftb.mods.ftbessentials.api.TeleportDestination;
 import net.minecraft.server.level.ServerPlayer;
 
 public class TeleportImmediateEvent {
-    public static Event<TeleportImmediate> TELEPORT = EventFactory.createLoop();
+    public static Event<TeleportImmediate> TELEPORT = EventFactory.createCompoundEventResult(TeleportImmediate.class);
 
     @FunctionalInterface
     public interface TeleportImmediate {
@@ -20,6 +21,6 @@ public class TeleportImmediateEvent {
          * @param destination the teleport destination
          * @return the event outcome
          */
-        TeleportDestination.Outcome teleport(ServerPlayer player, TeleportDestination destination);
+        CompoundEventResult<TeleportDestination.Outcome> teleport(ServerPlayer player, TeleportDestination destination);
     }
 }

@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbessentials;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.architectury.event.CompoundEventResult;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.*;
 import dev.ftb.mods.ftbessentials.api.TeleportDestination;
@@ -58,7 +59,7 @@ public class FTBEEventHandler {
 		ChatEvent.RECEIVED.register(FTBEEventHandler::playerChat);
 
 		TeleportImmediateEvent.TELEPORT.register((player, dest) ->
-				dest.success(dest.withPos(dest.pos().above(10))));
+				CompoundEventResult.pass());
 	}
 
 	private static void serverAboutToStart(MinecraftServer minecraftServer) {
