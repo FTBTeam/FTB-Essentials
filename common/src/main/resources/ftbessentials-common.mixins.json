@@ -5,7 +5,8 @@
   "client": [
   ],
   "mixins": [
-    "PlayerListAccess"
+    "PlayerListAccess",
+    "ServerScoreboardMixin"
   ],
   "injectors": {
     "defaultRequire": 1

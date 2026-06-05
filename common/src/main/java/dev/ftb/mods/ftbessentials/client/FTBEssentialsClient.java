@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbessentials.client;
 
 import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData.RecordingStatus;
+import dev.ftb.mods.ftblibrary.client.util.ClientUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -22,8 +23,14 @@ public class FTBEssentialsClient  {
 		}
 
 		MutableComponent nameComponent = Component.literal(packet.nickname().isEmpty() ? packet.name() : packet.nickname());
+
+		var team = ClientUtils.getClientLevel().getScoreboard().getPlayersTeam(packet.name());
+		if (team != null) {
+			nameComponent.withStyle(team.getColor());
+		}
+
 		if (packet.afk()) {
-			nameComponent.withStyle(ChatFormatting.GRAY);
+			nameComponent.append(Component.literal(" [afk]").withStyle(ChatFormatting.GRAY));
 		}
 
 		component.append(nameComponent);

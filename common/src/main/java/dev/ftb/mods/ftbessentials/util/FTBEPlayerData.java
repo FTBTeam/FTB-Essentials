@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.scores.PlayerTeam;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -205,6 +206,21 @@ public class FTBEPlayerData {
 
 	public static void sendPlayerTabs(ServerPlayer serverPlayer) {
 		MAP.values().forEach(d -> d.sendTabName(serverPlayer));
+	}
+
+	public static void sendPlayerTabsForScoreboardTeam(MinecraftServer server, PlayerTeam team) {
+		// when a scoreboard team is modified (specifically, color changed)
+		// send updates for each player in the team to the server
+		team.getPlayers().forEach(name -> sendPlayerTabToAll(server, name));
+	}
+
+	public static void sendPlayerTabToAll(MinecraftServer server, String playerName) {
+		// when a player joins or leaves a scoreboard team
+		// send updates for that player to the server
+		var sp = server.getPlayerList().getPlayer(playerName);
+		if (sp != null) {
+			getOrCreate(sp).ifPresent(data -> data.sendTabName(server));
+		}
 	}
 
 	public static void forEachPlayer(Consumer<FTBEPlayerData> consumer) {
