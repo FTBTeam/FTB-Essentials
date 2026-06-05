@@ -78,7 +78,7 @@ public class FTBEWorldData {
 	public void saveIfChanged() {
 		if (needSave) {
 			try {
-				Json5Util.tryWrite(mkdirs("").resolve(DATA_FILE), (Json5Element) toJson());
+				Json5Util.save(mkdirs("").resolve(DATA_FILE), (Json5Element) toJson());
 			} catch (IOException e) {
 				FTBEssentials.LOGGER.error("can't write {} : {} / {}", DATA_FILE, e.getClass().getName(), e.getMessage());
 			}
@@ -90,10 +90,10 @@ public class FTBEWorldData {
 		try {
 			Path dataFile = mkdirs("").resolve(DATA_FILE);
 			if (Files.exists(dataFile)) {
-				deserialize(Json5Util.tryRead(dataFile));
+				deserialize(Json5Util.load(dataFile));
 			} else {
 				// save a default file
-				Json5Util.tryWrite(dataFile, (Json5Element) toJson());
+				Json5Util.save(dataFile, (Json5Element) toJson());
 				FTBEssentials.LOGGER.info("created default world data file at {}", dataFile);
 			}
 		} catch (Exception ex) {

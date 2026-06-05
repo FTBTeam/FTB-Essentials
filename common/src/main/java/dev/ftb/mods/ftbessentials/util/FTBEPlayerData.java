@@ -304,7 +304,7 @@ public class FTBEPlayerData {
 		Path path = FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".json5");
 		try {
 			if (Files.exists(path)) {
-				readJson(Json5Util.tryRead(path));
+				readJson(Json5Util.load(path));
 			} else {
 				FTBEssentials.LOGGER.info("player data for {} doesn't exist yet, will create", uuid);
 			}
@@ -317,7 +317,7 @@ public class FTBEPlayerData {
 		if (needSave) {
 			Path path = FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".json5");
 			try {
-				Json5Util.tryWrite(path, (Json5Element) toJson());
+				Json5Util.save(path, (Json5Element) toJson());
             } catch (IOException e) {
 				FTBEssentials.LOGGER.error("can't write {} : {} / {}", path, e.getClass().getName(), e.getMessage());
             }
