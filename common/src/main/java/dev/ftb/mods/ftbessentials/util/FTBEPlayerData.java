@@ -247,14 +247,14 @@ public class FTBEPlayerData {
 		god = tag.getBoolean("god");
 		nick = tag.getString("nick");
 		recording = RecordingStatus.NAME_MAP.map.getOrDefault(tag.getString("recording"), RecordingStatus.NONE);
-		lastSeenPos = tag.contains("last_seen") ? new TeleportPos(tag.getCompound("last_seen")) : null;
+		lastSeenPos = tag.contains("last_seen") ? new TeleportPos(tag.getCompound("last_seen"), uuid) : null;
 
 		teleportHistory.clear();
 
 		ListTag th = tag.getList("teleport_history", Tag.TAG_COMPOUND);
 
 		for (int i = 0; i < th.size(); i++) {
-			teleportHistory.add(new TeleportPos(th.getCompound(i)));
+			teleportHistory.add(new TeleportPos(th.getCompound(i), uuid));
 		}
 
 		kitUseTimes.clear();
