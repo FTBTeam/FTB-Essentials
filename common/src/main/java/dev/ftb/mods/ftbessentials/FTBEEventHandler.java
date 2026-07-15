@@ -2,8 +2,11 @@ package dev.ftb.mods.ftbessentials;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.architectury.event.CompoundEventResult;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.*;
+import dev.ftb.mods.ftbessentials.api.TeleportDestination;
+import dev.ftb.mods.ftbessentials.api.event.TeleportImmediateEvent;
 import dev.ftb.mods.ftbessentials.api.records.TPARequest;
 import dev.ftb.mods.ftbessentials.commands.FTBCommands;
 import dev.ftb.mods.ftbessentials.commands.impl.teleporting.TPACommand;
