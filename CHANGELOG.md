@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2101.1.10]
+
+### Added
+* Added API for `SavedTeleportManager` 
+  * Added `SavedTeleportEvent` and `TeleportImmediateEvent`
+
+### Changed
+* Cancel player's velocity after teleporting them
+  * Primarily intended to avoid surprises when teleporting from a moving Create: Aeronautics contraption
+
 ## [2101.1.9]
 
 ### Fixed
