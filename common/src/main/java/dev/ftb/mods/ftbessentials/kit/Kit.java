@@ -12,6 +12,7 @@ import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +51,8 @@ public record Kit(List<ItemStack> items, long cooldown, boolean autoGrant) {
             items.forEach(stack -> {
                 ItemStack stack1 = stack.copy();
                 if (!player.getInventory().add(stack1)) {
-                    ItemEntity itementity = player.drop(stack1, false);
+                    // TODO: Validate prediction
+                    ItemEntity itementity = player.drop(stack1, false, Prediction.SERVER_ONLY);
                     if (itementity != null) {
                         itementity.setNoPickUpDelay();
                         itementity.setTarget(player.getUUID());

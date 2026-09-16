@@ -199,7 +199,7 @@ public class TeleportingCommands {
                     // broken heightmap (nether, other mod dimensions)
                     for (BlockPos newPos : BlockPos.spiralAround(new BlockPos(hmPos.getX(), level.getSeaLevel(), hmPos.getZ()), 16, Direction.EAST, Direction.SOUTH)) {
                         BlockState bs = level.getBlockState(newPos);
-                        if (bs.blocksMotion() && !bs.is(IGNORE_RTP_BLOCKS) && level.isEmptyBlock(newPos.above(1))
+                        if (bs.isSolid() && !bs.is(IGNORE_RTP_BLOCKS) && level.isEmptyBlock(newPos.above(1))
                                 && level.isEmptyBlock(newPos.above(2)) && level.isEmptyBlock(newPos.above(3))) {
                             goodPos = newPos.immutable();
                             break;

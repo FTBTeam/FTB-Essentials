@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.scores.TeamColor;
 
 public class FTBEssentialsClient  {
 	public static void updateTabName(UpdateTabNameMessage packet) {
@@ -26,7 +27,7 @@ public class FTBEssentialsClient  {
 
 		var team = ClientUtils.getClientLevel().getScoreboard().getPlayersTeam(packet.name());
 		if (team != null) {
-			nameComponent.withStyle(team.getColor());
+			nameComponent.withColor(team.getColor().orElse(TeamColor.WHITE).rgb());
 		}
 
 		if (packet.afk()) {
