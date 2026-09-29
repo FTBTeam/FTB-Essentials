@@ -1,8 +1,8 @@
 package dev.ftb.mods.ftbessentials.util;
 
+import dev.ftb.mods.ftbessentials.api.TeleportResult;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
-import dev.ftb.mods.ftbessentials.api.TeleportResult;
 import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import dev.ftb.mods.ftblibrary.util.result.DataOutcome;
 import net.minecraft.ChatFormatting;
@@ -28,6 +28,7 @@ public class WarmupCooldownTeleporter {
 	private static final Map<UUID, Warmup> WARMUPS = new HashMap<>();
 	private static final Map<UUID, Warmup> pendingAdditions = new HashMap<>();
 	private static final Set<UUID> pendingRemovals = new HashSet<>();
+	private Runnable onSuccess = () -> {};
 
 	public WarmupCooldownTeleporter(FTBEPlayerData playerData, ToIntFunction<ServerPlayer> cooldownConfig, ToIntFunction<ServerPlayer> warmupConfig) {
 		this(playerData, cooldownConfig, warmupConfig, false);
@@ -39,6 +40,11 @@ public class WarmupCooldownTeleporter {
 		this.warmupConfig = warmupConfig;
 		this.popHistoryOnTeleport = popHistoryOnTeleport;
 		this.lastRun = 0L;
+	}
+
+	public WarmupCooldownTeleporter onSuccess(Runnable runnable) {
+		this.onSuccess = runnable;
+		return this;
 	}
 
 	public TeleportResult checkCooldown(ServerPlayer player) {
@@ -84,10 +90,15 @@ public class WarmupCooldownTeleporter {
 
 		if (warmupTime == 0) {
 			// just port immediately
-			return teleportNow(player, pos);
+			TeleportResult res = teleportNow(player, pos);
+			if (res.isSuccess()) {
+				onSuccess.run();
+			}
+			return res;
 		} else {
 			// schedule the teleport
 			pendingAdditions.put(player.getUUID(), new Warmup(System.currentTimeMillis() + warmupTime * 1000L, this, player.position(), pos));
+			onSuccess.run();
 			return TeleportResult.SUCCESS;
 		}
 	}

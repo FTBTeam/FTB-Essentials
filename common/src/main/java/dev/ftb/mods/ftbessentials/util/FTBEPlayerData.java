@@ -5,6 +5,7 @@ import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
 import de.marhali.json5.Json5Primitive;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
+import dev.ftb.mods.ftbessentials.commands.groups.TeleportingCommands;
 import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
@@ -82,7 +83,8 @@ public class FTBEPlayerData {
 		warpTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.WARP::getCooldown, FTBEStartupConfig.WARP::getWarmup);
 		homeTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.HOME::getCooldown, FTBEStartupConfig.HOME::getWarmup);
 		tpaTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.TPA::getCooldown, FTBEStartupConfig.TPA::getWarmup);
-		rtpTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.RTP::getCooldown, FTBEStartupConfig.RTP::getWarmup);
+		rtpTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.RTP::getCooldown, FTBEStartupConfig.RTP::getWarmup)
+				.onSuccess(TeleportingCommands::updateLastRTPRun);
 		teleportHistory = new LinkedList<>();
 	}
 

@@ -19,6 +19,7 @@
   "ftbessentials.teleport.history_empty": "Teleportation history is empty!",
   "ftbessentials.teleport.max_less_than_min": "Maximum teleport distance cannot be less than minimum!",
   "ftbessentials.rtp.not_here": "You may not use /rtp in this dimension!",
+  "ftbessentials.rtp.on_global_cooldown": "The /rtp commmand is on global cooldown for %s !",
   "ftbessentials.rtp.looking": "Looking for random location...",
   "ftbessentials.rtp.found": "Found good location after %s attempt(s) @ %s",
   "ftbessentials.rtp.failed": "Could not find a valid location to teleport to!",

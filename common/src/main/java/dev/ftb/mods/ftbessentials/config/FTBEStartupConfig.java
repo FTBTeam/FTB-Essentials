@@ -74,6 +74,11 @@ public interface FTBEStartupConfig {
 			.comment("Blacklisted dimension ID's for /rtp (player *must not* be in any of these dimensions)",
 					"Wildcarded dimensions (e.g. 'somemod:*') are supported");
 
+	IntValue RTP_GLOBAL_COOLDOWN = RTP.config.addInt("global_cooldown", 0).range(0, Integer.MAX_VALUE)
+			.comment("Global cooldown in seconds for all players trying to use the /rtp command",
+					"This cooldown is enforced in addition to per-player command cooldowns",
+					"defined in the \"cooldown\" setting. Set to 0 to disable cooldown.");
+
 	PermissionBasedBooleanValue RTP_MAX_DISTANCE_CUSTOM = new PermissionBasedBooleanValue(
 			RTP.config.addBoolean("allow_custom_max_distance", false),
 			"ftbessentials.rtp.custom_max",

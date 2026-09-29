@@ -18,6 +18,7 @@ import dev.ftb.mods.ftbessentials.util.DimensionFilter;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftbessentials.util.TeleportPos;
 import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
+import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import dev.ftb.mods.ftblibrary.util.result.Outcome;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -144,6 +145,8 @@ public class TeleportingCommands {
         }).orElse(0);
     }
 
+    private static long lastRTPRun = 0L;
+
     //#region RTP
     private static int rtp(ServerPlayer player, int minDistance, int maxDistance) {
         if (maxDistance < minDistance) {
@@ -155,6 +158,17 @@ public class TeleportingCommands {
             player.sendSystemMessage(Component.translatable("ftbessentials.rtp.not_here").withStyle(ChatFormatting.RED));
             return 0;
         }
+        int cooldown = FTBEStartupConfig.RTP_GLOBAL_COOLDOWN.get();
+        if (cooldown > 0) {
+            long nextRunMS = lastRTPRun + cooldown * 1000L;
+            long now = System.currentTimeMillis();
+            if (nextRunMS > now) {
+                long secsLeft = (nextRunMS - now) / 1000L;
+                player.sendSystemMessage(Component.translatable("ftbessentials.rtp.on_global_cooldown", TimeUtils.prettyTimeString(secsLeft)).withStyle(ChatFormatting.RED));
+                return 0;
+            }
+        }
+
         return FTBEPlayerData.getOrCreate(player).map(data -> data.rtpTeleporter.teleport(player, p -> {
                     p.sendSystemMessage(Component.translatable("ftbessentials.rtp.looking"));
                     return findBlockPos(player.level(), p, minDistance, maxDistance);
@@ -261,5 +275,9 @@ public class TeleportingCommands {
 
     private static boolean isEmptyShape(Level level, BlockPos pos) {
         return level.getBlockState(pos).getCollisionShape(level, pos).isEmpty();
+    }
+
+    public static void updateLastRTPRun() {
+        lastRTPRun = System.currentTimeMillis();
     }
 }
