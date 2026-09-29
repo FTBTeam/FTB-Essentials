@@ -1,11 +1,14 @@
 package dev.ftb.mods.ftbessentials.fabric;
 
 import dev.ftb.mods.ftbessentials.FTBEssentials;
+import dev.ftb.mods.ftbessentials.api.TeleportDestination;
 import dev.ftb.mods.ftbessentials.api.event.RTPEvent;
+import dev.ftb.mods.ftbessentials.api.event.SavedTeleportEvent;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftbessentials.util.FTBEPlayerData;
 import dev.ftb.mods.ftblibrary.fabric.PlayerDisplayNameCallback;
 import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
+import dev.ftb.mods.ftblibrary.util.fabric.FabricEventHelper;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityLevelChangeEvents;
@@ -77,6 +80,10 @@ public class FTBEssentialsFabric implements ModInitializer {
                 data -> FTBEssentialsEvents.TELEPORT.invoker().teleport(data));
         NativeEventPosting.INSTANCE.registerEventWithResult(RTPEvent.TYPE,
                 data -> FTBEssentialsEvents.RTP.invoker().teleport(data));
+
+        FabricEventHelper.registerFabricEventPoster(SavedTeleportEvent.Data.class, FTBEssentialsEvents.SAVED_TELEPORT);
+        NativeEventPosting.INSTANCE.registerEventWithResult(SavedTeleportEvent.PreTeleport.TYPE,
+                data -> FTBEssentialsEvents.SAVED_TELEPORT_PRE_TELEPORT.invoker().preTeleport(data));
 
     }
 }
