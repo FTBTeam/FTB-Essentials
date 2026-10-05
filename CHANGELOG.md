@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [26.1.2.5-beta]
+## [26.1.2.5]
+
+### Added
+* Added API for `SavedTeleportManager`
+  * Added `SavedTeleportEvent` and `TeleportImmediateEvent`
+* Added a configurable global cooldown for the `/rtp` command
+  * See `rtp` -> `global_cooldown` config setting in `config/ftbessentials.json5`
+  * Default is 0, meaning no global cooldown is enforced
 
 ### Fixed
 * Fixed player colors resetting to white in multiplayer Tab list when on a scoreboard team with a different color
