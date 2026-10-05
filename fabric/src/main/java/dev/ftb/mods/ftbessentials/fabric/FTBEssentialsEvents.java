@@ -1,6 +1,8 @@
 package dev.ftb.mods.ftbessentials.fabric;
 
+import dev.ftb.mods.ftbessentials.api.TeleportDestination;
 import dev.ftb.mods.ftbessentials.api.event.RTPEvent;
+import dev.ftb.mods.ftbessentials.api.event.SavedTeleportEvent;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftblibrary.util.result.DataOutcome;
 import dev.ftb.mods.ftblibrary.util.result.Outcome;
@@ -28,6 +30,28 @@ public class FTBEssentialsEvents {
                     }
                 }
                 return Outcome.PASS;
+            }
+    );
+
+    /// See [SavedTeleportEvent]
+    public static final Event<SavedTeleportEvent> SAVED_TELEPORT = EventFactory.createArrayBacked(SavedTeleportEvent.class,
+            callbacks -> data -> {
+                for (SavedTeleportEvent c : callbacks) {
+                    c.accept(data);
+                }
+            }
+    );
+
+    public static Event<SavedTeleportEvent.PreTeleport> SAVED_TELEPORT_PRE_TELEPORT = EventFactory.createArrayBacked(SavedTeleportEvent.PreTeleport.class,
+            callbacks -> data -> {
+                TeleportDestination.Outcome outcome = data.dest().success();
+                for (var c : callbacks) {
+                    outcome = c.preTeleport(data);
+                    if (!outcome.success()) {
+                        break;
+                    }
+                }
+                return outcome;
             }
     );
 }

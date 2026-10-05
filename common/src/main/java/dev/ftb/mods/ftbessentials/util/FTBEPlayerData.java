@@ -5,6 +5,7 @@ import de.marhali.json5.Json5Element;
 import de.marhali.json5.Json5Object;
 import de.marhali.json5.Json5Primitive;
 import dev.ftb.mods.ftbessentials.FTBEssentials;
+import dev.ftb.mods.ftbessentials.commands.groups.TeleportingCommands;
 import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
 import dev.ftb.mods.ftbessentials.net.UpdateTabNameMessage;
 import dev.ftb.mods.ftblibrary.json5.Json5Util;
@@ -19,6 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.scores.PlayerTeam;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,7 +83,8 @@ public class FTBEPlayerData {
 		warpTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.WARP::getCooldown, FTBEStartupConfig.WARP::getWarmup);
 		homeTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.HOME::getCooldown, FTBEStartupConfig.HOME::getWarmup);
 		tpaTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.TPA::getCooldown, FTBEStartupConfig.TPA::getWarmup);
-		rtpTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.RTP::getCooldown, FTBEStartupConfig.RTP::getWarmup);
+		rtpTeleporter = new WarmupCooldownTeleporter(this, FTBEStartupConfig.RTP::getCooldown, FTBEStartupConfig.RTP::getWarmup)
+				.onSuccess(TeleportingCommands::updateLastRTPRun);
 		teleportHistory = new LinkedList<>();
 	}
 
@@ -207,6 +210,21 @@ public class FTBEPlayerData {
 		MAP.values().forEach(d -> d.sendTabName(serverPlayer));
 	}
 
+	public static void sendPlayerTabsForScoreboardTeam(MinecraftServer server, PlayerTeam team) {
+		// when a scoreboard team is modified (specifically, color changed)
+		// send updates for each player in the team to the server
+		team.getPlayers().forEach(name -> sendPlayerTabToAll(server, name));
+	}
+
+	public static void sendPlayerTabToAll(MinecraftServer server, String playerName) {
+		// when a player joins or leaves a scoreboard team
+		// send updates for that player to the server
+		var sp = server.getPlayerList().getPlayer(playerName);
+		if (sp != null) {
+			getOrCreate(sp).ifPresent(data -> data.sendTabName(server));
+		}
+	}
+
 	public static void forEachPlayer(Consumer<FTBEPlayerData> consumer) {
 		MAP.values().forEach(consumer);
 	}
@@ -288,7 +306,7 @@ public class FTBEPlayerData {
 		Path path = FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".json5");
 		try {
 			if (Files.exists(path)) {
-				readJson(Json5Util.tryRead(path));
+				readJson(Json5Util.load(path));
 			} else {
 				FTBEssentials.LOGGER.info("player data for {} doesn't exist yet, will create", uuid);
 			}
@@ -301,7 +319,7 @@ public class FTBEPlayerData {
 		if (needSave) {
 			Path path = FTBEWorldData.getInstance().mkdirs(PLAYER_DATA_PATH).resolve(uuid + ".json5");
 			try {
-				Json5Util.tryWrite(path, (Json5Element) toJson());
+				Json5Util.save(path, (Json5Element) toJson());
             } catch (IOException e) {
 				FTBEssentials.LOGGER.error("can't write {} : {} / {}", path, e.getClass().getName(), e.getMessage());
             }

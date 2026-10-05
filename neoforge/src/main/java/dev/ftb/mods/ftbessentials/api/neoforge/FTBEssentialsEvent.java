@@ -1,6 +1,8 @@
 package dev.ftb.mods.ftbessentials.api.neoforge;
 
+import dev.ftb.mods.ftbessentials.api.TeleportDestination;
 import dev.ftb.mods.ftbessentials.api.event.RTPEvent;
+import dev.ftb.mods.ftbessentials.api.event.SavedTeleportEvent;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftblibrary.api.neoforge.BaseEventWithData;
 import net.minecraft.server.level.ServerLevel;
@@ -22,6 +24,30 @@ public class FTBEssentialsEvent {
     public static class RTP extends BaseEventWithData<RTPEvent.Data> implements ICancellableEvent {
         public RTP(RTPEvent.Data data) {
             super(data);
+        }
+    }
+
+    public static class SavedTeleport extends BaseEventWithData<SavedTeleportEvent.Data> {
+        public SavedTeleport(SavedTeleportEvent.Data data) {
+            super(data);
+        }
+
+        public static class Pre extends BaseEventWithData<SavedTeleportEvent.PreTeleport.Data> implements ICancellableEvent {
+            private TeleportDestination.Outcome outcome;
+
+            public Pre(SavedTeleportEvent.PreTeleport.Data data) {
+                super(data);
+
+                outcome = data.dest().success();
+            }
+
+            public TeleportDestination.Outcome getOutcome() {
+                return outcome;
+            }
+
+            public void setOutcome(TeleportDestination.Outcome outcome) {
+                this.outcome = outcome;
+            }
         }
     }
 }

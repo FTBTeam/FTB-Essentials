@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbessentials.neoforge;
 
 import dev.ftb.mods.ftbessentials.FTBEssentials;
 import dev.ftb.mods.ftbessentials.api.event.RTPEvent;
+import dev.ftb.mods.ftbessentials.api.event.SavedTeleportEvent;
 import dev.ftb.mods.ftbessentials.api.event.TeleportEvent;
 import dev.ftb.mods.ftbessentials.api.neoforge.FTBEssentialsEvent;
 import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
@@ -61,6 +62,7 @@ public class FTBEssentialsNeoForge {
 			}
 		});
 
+		bus.addListener(FTBEssentialsEvent.SavedTeleport.class, event -> FTBEssentials.LOGGER.info("saved: {}", event.getEventData()));
 		registerNativeEventPosting(bus);
 	}
 
@@ -70,10 +72,22 @@ public class FTBEssentialsNeoForge {
 			bus.post(event);
 			return event.isCanceled() ? DataOutcome.fail(Component.translatable("ftbessentials.teleport_prevented")) : DataOutcome.pass();
 		});
+
 		NativeEventPosting.get().registerEventWithResult(RTPEvent.TYPE, data -> {
 			FTBEssentialsEvent.RTP event = new FTBEssentialsEvent.RTP(data);
 			bus.post(event);
 			return event.isCanceled() ? Outcome.FAIL : Outcome.PASS;
+		});
+
+		NativeEventPosting.get().registerEvent(SavedTeleportEvent.Data.class, data ->
+				bus.post(new FTBEssentialsEvent.SavedTeleport(data)));
+
+		NativeEventPosting.get().registerEventWithResult(SavedTeleportEvent.PreTeleport.TYPE, data -> {
+			FTBEssentialsEvent.SavedTeleport.Pre event = new FTBEssentialsEvent.SavedTeleport.Pre(data);
+			bus.post(event);
+			return event.getOutcome().success() && event.isCanceled() ?
+					data.dest().failed(Component.literal("<canceled>")) :
+					event.getOutcome();
 		});
 	}
 

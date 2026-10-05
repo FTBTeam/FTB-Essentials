@@ -1,37 +1,59 @@
 package dev.ftb.mods.ftbessentials.util;
 
 import de.marhali.json5.Json5Object;
+import dev.ftb.mods.ftbessentials.api.TeleportResult;
+import dev.ftb.mods.ftbessentials.api.event.SavedTeleportEvent;
 import dev.ftb.mods.ftbessentials.config.FTBEStartupConfig;
+import dev.ftb.mods.ftblibrary.platform.event.NativeEventPosting;
 import net.minecraft.server.level.ServerPlayer;
+import org.jspecify.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 public abstract class SavedTeleportManager {
     private final Map<String,TeleportPos> destinations = new HashMap<>();
 
     public void addDestination(String name, TeleportPos dest, ServerPlayer player) {
-        String nameLower = name.toLowerCase();
+        String nameLower = name.toLowerCase(Locale.ROOT);
         if (destinations.size() >= getMaxSize(player) && !destinations.containsKey(nameLower)) {
             throw new TooManyDestinationsException();
         }
         destinations.put(nameLower, dest);
+        NativeEventPosting.get().postEvent(new SavedTeleportEvent.Data(nameLower, dest.asDestination(), owningPlayer(), true));
         onChanged();
     }
 
+    @Nullable
+    protected abstract UUID owningPlayer();
+
     public boolean deleteDestination(String name) {
-        if (destinations.remove(name.toLowerCase()) != null) {
+        String nameLower = name.toLowerCase(Locale.ROOT);
+        TeleportPos removed = destinations.remove(nameLower);
+        if (removed != null) {
+            NativeEventPosting.get().postEvent(new SavedTeleportEvent.Data(nameLower, removed.asDestination(), owningPlayer(), false));
             onChanged();
             return true;
         }
         return false;
     }
 
-    public TeleportPos.TeleportResult teleportTo(String name, ServerPlayer player, WarmupCooldownTeleporter teleporter) {
-        TeleportPos pos = destinations.get(name.toLowerCase());
-        return pos != null ? teleporter.teleport(player, p -> pos) : TeleportPos.TeleportResult.UNKNOWN_DESTINATION;
+    public TeleportResult teleportTo(String name, ServerPlayer player, WarmupCooldownTeleporter teleporter) {
+        String nameLower = name.toLowerCase(Locale.ROOT);
+        TeleportPos pos = destinations.get(nameLower);
+        if (pos == null) {
+            return TeleportResult.UNKNOWN_DESTINATION;
+        }
+
+        var outcome = NativeEventPosting.get().postEventWithResult(
+                SavedTeleportEvent.PreTeleport.TYPE,
+                new SavedTeleportEvent.PreTeleport.Data(nameLower, player, pos.asDestination(), owningPlayer())
+        );
+        if (!outcome.success()) {
+            return TeleportResult.failed(outcome.reason());
+        }
+
+        return teleporter.teleport(player, _ -> TeleportPos.fromDestination(outcome.dest()));
     }
 
     public Stream<DestinationEntry> destinations() {
@@ -69,6 +91,11 @@ public abstract class SavedTeleportManager {
         }
 
         @Override
+        protected @Nullable UUID owningPlayer() {
+            return playerData.getUuid();
+        }
+
+        @Override
         protected int getMaxSize(ServerPlayer player) {
             return FTBEStartupConfig.MAX_HOMES.get(player);
         }
@@ -84,6 +111,11 @@ public abstract class SavedTeleportManager {
 
         public WarpManager(FTBEWorldData worldData) {
             this.worldData = worldData;
+        }
+
+        @Override
+        protected @Nullable UUID owningPlayer() {
+            return null;
         }
 
         @Override
